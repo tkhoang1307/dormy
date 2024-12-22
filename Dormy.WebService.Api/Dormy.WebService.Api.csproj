@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ApplicationLogic\" />
+    <Folder Include="Core\Configurations\" />
+    <Folder Include="Core\Interfaces\" />
+    <Folder Include="Core\Utilities\" />
+    <Folder Include="Infrastructure\TokenRetriever\" />
+    <Folder Include="Migrations\" />
+    <Folder Include="Models\Constants\" />
+    <Folder Include="Models\ResponseModels\" />
+    <Folder Include="Models\RequestModels\" />
+    <Folder Include="Presentation\Authorization\" />
+    <Folder Include="Presentation\Mappers\" />
+    <Folder Include="Presentation\Validations\" />
+  </ItemGroup>
+
+</Project>

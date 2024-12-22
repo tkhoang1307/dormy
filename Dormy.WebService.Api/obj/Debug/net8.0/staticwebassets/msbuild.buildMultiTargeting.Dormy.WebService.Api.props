@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Dormy.WebService.Api.props" />
+</Project>
