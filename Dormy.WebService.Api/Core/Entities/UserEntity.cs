@@ -1,9 +1,8 @@
 ﻿using Dormy.WebService.Api.Models.Enums;
-using System.Reflection;
 
 namespace Dormy.WebService.Api.Core.Entities
 {
-    public class AdminEntity : BaseEntity
+    public class UserEntity: BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -21,14 +20,29 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public string JobTitle { get; set; } = string.Empty;
+        public string NationalIdNumber { get; set; } = string.Empty;
+
+        // Should define Enum for this status
+        public string Status { get; set; } = string.Empty;
 
         public Gender Gender { get; set; }
+
+        public Guid GuardianId { get; set; }
+
+        public GuardianEntity Guardian { get; set; } = null!;
+
+        public Guid WorkplaceId { get; set; }
+
+        public WorkplaceEntity Workplace { get; set; } = null!;
+
+        public Guid HealthInsuranceId { get; set; }
+
+        public HealthInsuranceEntity HealthInsurance { get; set; } = null!;
+
+        public List<ViolationEntity>? Violations { get; set; }
 
         public List<OvernightAbsenceEntity>? OvernightAbsences { get; set; }
 
         public List<NotificationEntity>? Notifications { get; set; }
-
-        public List<SettingEntity>? Settings { get; set; }
     }
 }

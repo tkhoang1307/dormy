@@ -1,0 +1,16 @@
+﻿using Dormy.WebService.Api.Core.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Dormy.WebService.Api.Core.Configurations
+{
+    public class HealthInsuranceConfiguration : IEntityTypeConfiguration<HealthInsuranceEntity>
+    {
+        public void Configure(EntityTypeBuilder<HealthInsuranceEntity> builder)
+        {
+            builder
+                .Property(healthInsurance => healthInsurance.Id)
+                .ValueGeneratedOnAdd();
+        }
+    }
+}
