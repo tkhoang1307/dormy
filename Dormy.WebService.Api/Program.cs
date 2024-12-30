@@ -1,6 +1,4 @@
 using Dormy.WebService.Api.Infrastructure.Postgres;
-using Dormy.WebService.Api.Infrastructure.Postgres.IRepositories;
-using Dormy.WebService.Api.Infrastructure.Postgres.Repositories;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +23,9 @@ namespace Dormy.WebService.Api
                 options.UseNpgsql(builder.Configuration.GetConnectionString("LocalConnection"));
             });
 
+            // Fix postgres datetime
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             // Add CORS
             builder.Services.AddCors(options =>
             {
@@ -36,19 +37,13 @@ namespace Dormy.WebService.Api
                 });
             });
 
-            //builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddTransient<IAdminRepository, AdminRepository>();
+            builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseAuthorization();
 
@@ -58,8 +53,8 @@ namespace Dormy.WebService.Api
 
             using (var scope = app.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-                context.Database.Migrate();
+                //var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+                //context.Database.Migrate();
             }
 
             app.Run();
