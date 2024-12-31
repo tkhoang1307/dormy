@@ -1,6 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
@@ -9,8 +9,8 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
         public void Configure(EntityTypeBuilder<AdminEntity> builder)
         {
             builder
-               .Property(e => e.Id)
-               .ValueGeneratedOnAdd();
+                .Property(admin => admin.Id)
+                .ValueGeneratedOnAdd();
         }
     }
 }

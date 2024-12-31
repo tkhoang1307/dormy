@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -20,17 +21,13 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ApplicationLogic\" />
-    <Folder Include="Core\Configurations\" />
-    <Folder Include="Core\Interfaces\" />
     <Folder Include="Core\Utilities\" />
-    <Folder Include="Infrastructure\TokenRetriever\" />
     <Folder Include="Migrations\" />
     <Folder Include="Models\Constants\" />
-    <Folder Include="Models\ResponseModels\" />
     <Folder Include="Models\RequestModels\" />
     <Folder Include="Presentation\Authorization\" />
     <Folder Include="Presentation\Mappers\" />

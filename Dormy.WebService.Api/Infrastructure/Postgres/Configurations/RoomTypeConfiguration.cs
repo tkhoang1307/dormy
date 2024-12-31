@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Dormy.WebService.Api.Core.Configurations
+namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
     public class RoomTypeConfiguration : IEntityTypeConfiguration<RoomTypeEntity>
     {
@@ -12,7 +12,7 @@ namespace Dormy.WebService.Api.Core.Configurations
                 .Property(roomType => roomType.Id)
                 .ValueGeneratedOnAdd();
 
-            
+
         }
     }
 }

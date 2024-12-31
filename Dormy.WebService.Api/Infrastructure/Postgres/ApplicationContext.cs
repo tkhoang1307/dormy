@@ -1,5 +1,5 @@
-﻿using Dormy.WebService.Api.Core.Configurations;
-using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Infrastructure.Postgres.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dormy.WebService.Api.Infrastructure.Postgres

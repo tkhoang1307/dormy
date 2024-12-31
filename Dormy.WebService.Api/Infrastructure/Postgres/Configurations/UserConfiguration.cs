@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
-namespace Dormy.WebService.Api.Core.Configurations
+namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
     public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
     {

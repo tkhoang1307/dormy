@@ -1,6 +1,14 @@
+using Dormy.WebService.Api.ApplicationLogic;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.Postgres;
+using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Startup;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using System.Text;
 
 namespace Dormy.WebService.Api
 {
@@ -16,7 +24,33 @@ namespace Dormy.WebService.Api
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(opt =>
+            {
+                opt.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Description = "Standard Authorization (\"bearer {token}\" ) ",
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                });
+                opt.OperationFilter<SecurityRequirementsOperationFilter>();
+            });
+
+            // Config JWT
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                    };
+                });
 
             builder.Services.AddDbContext<ApplicationContext>(options =>
             {
@@ -37,7 +71,12 @@ namespace Dormy.WebService.Api
                 });
             });
 
+            // Add DI Repositories
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+            // Add DI Services
+            builder.Services.AddSingleton<ITokenRetriever, TokenRetriever>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
 
             var app = builder.Build();
 
@@ -45,9 +84,9 @@ namespace Dormy.WebService.Api
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.UseAuthorization();
-
             app.UseRouting();
+
+            app.UseAuthorization();
             
             app.MapControllers();
 

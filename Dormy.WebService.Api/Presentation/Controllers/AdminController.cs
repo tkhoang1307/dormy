@@ -1,5 +1,5 @@
-using Dormy.WebService.Api.Core.Entities;
-using Dormy.WebService.Api.Startup;
+using Dormy.WebService.Api.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
@@ -8,34 +8,31 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     [Route("[controller]")]
     public class AdminController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-
+        private readonly IAdminService _adminService;
         private readonly ILogger<AdminController> _logger;
+        private readonly ITokenRetriever _tokenRetriever;
 
-        public AdminController(ILogger<AdminController> logger, IUnitOfWork unitOfWork)
+        public AdminController(ILogger<AdminController> logger, IAdminService adminService, ITokenRetriever tokenRetriever)
         {
             _logger = logger;
-            _unitOfWork = unitOfWork;
+            _adminService = adminService;
+            _tokenRetriever = tokenRetriever;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetAllUser()
         {
-            AdminEntity admin1 = new()
-            {
-                Email = "admin1@gmail.com",
-                Id = Guid.NewGuid(),
-                DateOfBirth = DateTime.Now,
-                FirstName = "Admin",
-                Gender = Models.Enums.Gender.MALE,
-                JobTitle = "Admin position"
-            };
-
-            await _unitOfWork.AdminRepository.AddAsync(admin1);
-            await _unitOfWork.SaveChangeAsync();
-
-            var result = await _unitOfWork.AdminRepository.GetAllAsync(x => true);
+            var result = await _adminService.GetAllUser();
             return Ok(result); 
+        }
+
+        [HttpGet("token")]
+        [AllowAnonymous]
+        public IActionResult GetToken(string username, string email)
+        {
+            var token = _tokenRetriever.CreateToken(Guid.NewGuid(), username, email);
+            return Ok(token);
         }
     }
 }

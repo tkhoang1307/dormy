@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Dormy.WebService.Api.Core.Configurations
+namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
     public class BedConfiguration : IEntityTypeConfiguration<BedEntity>
     {
