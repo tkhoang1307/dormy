@@ -22,10 +22,9 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string NationalIdNumber { get; set; } = string.Empty;
 
-        // Should define Enum for this status
-        public string Status { get; set; } = string.Empty;
+        public UserStatusEnum Status { get; set; }
 
-        public Gender Gender { get; set; }
+        public GenderEnum Gender { get; set; }
 
         public Guid GuardianId { get; set; }
 
@@ -44,5 +43,15 @@ namespace Dormy.WebService.Api.Core.Entities
         public List<OvernightAbsenceEntity>? OvernightAbsences { get; set; }
 
         public List<NotificationEntity>? Notifications { get; set; }
+
+        public List<InvoiceUserEntity>? InvoiceUsers { get; set; }
+
+        public List<ContractEntity>? Contracts { get; set; }
+
+        public List<VehicleEntity>? Vehicles { get; set; }
+
+        public List<ParkingRequestEntity>? ParkingRequests { get; set; }
+
+        public List<RequestEntity>? Requests { get; set; }
     }
 }

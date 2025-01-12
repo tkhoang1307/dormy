@@ -10,8 +10,6 @@
 
         public string Abbrevation { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-
         public UserEntity User { get; set; } = null!;
     }
 }

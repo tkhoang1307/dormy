@@ -1,6 +1,8 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
-    public class RoomEntity
+    public class RoomEntity : BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -8,10 +10,9 @@
 
         public int FloorNumber { get; set; } 
 
-        public int Capacity { get; set; }
+        public int TotalAvailableBed { get; set; }
 
-        // Shuold define enum for this status
-        public string Status { get; set; } = string.Empty;
+        public RoomStatusEnum Status { get; set; }
 
         public Guid BuildingId { get; set; }
 
@@ -22,5 +23,13 @@
         public RoomTypeEntity RoomType { get; set; } = null!;
 
         public List<BedEntity>? Beds { get; set; }
+
+        public List<InvoiceEntity>? Invoices { get; set; }
+
+        public List<ServiceIndicatorEntity>? ServiceIndicators { get; set; }
+
+        public List<ContractEntity>? Contracts { get; set; }
+
+        public List<RequestEntity>? Requests { get; set; }
     }
 }

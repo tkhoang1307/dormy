@@ -77,6 +77,30 @@ namespace Dormy.WebService.Api
             // Add DI Services
             builder.Services.AddSingleton<ITokenRetriever, TokenRetriever>();
             builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IBedService, BedService>();
+            builder.Services.AddScoped<IBuildingService, BuildingService>();
+            builder.Services.AddScoped<IContractExtensionService, ContractExtensionService>();
+            builder.Services.AddScoped<IContractService, ContractService>();
+            builder.Services.AddScoped<IGuardianService, GuardianService>();
+            builder.Services.AddScoped<IHealthInsuranceService, HealthInsuranceService>();
+            builder.Services.AddScoped<IInvoiceItemService, InvoiceItemService>();
+            builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IOvernightAbsenceService, OvernightAbsenceService>();
+            builder.Services.AddScoped<IParkingRequestService, ParkingRequestService>();
+            builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
+            builder.Services.AddScoped<IRequestService, RequestService>();
+            builder.Services.AddScoped<IRoomService, RoomService>();
+            builder.Services.AddScoped<IRoomServiceService, RoomServiceService>();
+            builder.Services.AddScoped<IRoomTypeService, RoomTypeService>();
+            builder.Services.AddScoped<IRoomTypeServiceService, RoomTypeServiceService>();
+            builder.Services.AddScoped<IServiceIndicatorService, ServiceIndicatorService>();
+            builder.Services.AddScoped<ISettingService, SettingService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IVehicleHistoryService, VehicleHistoryService>();
+            builder.Services.AddScoped<IVehicleService, VehicleService>();
+            builder.Services.AddScoped<IViolationService, ViolationService>();
+            builder.Services.AddScoped<IWorkplaceService, WorkplaceService>();
 
             var app = builder.Build();
 

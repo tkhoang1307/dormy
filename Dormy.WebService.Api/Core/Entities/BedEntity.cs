@@ -1,14 +1,17 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
-    public class BedEntity
+    public class BedEntity : BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-
-        // Need to check again data type
-        public string BedNumber { get; set; } = string.Empty;
+        public int BedNumber { get; set; }
+        public BedStatusEnum Status { get; set; }
 
         public Guid RoomId { get; set; }
 
         public RoomEntity Room { get; set; } = null!;
+
+        public List<ContractEntity>? Contracts { get; set; }
     }
 }

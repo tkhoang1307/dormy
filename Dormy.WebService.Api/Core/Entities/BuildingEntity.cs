@@ -1,15 +1,16 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
-    public class BuildingEntity
+    public class BuildingEntity : BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; } = string.Empty;
 
-        public int FloorNumber { get; set; }
+        public int TotalFloors { get; set; }
 
-        //Should define enum for this field
-        public string GenderRestriction { get; set; } = string.Empty;
+        public GenderEnum GenderRestriction { get; set; }
 
         public List<RoomEntity>? Rooms { get; set; }
     }

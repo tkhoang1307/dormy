@@ -1,15 +1,15 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
-    public class RoomUtilityConfiguration : IEntityTypeConfiguration<RoomUtilityEntity>
+    public class ParkingSpotConfiguration : IEntityTypeConfiguration<ParkingSpotEntity>
     {
-        public void Configure(EntityTypeBuilder<RoomUtilityEntity> builder)
+        public void Configure(EntityTypeBuilder<ParkingSpotEntity> builder)
         {
             builder
-                .Property(roomUtility => roomUtility.Id)
+                .Property(parkingSpot => parkingSpot.Id)
                 .ValueGeneratedOnAdd();
         }
     }

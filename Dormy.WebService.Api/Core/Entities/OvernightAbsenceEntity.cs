@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
     public class OvernightAbsenceEntity : BaseEntity
     {
@@ -10,8 +12,7 @@
 
         public string Reason { get; set; } = string.Empty;
 
-        //Should define Enum for this status
-        public string Status { get; set; } = string.Empty;
+        public OvernightAbsenceStatusEnum Status { get; set; }
 
         public Guid UserId { get; set; }
 

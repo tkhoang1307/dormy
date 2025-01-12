@@ -23,12 +23,22 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string JobTitle { get; set; } = string.Empty;
 
-        public Gender Gender { get; set; }
+        public GenderEnum Gender { get; set; }
 
         public List<OvernightAbsenceEntity>? OvernightAbsences { get; set; }
 
         public List<NotificationEntity>? Notifications { get; set; }
 
         public List<SettingEntity>? Settings { get; set; }
+
+        public List<ServiceIndicatorEntity>? ServiceIndicators { get; set; }
+
+        public List<ContractEntity>? Contracts { get; set; }
+
+        public List<ContractExtensionEntity>? ContractExtensions { get; set; }
+
+        public List<ParkingRequestEntity>? ParkingRequests { get; set; }
+
+        public List<RequestEntity>? Requests { get; set; }
     }
 }

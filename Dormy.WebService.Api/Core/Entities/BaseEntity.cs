@@ -2,10 +2,15 @@
 {
     public class BaseEntity
     {
-        public DateTime CreatedDateUtc { get; set; }
-        public DateTime LastUpdatedDateUtc { get; set; }
-        public Guid LastUpdatedBy { get; set; }
-        public uint RecordVersion { get; set; }
+        public DateTime CreatedDateUtc { get; set; } = DateTime.Now;
+
+        public DateTime LastUpdatedDateUtc { get; set; } = DateTime.Now;
+
+        public Guid CreatedBy { get; set; } = Guid.NewGuid();
+
+        public Guid LastUpdatedBy { get; set; } = Guid.NewGuid();
+
+        public bool isDeleted { get; set; } = false;
 
     }
 }
