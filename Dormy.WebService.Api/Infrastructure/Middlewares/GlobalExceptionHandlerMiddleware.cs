@@ -20,9 +20,14 @@ namespace Dormy.WebService.Api.Infrastructure.Middlewares
             {
                 await _next(httpContext);
             }
+            catch (UsernameIsExistedException ex)
+            {
+                _logger.LogError($"Username is existed: {ex}");
+                await HandleUsernameExistedExceptionAsync(httpContext, ex);
+            }
             catch (DuplicatedPasswordUpdateException ex)
             {
-                _logger.LogError($"Something went wrong: {ex}");
+                _logger.LogError($"Duplicated new password with current password: {ex}");
                 await HandleDuplicatedPasswordExceptionAsync(httpContext, ex);
             }
             catch (Exception ex)
@@ -30,6 +35,15 @@ namespace Dormy.WebService.Api.Infrastructure.Middlewares
                 _logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex);
             }
+        }
+
+        private static Task HandleUsernameExistedExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            var result = Newtonsoft.Json.JsonConvert.SerializeObject(new { error = exception.Message });
+            return context.Response.WriteAsync(result);
         }
 
         private static Task HandleDuplicatedPasswordExceptionAsync(HttpContext context, Exception exception)

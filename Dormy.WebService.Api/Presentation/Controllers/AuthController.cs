@@ -29,7 +29,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPost("admin/create-account")]
-        [Authorize(Roles = Role.ADMIN)]
+        //[Authorize(Roles = Role.ADMIN)]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateAdminAccount(AdminRequestModel request)
         {
             var result = await _adminService.CreateAdminAccount(request);

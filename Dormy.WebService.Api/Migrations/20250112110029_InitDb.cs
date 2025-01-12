@@ -780,6 +780,11 @@ namespace Dormy.WebService.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Admins",
+                columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName", "isDeleted" },
+                values: new object[] { new Guid("4c8a61a1-a31a-432f-ad1c-56cf6158b8c8"), new Guid("73c220db-e843-496a-9b5a-3755a5713d42"), new DateTime(2025, 1, 12, 18, 0, 28, 992, DateTimeKind.Local).AddTicks(2182), new DateTime(2025, 1, 12, 18, 0, 28, 992, DateTimeKind.Local).AddTicks(2202), "hungdv190516@gmail.com", "Admin", 0, "Admin", "", new Guid("9ba17551-a814-468e-8a47-d15f36e2c674"), new DateTime(2025, 1, 12, 18, 0, 28, 992, DateTimeKind.Local).AddTicks(2183), "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin", false });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Beds_RoomId",
                 table: "Beds",

@@ -119,10 +119,11 @@ namespace Dormy.WebService.Api
             // Middlewares
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
+            // Migrate Db
             using (var scope = app.Services.CreateScope())
             {
-                //var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-                //context.Database.Migrate();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+                context.Database.Migrate();
             }
 
             app.Run();

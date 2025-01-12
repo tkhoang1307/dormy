@@ -44,6 +44,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var adminEntity = _adminMapper.MapToAdminEntity(model);
 
+            var existedAccountByUsername = await _unitOfWork.AdminRepository.GetAsync(x => x.UserName.ToLower().Equals(model.UserName.ToLower()));
+            if (existedAccountByUsername != null)
+            {
+                throw new UsernameIsExistedException(ErrorMessages.UsernameIsExisted);
+            }
+
             await _unitOfWork.AdminRepository.AddAsync(adminEntity);
             await _unitOfWork.SaveChangeAsync();
 

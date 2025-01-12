@@ -2,6 +2,7 @@
 {
     public static class ErrorMessages
     {
-        public const string DuplicatedErrorMessage = "New password must be different with current password";
+        public const string DuplicatedErrorMessage = "New password must be different with current password.";
+        public const string UsernameIsExisted = "Username is existed.";
     }
 }
