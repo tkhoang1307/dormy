@@ -1,6 +1,9 @@
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.RequestModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
@@ -9,30 +12,40 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IEmailService _emailService;
         private readonly ILogger<AdminController> _logger;
         private readonly ITokenRetriever _tokenRetriever;
 
-        public AdminController(ILogger<AdminController> logger, IAdminService adminService, ITokenRetriever tokenRetriever)
+        public AdminController(
+            ILogger<AdminController> logger,
+            IAdminService adminService,
+            ITokenRetriever tokenRetriever,
+            IEmailService emailService)
         {
             _logger = logger;
             _adminService = adminService;
             _tokenRetriever = tokenRetriever;
+            _emailService = emailService;
         }
 
         [HttpGet]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetAllUser()
         {
             var result = await _adminService.GetAllUser();
-            return Ok(result); 
+            return Ok(result);
         }
 
-        [HttpGet("token")]
-        [AllowAnonymous]
-        public IActionResult GetToken(string username, string email)
+        [HttpGet("id/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetAdminAccount(Guid id)
         {
-            var token = _tokenRetriever.CreateToken(Guid.NewGuid(), username, email);
-            return Ok(token);
+            var result = await _adminService.GetAdminAccount(id);
+            if (result.IsSuccess)
+            {
+                return Ok(result.Result);
+            }
+            return NotFound();
         }
     }
 }

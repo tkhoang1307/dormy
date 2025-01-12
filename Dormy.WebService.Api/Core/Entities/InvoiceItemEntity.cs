@@ -12,7 +12,7 @@
 
         public string Unit { get; set; } = string.Empty;
 
-        public object Metadata { get; set; } = null!;
+        public string Metadata { get; set; } = string.Empty;
 
         public Guid InvoiceId { get; set; }
 

@@ -2,6 +2,6 @@
 {
     public interface ITokenRetriever
     {
-        string CreateToken(Guid id, string username, string email);
+        string CreateToken(Guid id, string username, string email, string role);
     }
 }

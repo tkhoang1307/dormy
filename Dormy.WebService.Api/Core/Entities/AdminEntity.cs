@@ -1,5 +1,4 @@
 ﻿using Dormy.WebService.Api.Models.Enums;
-using System.Reflection;
 
 namespace Dormy.WebService.Api.Core.Entities
 {

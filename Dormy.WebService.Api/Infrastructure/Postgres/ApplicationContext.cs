@@ -26,7 +26,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
         public DbSet<RoomEntity> Rooms { get; set; }
         public DbSet<RoomServiceEntity> RoomServices { get; set; }
         public DbSet<RoomTypeEntity> RoomTypes { get; set; }
-        public DbSet<RoomUtilityEntity> RoomUtilities { get; set; }
         public DbSet<SettingEntity> Settings { get; set; }
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<ViolationEntity> Violations { get; set; }
@@ -44,7 +43,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
             modelBuilder.ApplyConfiguration(new RoomConfiguration());
             modelBuilder.ApplyConfiguration(new RoomServiceConfiguration());
             modelBuilder.ApplyConfiguration(new RoomTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoomUtilityConfiguration());
             modelBuilder.ApplyConfiguration(new SettingConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new ViolationConfiguration());

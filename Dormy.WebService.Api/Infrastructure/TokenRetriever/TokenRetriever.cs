@@ -14,13 +14,14 @@ namespace Dormy.WebService.Api.Infrastructure.TokenRetriever
             _configuration = configuration;
         }
 
-        public string CreateToken(Guid id, string username, string email)
+        public string CreateToken(Guid id, string username, string email, string role)
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, id.ToString()),
-                new Claim(ClaimTypes.Role, username),
+                new Claim(ClaimTypes.Role, role),
                 new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Name, username),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(

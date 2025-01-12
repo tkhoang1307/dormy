@@ -1,5 +1,6 @@
 using Dormy.WebService.Api.ApplicationLogic;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Infrastructure.Middlewares;
 using Dormy.WebService.Api.Infrastructure.Postgres;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Startup;
@@ -101,6 +102,7 @@ namespace Dormy.WebService.Api
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<IViolationService, ViolationService>();
             builder.Services.AddScoped<IWorkplaceService, WorkplaceService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             var app = builder.Build();
 
@@ -113,6 +115,9 @@ namespace Dormy.WebService.Api
             app.UseAuthorization();
             
             app.MapControllers();
+
+            // Middlewares
+            app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
             using (var scope = app.Services.CreateScope())
             {
