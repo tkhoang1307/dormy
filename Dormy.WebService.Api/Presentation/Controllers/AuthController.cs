@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -51,13 +52,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var userClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             if (userClaim == null)
             {
-                return NotFound();
+                //return NotFound();
+                return NotFound(new ApiResponse().SetNotFound("invalid_user"));
             }
             var isValidUserGuidId = Guid.TryParse(userClaim.Value, out Guid id);
 
             if (!isValidUserGuidId)
             {
-                return BadRequest("User ID is invalid type - Guid required");
+                return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
             }
             var response = await _adminService.ChangeAdminPassword(id, model.NewPassword);
             return Ok();
