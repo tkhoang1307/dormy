@@ -1,7 +1,9 @@
-﻿namespace Dormy.WebService.Api.Core.Interfaces
+﻿using Dormy.WebService.Api.Models.ResponseModels;
+
+namespace Dormy.WebService.Api.Core.Interfaces
 {
     public interface ITokenRetriever
     {
-        string CreateToken(Guid id, string username, string email, string role);
+        string CreateToken(JwtResponseModel jwtReponseModel);
     }
 }

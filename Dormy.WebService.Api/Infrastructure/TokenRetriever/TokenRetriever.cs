@@ -1,7 +1,9 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace Dormy.WebService.Api.Infrastructure.TokenRetriever
 {
@@ -14,29 +16,31 @@ namespace Dormy.WebService.Api.Infrastructure.TokenRetriever
             _configuration = configuration;
         }
 
-        public string CreateToken(Guid id, string username, string email, string role)
+        public string CreateToken(JwtResponseModel jwtReponseModel)
         {
-            List<Claim> claims = new List<Claim>
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+            var jwtKeyString = _configuration["Jwt:Key"];
+
+            var jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKeyString ?? string.Empty);
+
+            var tokenDesc = new SecurityTokenDescriptor
             {
-                new Claim(ClaimTypes.NameIdentifier, id.ToString()),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Name, username),
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, jwtReponseModel.UserId.ToString()),
+                    new Claim(ClaimTypes.GivenName, jwtReponseModel.FirstName),
+                    new Claim(ClaimTypes.Surname, jwtReponseModel.LastName),
+                    new Claim(ClaimTypes.Email, jwtReponseModel.Email),
+                    new Claim(ClaimTypes.Role, jwtReponseModel.Role),
+                    new Claim(ClaimTypes.Name, jwtReponseModel.UserName)
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(60 * 24),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(jwtKeyBytes), SecurityAlgorithms.HmacSha256Signature)
             };
+            var token = jwtTokenHandler.CreateToken(tokenDesc);
 
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                 _configuration["Jwt:Key"]!));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(90),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return jwtTokenHandler.WriteToken(token);
         }
     }
 }

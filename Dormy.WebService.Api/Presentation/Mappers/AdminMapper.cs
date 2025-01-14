@@ -33,7 +33,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Email = adminEntity.Email,
                 FirstName = adminEntity.FirstName,
                 LastName = adminEntity.LastName,
-                Gender = adminEntity.Gender,
+                Gender = adminEntity.Gender.ToString(),
                 JobTitle = adminEntity.JobTitle,
                 PhoneNumber = adminEntity.PhoneNumber,
                 UserName = adminEntity.UserName,

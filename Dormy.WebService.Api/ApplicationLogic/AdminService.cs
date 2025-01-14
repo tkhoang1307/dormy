@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
+using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -14,11 +15,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly AdminMapper _adminMapper;
+        private readonly ITokenRetriever _tokenRetriever;
 
-        public AdminService(IUnitOfWork unitOfWork)
+        public AdminService(IUnitOfWork unitOfWork, ITokenRetriever tokenRetriever)
         {
             _unitOfWork = unitOfWork;
             _adminMapper = new AdminMapper();
+            _tokenRetriever = tokenRetriever;
         }
 
         public async Task<ApiResponse> ChangeAdminPassword(Guid id, string newPassword)
@@ -76,17 +79,40 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return results;
         }
 
-        public async Task<AdminEntity?> Login(LoginRequestModel model)
+        public async Task<ApiResponse> Login(LoginRequestModel model)
         {
             var accountEntity = await _unitOfWork.AdminRepository
-                .GetAsync(x => x.UserName.ToLower().Equals(model.Username.ToLower()));
+                .GetAsync(x => x.UserName == model.Username);
 
-            if (accountEntity != null && EncryptHelper.VerifyPassword(model.Password, accountEntity.Password))
+            if (accountEntity == null)
             {
-                return accountEntity;
+                return new ApiResponse().SetBadRequest("Username is not existed");
             }
 
-            return null;
+            if (!EncryptHelper.VerifyPassword(model.Password, accountEntity.Password))
+            {
+                return new ApiResponse().SetBadRequest("Password is not correct");
+            }
+
+            var accessToken = _tokenRetriever.CreateToken(new JwtResponseModel()
+            {
+                UserId = accountEntity.Id,
+                Email = accountEntity.Email,
+                FirstName = accountEntity.FirstName,
+                LastName = accountEntity.LastName,
+                Role = Role.ADMIN,
+                UserName = accountEntity.UserName,
+            });
+
+            var adminResponseModel = _adminMapper.MapToAdminResponseModel(accountEntity);
+
+            var dataResponse = new AdminLoginResponseModel
+            {
+                AccessToken = accessToken,
+                AdminInformation = adminResponseModel
+            };
+
+            return new ApiResponse().SetOk(dataResponse);
         }
     }
 }

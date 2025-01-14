@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250112110029_InitDb")]
+    [Migration("20250113150805_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -87,17 +87,17 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("4c8a61a1-a31a-432f-ad1c-56cf6158b8c8"),
-                            CreatedBy = new Guid("73c220db-e843-496a-9b5a-3755a5713d42"),
-                            CreatedDateUtc = new DateTime(2025, 1, 12, 18, 0, 28, 992, DateTimeKind.Local).AddTicks(2182),
-                            DateOfBirth = new DateTime(2025, 1, 12, 18, 0, 28, 992, DateTimeKind.Local).AddTicks(2202),
+                            Id = new Guid("79264bf6-aaa9-4829-b2c6-87f398f05a7a"),
+                            CreatedBy = new Guid("59528fa6-489d-4df8-9689-291d075fd2c3"),
+                            CreatedDateUtc = new DateTime(2025, 1, 13, 22, 8, 5, 281, DateTimeKind.Local).AddTicks(8003),
+                            DateOfBirth = new DateTime(2025, 1, 13, 22, 8, 5, 281, DateTimeKind.Local).AddTicks(8009),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = 0,
                             JobTitle = "Admin",
                             LastName = "",
-                            LastUpdatedBy = new Guid("9ba17551-a814-468e-8a47-d15f36e2c674"),
-                            LastUpdatedDateUtc = new DateTime(2025, 1, 12, 18, 0, 28, 992, DateTimeKind.Local).AddTicks(2183),
+                            LastUpdatedBy = new Guid("26292b7a-43ce-4518-962f-332877e141d3"),
+                            LastUpdatedDateUtc = new DateTime(2025, 1, 13, 22, 8, 5, 281, DateTimeKind.Local).AddTicks(8004),
                             Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
                             PhoneNumber = "",
                             UserName = "admin",
@@ -239,7 +239,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ContractEntity");
+                    b.ToTable("Contracts");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ContractExtensionEntity", b =>
@@ -285,7 +285,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("ApproverId");
 
-                    b.ToTable("ContractExtensionEntity");
+                    b.ToTable("ContractExtensions");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.GuardianEntity", b =>
@@ -424,7 +424,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("InvoiceEntity");
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.InvoiceItemEntity", b =>
@@ -473,7 +473,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("InvoiceItemEntity");
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.InvoiceUserEntity", b =>
@@ -509,7 +509,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("InvoiceUserEntity");
+                    b.ToTable("invoiceUsers");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.NotificationEntity", b =>
@@ -665,7 +665,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("ParkingRequestEntity");
+                    b.ToTable("ParkingRequests");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ParkingSpotEntity", b =>
@@ -700,7 +700,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ParkingSpotEntity");
+                    b.ToTable("ParkingSpots");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.RequestEntity", b =>
@@ -752,7 +752,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RequestEntity");
+                    b.ToTable("Requests");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.RoomEntity", b =>
@@ -912,7 +912,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("RoomTypeId");
 
-                    b.ToTable("RoomTypeServiceEntity");
+                    b.ToTable("RoomTypeServices");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ServiceIndicatorEntity", b =>
@@ -969,7 +969,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("RoomServiceId");
 
-                    b.ToTable("ServiceIndicatorEntity");
+                    b.ToTable("ServiceIndicators");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.SettingEntity", b =>
@@ -1133,7 +1133,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VehicleEntity");
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.VehicleHistoryEntity", b =>
@@ -1172,7 +1172,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("VehicleHistoryEntity");
+                    b.ToTable("VehicleHistories");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ViolationEntity", b =>

@@ -37,15 +37,11 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPost("admin/sign-in")]
-        public async Task<IActionResult> AdminSignIn(LoginRequestModel request)
+        public async Task<IActionResult> SignInAdmin([FromBody] LoginRequestModel request)
         {
-            var account = await _adminService.Login(request);
-            if (account != null)
-            {
-                var token = _tokenRetriever.CreateToken(account.Id, account.UserName, account.Email, Role.ADMIN);
-                return Ok(token);
-            }
-            return NotFound();
+            var response = await _adminService.Login(request);
+
+            return response.IsSuccess ? Ok(response) : BadRequest(response);
         }
 
         [HttpPut("admin/change-password")]
