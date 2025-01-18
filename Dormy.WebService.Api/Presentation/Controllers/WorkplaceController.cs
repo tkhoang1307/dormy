@@ -42,7 +42,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize(Roles = Role.ADMIN)]
+        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         public async Task<IActionResult> GetAllWorkplace(int pageIndex = 1, int pageSize = 25)
         {
             var response = await _workplaceService.GetAllWorkplace(pageIndex, pageSize);

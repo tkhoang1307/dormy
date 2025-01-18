@@ -1,5 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -34,13 +36,29 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetAllWorkplace(int pageIndex = 1, int pageSize = 25)
         {
-            var entities = await _unitOfWork.WorkplaceRepository
-            .GetAllAsync(
-                     filter: x => true,
-                     include: x => x.Include(workplace => workplace.Users),
-                     pageIndex: pageIndex,
-                     pageSize: pageSize,
-                     isPaging: true);
+            var entities = new List<WorkplaceEntity>();
+
+            var isAdmin = _userContextService.UserRoles.Any(x => x.Trim().ToLower().Equals(Role.ADMIN.ToLower()));
+            if (isAdmin)
+            {
+                entities = await _unitOfWork.WorkplaceRepository
+                    .GetAllAsync(
+                        filter: x => true,
+                        include: x => x.Include(workplace => workplace.Users),
+                        pageIndex: pageIndex,
+                        pageSize: pageSize,
+                        isPaging: true);
+            }
+            else
+            {
+                entities = await _unitOfWork.WorkplaceRepository
+                    .GetAllAsync(
+                        filter: x => x.isDeleted == false,
+                        include: x => x.Include(workplace => workplace.Users),
+                        pageIndex: pageIndex,
+                        pageSize: pageSize,
+                        isPaging: true);
+            }
 
             if (entities == null)
             {
