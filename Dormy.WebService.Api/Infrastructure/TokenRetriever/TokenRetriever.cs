@@ -22,10 +22,16 @@ namespace Dormy.WebService.Api.Infrastructure.TokenRetriever
 
             var jwtKeyString = _configuration["Jwt:Key"];
 
+            var jwtIssuer = _configuration["Jwt:Issuer"];
+
+            var jwtAudience = _configuration["Jwt:Audience"];
+
             var jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKeyString ?? string.Empty);
 
             var tokenDesc = new SecurityTokenDescriptor
             {
+                Issuer = jwtIssuer,
+                Audience = jwtAudience,
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, jwtReponseModel.UserId.ToString()),

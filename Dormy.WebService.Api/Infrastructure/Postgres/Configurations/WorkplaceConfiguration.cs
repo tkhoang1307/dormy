@@ -11,6 +11,11 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
             builder
                 .Property(workplace => workplace.Id)
                 .ValueGeneratedOnAdd();
+
+            builder
+                .HasMany(workplace => workplace.Users)
+                .WithOne(user => user.Workplace)
+                .HasForeignKey(user => user.WorkplaceId);
         }
     }
 }

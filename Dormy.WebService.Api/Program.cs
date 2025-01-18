@@ -104,6 +104,8 @@ namespace Dormy.WebService.Api
             builder.Services.AddScoped<IWorkplaceService, WorkplaceService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
+            builder.Services.AddScoped<IUserContextService, UserContextService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -118,12 +120,13 @@ namespace Dormy.WebService.Api
 
             // Middlewares
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+            app.UseMiddleware<UserContextMiddleware>();
 
             // Migrate Db
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-                context.Database.Migrate();
+                //context.Database.Migrate();
             }
 
             app.Run();

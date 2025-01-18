@@ -4,5 +4,6 @@
     {
         public const string DuplicatedErrorMessage = "New password must be different with current password.";
         public const string UsernameIsExisted = "Username is existed.";
+        public const string CanNotDeleteNotEmptyEntity = "Can not delete data, related data existed";
     }
 }

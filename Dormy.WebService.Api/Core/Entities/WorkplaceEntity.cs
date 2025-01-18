@@ -10,6 +10,6 @@
 
         public string Abbrevation { get; set; } = string.Empty;
 
-        public UserEntity User { get; set; } = null!;
+        public List<UserEntity> Users { get; set; } = [];
     }
 }

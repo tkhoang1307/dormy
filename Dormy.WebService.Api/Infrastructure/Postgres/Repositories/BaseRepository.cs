@@ -1,6 +1,6 @@
 ﻿using Dormy.WebService.Api.Infrastructure.Postgres.IRepositories;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
@@ -40,6 +40,35 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
             return await _dbSet.ToListAsync();
         }
 
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter,
+                                               Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+                                               int pageIndex = 1,
+                                               int pageSize = 25,
+                                               bool isPaging = true)
+        {
+            IQueryable<T> query = _dbSet;
+
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            if (isPaging)
+            {
+                query = query
+                    .Skip((pageIndex - 1) * pageSize)
+                    .Take(pageSize); ;
+            }
+
+            return await query.AsNoTracking().ToListAsync();
+        }
+
         public Task<T?> GetAsync(Expression<Func<T, bool>> filter)
         {
             if (filter == null)
@@ -51,6 +80,16 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
 
                 return _dbSet.FirstOrDefaultAsync(filter);
             }
+        }
+
+        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+        {
+            IQueryable<T> query = _dbSet;
+            if (include != null)
+            {
+                query = include(query);
+            }
+            return await query.FirstOrDefaultAsync(filter);
         }
 
         public async Task<bool> IsExisted(Guid id)

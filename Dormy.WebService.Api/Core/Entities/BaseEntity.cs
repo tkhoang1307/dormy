@@ -6,9 +6,9 @@
 
         public DateTime LastUpdatedDateUtc { get; set; } = DateTime.Now;
 
-        public Guid CreatedBy { get; set; } = Guid.NewGuid();
+        public Guid? CreatedBy { get; set; }
 
-        public Guid LastUpdatedBy { get; set; } = Guid.NewGuid();
+        public Guid? LastUpdatedBy { get; set; }
 
         public bool isDeleted { get; set; } = false;
 

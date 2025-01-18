@@ -7,13 +7,13 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public HttpStatusCode StatusCode { get; private set; }
         public bool IsSuccess { get; private set; }
         public string ErrorMessage { get; private set; }
-        public object Data { get; private set; }
+        public object Result { get; private set; }
 
         public ApiResponse SetOk(object result = null)
         {
             IsSuccess = true;
             StatusCode = HttpStatusCode.OK;
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -25,7 +25,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -37,7 +37,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -45,7 +45,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         {
             IsSuccess = true;
             StatusCode = HttpStatusCode.Created;
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -53,7 +53,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         {
             IsSuccess = true;
             StatusCode = HttpStatusCode.Accepted;
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -65,7 +65,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -77,7 +77,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -89,7 +89,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -101,7 +101,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
 
@@ -113,7 +113,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
             {
                 ErrorMessage = message;
             }
-            Data = result;
+            Result = result;
             return this;
         }
     }
