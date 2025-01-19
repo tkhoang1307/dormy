@@ -5,6 +5,7 @@ using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -30,7 +31,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(buildingId);
             }
 
-            var roomTypeIds = rooms.Select(x => x.RoomTypeId).Distinct().ToList(); 
+            var roomTypeIds = rooms.Select(x => x.RoomTypeId).Distinct().ToList();
 
             var roomTypes = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => roomTypeIds.Contains(x.Id));
 
@@ -52,6 +53,34 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(buildingId);
+        }
+
+        public async Task<ApiResponse> GetRoomById(Guid id)
+        {
+            var entity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(id), x => x.Include(x => x.RoomType));
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(id);
+            }
+
+            var response = _roomMapper.MapToRoomResponseModel(entity);
+            return new ApiResponse().SetOk(response);
+        }
+
+        public async Task<ApiResponse> GetRoomsByBuildingId(Guid buildingId)
+        {
+            var entity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(buildingId), x => x.Include(x => x.Rooms).ThenInclude(x => x.RoomType));
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(buildingId);
+            }
+
+            entity.Rooms ??= [];
+
+            var response = entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.RoomNumer).ToList();
+            return new ApiResponse().SetOk(response);
         }
 
         public async Task<ApiResponse> SoftDeleteRoom(Guid id)

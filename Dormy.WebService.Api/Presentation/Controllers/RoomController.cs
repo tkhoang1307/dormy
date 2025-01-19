@@ -17,12 +17,28 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _roomService = roomService;
         }
 
-        [HttpPost("batch/buildingId/{buildingId:guid}")]
+        [HttpPost("create/batch/buildingId/{buildingId:guid}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomRequestModel> rooms)
         {
             var response = await _roomService.CreateRoomBatch(rooms, buildingId);
             return Ok(response);
+        }
+
+        [HttpGet("batch/buildingId/{buildingId:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetRoomsByBuildingId(Guid buildingId)
+        {
+            var response = await _roomService.GetRoomsByBuildingId(buildingId);
+            return response.IsSuccess ? Ok(response) : NotFound(response);
+        }
+
+        [HttpGet("id/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetRoomById(Guid id)
+        {
+            var response = await _roomService.GetRoomById(id);
+            return response.IsSuccess ? Ok(response) : NotFound(response);
         }
 
         [HttpPut]

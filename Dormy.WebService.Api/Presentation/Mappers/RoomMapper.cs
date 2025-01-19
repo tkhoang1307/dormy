@@ -27,7 +27,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 FloorNumber = entity.FloorNumber,
                 RoomNumer = entity.RoomNumer,
                 RoomTypeId = entity.RoomTypeId,
-                RoomTypeName = entity.RoomType.RoomTypeName,
+                RoomTypeName = entity.RoomType?.RoomTypeName ?? string.Empty,
                 Status = entity.Status,
                 StatusName = entity.Status.ToString(),
                 TotalAvailableBed = entity.TotalAvailableBed,
