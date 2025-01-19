@@ -2,6 +2,8 @@ using Dormy.WebService.Api.ApplicationLogic;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.Middlewares;
 using Dormy.WebService.Api.Infrastructure.Postgres;
+using Dormy.WebService.Api.Infrastructure.Postgres.IRepositories;
+using Dormy.WebService.Api.Infrastructure.Postgres.Repositories;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Startup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -74,6 +76,9 @@ namespace Dormy.WebService.Api
 
             // Add DI Repositories
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+            //builder.Services.AddTransient<IRoomTypeRepository, RoomTypeRepository>();
+            //builder.Services.AddTransient<IRoomRepository, RoomRepository>();
+            //builder.Services.AddTransient<IBuildingRepository, BuildingRepository>();
 
             // Add DI Services
             builder.Services.AddSingleton<ITokenRetriever, TokenRetriever>();

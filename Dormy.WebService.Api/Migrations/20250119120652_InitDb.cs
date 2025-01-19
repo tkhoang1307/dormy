@@ -277,8 +277,8 @@ namespace Dormy.WebService.Api.Migrations
                 {
                     table.PrimaryKey("PK_Rooms", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Rooms_Buildings_Id",
-                        column: x => x.Id,
+                        name: "FK_Rooms_Buildings_BuildingId",
+                        column: x => x.BuildingId,
                         principalTable: "Buildings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -783,7 +783,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName", "isDeleted" },
-                values: new object[] { new Guid("5f317b2c-2e0a-4e3a-8eca-b548ff757e36"), null, new DateTime(2025, 1, 18, 22, 23, 17, 914, DateTimeKind.Local).AddTicks(328), new DateTime(2025, 1, 18, 22, 23, 17, 914, DateTimeKind.Local).AddTicks(334), "hungdv190516@gmail.com", "Admin", 0, "Admin", "", null, new DateTime(2025, 1, 18, 22, 23, 17, 914, DateTimeKind.Local).AddTicks(328), "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin", false });
+                values: new object[] { new Guid("df37a0be-632f-41d5-b2c9-86c96eaaf222"), null, new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6291), new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6297), "hungdv190516@gmail.com", "Admin", 0, "Admin", "", null, new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6292), "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin", false });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Beds_RoomId",
@@ -889,6 +889,11 @@ namespace Dormy.WebService.Api.Migrations
                 name: "IX_RoomTypeServices_RoomTypeId",
                 table: "RoomTypeServices",
                 column: "RoomTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_BuildingId",
+                table: "Rooms",
+                column: "BuildingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rooms_RoomTypeId",

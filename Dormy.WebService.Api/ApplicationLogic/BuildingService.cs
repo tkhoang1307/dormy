@@ -1,15 +1,122 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
-    public class BuildingService: IBuildingService
+    public class BuildingService : IBuildingService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserContextService _userContextService;
+        private readonly BuildingMapper _buildingMapper;
 
-        public BuildingService(IUnitOfWork unitOfWork)
+        public BuildingService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
+            _buildingMapper = new BuildingMapper();
+            _userContextService = userContextService;
+        }
+
+        public async Task<ApiResponse> CreateBuilding(BuildingRequestModel model)
+        {
+            var roomTypeIds = model.Floors
+                       .SelectMany(floor => floor.Rooms)
+                       .Select(room => room.RoomTypeId)
+                       .Distinct()
+                       .ToList();
+
+            var roomTypes = await _unitOfWork.RoomTypeRepository
+                                             .GetAllAsync(rt => roomTypeIds.Contains(rt.Id));
+
+            if (roomTypes.Count != roomTypeIds.Count)
+            {
+                var missingIds = roomTypeIds.Except(roomTypes.Select(rt => rt.Id));
+                return new ApiResponse().SetBadRequest($"Room Types with IDs: {string.Join(", ", missingIds)} were not found");
+            }
+
+            var buildingEntity = _buildingMapper.MapToBuildingEntity(model);
+
+            if (_userContextService.UserId != Guid.Empty)
+            {
+                buildingEntity.CreatedBy = _userContextService.UserId;
+            }
+
+            if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
+            {
+                foreach (var room in buildingEntity.Rooms)
+                {
+                    room.CreatedBy = _userContextService.UserId;
+                }
+            }
+
+            await _unitOfWork.BuildingRepository.AddAsync(buildingEntity);
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetCreated(buildingEntity.Id);
+        }
+
+        public async Task<ApiResponse> GetBuildingById(Guid id)
+        {
+            var entity = await _unitOfWork.BuildingRepository
+                .GetAsync(
+                    building => building.Id.Equals(id),
+                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType)
+                );
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(id);
+            }
+            var response = _buildingMapper.MapToBuildingResponseModel(entity);
+
+            var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(entity.CreatedBy));
+
+            response.CreatedByAdminName = author?.UserName ?? string.Empty;
+
+            if (entity.LastUpdatedBy != null)
+            {
+                var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(entity.LastUpdatedBy));
+                response.UpdatedByAdminName = author?.UserName ?? string.Empty;
+            }
+
+            return new ApiResponse().SetOk(response);
+        }
+
+        public async Task<ApiResponse> GetBuildingBatch(List<Guid> ids, bool isGetAll = false)
+        {
+            var entities = await _unitOfWork.BuildingRepository
+                .GetAllAsync(
+                    building => isGetAll || ids.Contains(building.Id),
+                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType)
+                );
+
+            if (entities == null)
+            {
+                return new ApiResponse().SetOk(new());
+            }
+            var buildingListResponseModel = entities.Select(entity => _buildingMapper.MapToBuildingResponseModel(entity)).ToList();
+
+
+            for (int i = 0; i < buildingListResponseModel.Count; i++)
+            {
+                var buildingResponseModel = buildingListResponseModel[i];
+                var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(buildingResponseModel.CreatedBy));
+
+                buildingResponseModel.CreatedByAdminName = author?.UserName ?? string.Empty;
+
+                if (buildingResponseModel.LastUpdatedBy != null)
+                {
+                    var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(buildingResponseModel.LastUpdatedBy));
+                    buildingResponseModel.UpdatedByAdminName = author?.UserName ?? string.Empty;
+                }
+            }
+
+            return new ApiResponse().SetOk(buildingListResponseModel);
         }
     }
 }

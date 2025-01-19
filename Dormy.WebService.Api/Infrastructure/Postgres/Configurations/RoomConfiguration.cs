@@ -15,7 +15,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
             builder
                 .HasOne(room => room.Building)
                 .WithMany(building => building.Rooms)
-                .HasForeignKey(room => room.Id);
+                .HasForeignKey(room => room.BuildingId);
 
             builder
                 .HasOne(room => room.RoomType)

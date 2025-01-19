@@ -31,7 +31,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter)
         {
             if (filter != null)
             {

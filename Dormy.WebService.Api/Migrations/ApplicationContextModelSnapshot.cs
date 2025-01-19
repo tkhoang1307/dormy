@@ -84,15 +84,15 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("5f317b2c-2e0a-4e3a-8eca-b548ff757e36"),
-                            CreatedDateUtc = new DateTime(2025, 1, 18, 22, 23, 17, 914, DateTimeKind.Local).AddTicks(328),
-                            DateOfBirth = new DateTime(2025, 1, 18, 22, 23, 17, 914, DateTimeKind.Local).AddTicks(334),
+                            Id = new Guid("df37a0be-632f-41d5-b2c9-86c96eaaf222"),
+                            CreatedDateUtc = new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6291),
+                            DateOfBirth = new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6297),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = 0,
                             JobTitle = "Admin",
                             LastName = "",
-                            LastUpdatedDateUtc = new DateTime(2025, 1, 18, 22, 23, 17, 914, DateTimeKind.Local).AddTicks(328),
+                            LastUpdatedDateUtc = new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6292),
                             Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
                             PhoneNumber = "",
                             UserName = "admin",
@@ -792,6 +792,8 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BuildingId");
+
                     b.HasIndex("RoomTypeId");
 
                     b.ToTable("Rooms");
@@ -1448,7 +1450,7 @@ namespace Dormy.WebService.Api.Migrations
                 {
                     b.HasOne("Dormy.WebService.Api.Core.Entities.BuildingEntity", "Building")
                         .WithMany("Rooms")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("BuildingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
