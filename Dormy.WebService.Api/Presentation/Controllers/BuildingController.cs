@@ -53,5 +53,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             return Ok(response.Result);
         }
+
+        [HttpDelete("id/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> SoftDeleteBuilding(Guid id)
+        {
+            var response = await _buildingService.SoftDeleteBuildingById(id);
+            return Ok(response.Result);
+        }
     }
 }

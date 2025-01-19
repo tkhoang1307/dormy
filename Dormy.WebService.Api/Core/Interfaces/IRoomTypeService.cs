@@ -7,5 +7,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     {
         Task<ApiResponse> CreateRoomType(RoomTypeRequestModel model);
         Task<ApiResponse> GetRoomTypes();
+        Task<ApiResponse> UpdateRoomType(RoomTypeUpdateRequestModel model);
+        Task<ApiResponse> SoftDeleteRoomType(Guid id);
     }
 }

@@ -1,5 +1,6 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -117,6 +118,30 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             return new ApiResponse().SetOk(buildingListResponseModel);
+        }
+
+        public async Task<ApiResponse> SoftDeleteBuildingById(Guid id)
+        {
+            var roomEntities = await _unitOfWork.RoomRepository.GetAllAsync(r => r.BuildingId.Equals(id));
+
+            if (BedHelper.IsBedOccupied(roomEntities))
+            {
+                return new ApiResponse().SetBadRequest(id, ErrorMessages.BedIsOccupiedErrorMessage);
+            }
+
+            var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(id));
+
+            if (buildingEntity == null)
+            {
+                return new ApiResponse().SetNotFound(id);
+            }
+
+            buildingEntity.isDeleted = true;
+            buildingEntity.LastUpdatedDateUtc = DateTime.UtcNow;
+            buildingEntity.LastUpdatedBy = _userContextService.UserId;
+
+            await _unitOfWork.SaveChangeAsync();
+            return new ApiResponse().SetOk(buildingEntity.Id);
         }
     }
 }

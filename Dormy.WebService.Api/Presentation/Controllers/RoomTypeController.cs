@@ -32,5 +32,29 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var response = await _roomTypeService.CreateRoomType(model);
             return Ok(response);
         }
+
+        [HttpPut]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> UpdateRoomType([FromBody] RoomTypeUpdateRequestModel model)
+        {
+            var response = await _roomTypeService.UpdateRoomType(model);
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            return NotFound();
+        }
+
+        [HttpDelete("id/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> SoftDeleteRoomType(Guid id)
+        {
+            var response = await _roomTypeService.SoftDeleteRoomType(id);
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            return NotFound();
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
-using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 
@@ -15,7 +14,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 FloorNumber = floorNumber,
                 RoomNumer = model.RoomNumber,
                 RoomTypeId = model.RoomTypeId,
-                Status = RoomStatusEnum.AVAILABLE,
+                Status = model.RoomStatus,
                 TotalAvailableBed = model.TotalAvailableBed,
                 BuildingId = buildingId,
             };
