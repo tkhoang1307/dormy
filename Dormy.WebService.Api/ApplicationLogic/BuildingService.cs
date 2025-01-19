@@ -24,8 +24,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateBuilding(BuildingRequestModel model)
         {
-            var roomTypeIds = model.Floors
-                       .SelectMany(floor => floor.Rooms)
+            var roomTypeIds = model.Rooms
                        .Select(room => room.RoomTypeId)
                        .Distinct()
                        .ToList();

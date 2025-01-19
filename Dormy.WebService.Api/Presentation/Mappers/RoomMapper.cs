@@ -6,17 +6,16 @@ namespace Dormy.WebService.Api.Presentation.Mappers
 {
     public class RoomMapper
     {
-        public RoomEntity MapToRoomEntity(RoomRequestModel model, int floorNumber, Guid buildingId)
+        public RoomEntity MapToRoomEntity(RoomRequestModel model)
         {
             return new RoomEntity
             {
-                Id = Guid.NewGuid(),
-                FloorNumber = floorNumber,
+                FloorNumber = model.FloorNumber,
                 RoomNumer = model.RoomNumber,
                 RoomTypeId = model.RoomTypeId,
                 Status = model.RoomStatus,
                 TotalAvailableBed = model.TotalAvailableBed,
-                BuildingId = buildingId,
+                CreatedDateUtc = DateTime.Now,
             };
         }
 
@@ -33,6 +32,11 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 StatusName = entity.Status.ToString(),
                 TotalAvailableBed = entity.TotalAvailableBed,
                 BuildingId = entity.BuildingId,
+                CreatedDateUtc = entity.CreatedDateUtc,
+                CreatedBy = entity.CreatedBy,
+                isDeleted = entity.isDeleted,
+                LastUpdatedBy = entity.LastUpdatedBy,
+                LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
             };
         }
     }

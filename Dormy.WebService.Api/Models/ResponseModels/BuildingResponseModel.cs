@@ -15,17 +15,10 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public GenderEnum GenderRestriction { get; set; }
 
-        public List<FloorResponseModel> Floors { get; set; } = [];
+        public List<RoomResponseModel> Rooms { get; set; } = [];
 
         public string CreatedByAdminName { get; set; } = string.Empty;
 
         public string UpdatedByAdminName { get; set; } = string.Empty;
-    }
-
-    public class FloorResponseModel
-    {
-        public int FloorId { get; set; }
-
-        public List<RoomResponseModel> Rooms { get; set; } = [];
     }
 }

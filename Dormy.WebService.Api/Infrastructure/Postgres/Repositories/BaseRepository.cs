@@ -21,6 +21,11 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
             await _dbSet.AddAsync(entity);
         }
 
+        public async Task AddRangeAsync(List<T> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+        }
+
         public async Task DeleteByIdAsync(Guid id)
         {
             T? entity = await _dbSet.FindAsync(id);

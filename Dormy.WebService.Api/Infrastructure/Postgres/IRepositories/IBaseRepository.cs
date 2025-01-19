@@ -8,6 +8,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.IRepositories
         Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter);
         Task<T?> GetAsync(Expression<Func<T, bool>> filter);
         Task AddAsync(T entity);
+        Task AddRangeAsync(List<T> entities);
         Task DeleteByIdAsync(Guid id);
         Task<bool> IsExisted(Guid id);
         Task<T> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include);

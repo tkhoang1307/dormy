@@ -10,13 +10,6 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public GenderEnum GenderRestriction { get; set; }
 
-        public List<FloorRequestModel> Floors { get; set; } = [];
-    }
-
-    public class FloorRequestModel
-    {
-        public int FloorId { get; set; }
-
         public List<RoomRequestModel> Rooms { get; set; } = [];
     }
 
