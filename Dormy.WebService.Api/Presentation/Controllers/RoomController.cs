@@ -64,5 +64,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var response = await _roomService.SoftDeleteRoom(id);
             return response.IsSuccess ? Ok(response) : NotFound(response.Result);
         }
+
+        [HttpDelete("delete/batch")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> SoftDeleteBatch([FromBody] List<Guid> ids)
+        {
+            var response = await _roomService.SoftDeleteRoomBatch(ids);
+            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+        }
     }
 }

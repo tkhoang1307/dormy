@@ -11,5 +11,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> UpdateRoom(RoomUpdateRequestModel rooms);
         Task<ApiResponse> UpdateRoomStatus(RoomUpdateStatusRequestModel rooms);
         Task<ApiResponse> SoftDeleteRoom(Guid id);
+        Task<ApiResponse> SoftDeleteRoomBatch(List<Guid> ids);
     }
 }

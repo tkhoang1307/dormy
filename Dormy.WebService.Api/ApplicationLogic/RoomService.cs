@@ -106,6 +106,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(id);
         }
 
+        public async Task<ApiResponse> SoftDeleteRoomBatch(List<Guid> ids)
+        {
+            var entities = await _unitOfWork.RoomRepository.GetAllAsync(x => ids.Contains(x.Id));
+
+            if (entities == null || (entities.Count != ids.Count))
+            {
+                return new ApiResponse().SetNotFound("Some of room is not found");
+            }
+
+            if (BedHelper.IsBedOccupied(entities))
+            {
+                return new ApiResponse().SetBadRequest("There are some beds is in used.");
+            }
+
+            foreach (var entity in entities)
+            {
+                entity.isDeleted = true;
+                entity.LastUpdatedDateUtc = DateTime.UtcNow;
+                entity.LastUpdatedBy = _userContextService.UserId;
+            }
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetOk();
+        }
+
         public async Task<ApiResponse> UpdateRoom(RoomUpdateRequestModel model)
         {
             var entity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(model.Id));
