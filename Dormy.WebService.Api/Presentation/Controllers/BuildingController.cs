@@ -54,6 +54,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(response.Result);
         }
 
+        [HttpPost("create/batch")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> CreateBuildingBatch(List<BuildingRequestModel> models)
+        {
+            var response = await _buildingService.CreateBuildingBatch(models);
+
+            return Ok(response.Result);
+        }
+
         [HttpDelete("id/{id:guid}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteBuilding(Guid id)

@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -141,6 +142,52 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetOk(buildingEntity.Id);
+        }
+
+        public async Task<ApiResponse> CreateBuildingBatch(List<BuildingRequestModel> models)
+        {
+            var roomTypeIds = models
+                       .SelectMany(b => b.Rooms)
+                       .Select(room => room.RoomTypeId)
+                       .Distinct()
+                       .ToList();
+
+            var roomTypes = await _unitOfWork.RoomTypeRepository
+                                             .GetAllAsync(rt => roomTypeIds.Contains(rt.Id));
+
+            if (roomTypes.Count != roomTypeIds.Count)
+            {
+                var missingIds = roomTypeIds.Except(roomTypes.Select(rt => rt.Id));
+                return new ApiResponse().SetBadRequest($"Room Types with IDs: {string.Join(", ", missingIds)} were not found");
+            }
+
+            var listBuildingEntities = new List<BuildingEntity>();
+
+            foreach (var model in models)
+            {
+                var buildingEntity = _buildingMapper.MapToBuildingEntity(model);
+
+                if (_userContextService.UserId != Guid.Empty)
+                {
+                    buildingEntity.CreatedBy = _userContextService.UserId;
+                }
+
+                if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
+                {
+                    foreach (var room in buildingEntity.Rooms)
+                    {
+                        room.CreatedBy = _userContextService.UserId;
+                    }
+                }
+
+                listBuildingEntities.Add(buildingEntity);
+            }
+
+            await _unitOfWork.BuildingRepository.AddRangeAsync(listBuildingEntities);
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetCreated(listBuildingEntities.Select(b => b.Id).ToList());
         }
     }
 }

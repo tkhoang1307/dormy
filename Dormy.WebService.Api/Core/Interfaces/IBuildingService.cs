@@ -6,6 +6,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     public interface IBuildingService
     {
         Task<ApiResponse> CreateBuilding(BuildingRequestModel model);
+        Task<ApiResponse> CreateBuildingBatch(List<BuildingRequestModel> models);
         Task<ApiResponse> GetBuildingById(Guid id);
         Task<ApiResponse> GetBuildingBatch(List<Guid> ids, bool isGetAll);
         Task<ApiResponse> SoftDeleteBuildingById(Guid id);
