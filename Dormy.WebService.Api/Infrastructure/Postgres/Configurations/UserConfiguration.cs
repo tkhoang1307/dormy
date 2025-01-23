@@ -12,10 +12,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .Property(user => user.Id)
                 .ValueGeneratedOnAdd();
 
-            builder.HasOne(user => user.Guardian)
-                .WithOne(guardian => guardian.User)
-                .HasForeignKey<UserEntity>(user => user.GuardianId);
-
             builder.HasOne(user => user.HealthInsurance)
                 .WithOne(healthInsurance => healthInsurance.User)
                 .HasForeignKey<UserEntity>(user => user.HealthInsuranceId);

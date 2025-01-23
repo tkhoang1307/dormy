@@ -14,6 +14,8 @@
 
         public string RelationshipToUser { get; set; } = string.Empty;
 
-        public UserEntity User { get; set; } = null!; 
+        public Guid UserId { get; set; }
+
+        public UserEntity User { get; set; } = null!;
     }
 }

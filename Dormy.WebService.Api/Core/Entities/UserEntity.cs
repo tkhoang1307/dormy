@@ -26,10 +26,6 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public GenderEnum Gender { get; set; }
 
-        public Guid GuardianId { get; set; }
-
-        public GuardianEntity Guardian { get; set; } = null!;
-
         public Guid WorkplaceId { get; set; }
 
         public WorkplaceEntity Workplace { get; set; } = null!;
@@ -37,6 +33,8 @@ namespace Dormy.WebService.Api.Core.Entities
         public Guid HealthInsuranceId { get; set; }
 
         public HealthInsuranceEntity HealthInsurance { get; set; } = null!;
+
+        public List<GuardianEntity>? Guardians { get; set; }
 
         public List<ViolationEntity>? Violations { get; set; }
 
