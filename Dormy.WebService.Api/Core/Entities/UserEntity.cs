@@ -22,7 +22,7 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string NationalIdNumber { get; set; } = string.Empty;
 
-        public UserStatusEnum Status { get; set; }
+        public UserStatusEnum Status { get; set; } = UserStatusEnum.ACTIVE;
 
         public GenderEnum Gender { get; set; }
 

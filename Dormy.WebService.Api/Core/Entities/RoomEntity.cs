@@ -8,9 +8,9 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string RoomNumber { get; set; } = string.Empty;
 
-        public int FloorNumber { get; set; } 
+        public int FloorNumber { get; set; }
 
-        public int TotalUsedBed { get; set; }
+        public int TotalUsedBed { get; set; } = 0;
 
         public int TotalAvailableBed { get; set; }
 

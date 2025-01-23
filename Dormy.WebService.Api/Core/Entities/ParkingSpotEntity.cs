@@ -10,9 +10,9 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public int CapacitySpots { get; set; }
 
-        public int CurrentQuantity { get; set; }
+        public int CurrentQuantity { get; set; } = 0;
 
-        public ParkingSpotStatusEnum Status { get; set; }
+        public ParkingSpotStatusEnum Status { get; set; } = ParkingSpotStatusEnum.AVAILABLE;
 
         public List<ParkingRequestEntity>? ParkingRequests { get; set; }
 
