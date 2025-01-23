@@ -23,11 +23,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .HasForeignKey(contract => contract.ApproverId);
 
             builder
-                .HasOne(contract => contract.Bed)
-                .WithMany(bed => bed.Contracts)
-                .HasForeignKey(contract => contract.BedId);
-
-            builder
                 .HasOne(contract => contract.Room)
                 .WithMany(room => room.Contracts)
                 .HasForeignKey(contract => contract.RoomId);

@@ -43,7 +43,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var result = await _adminService.GetAdminAccount(id);
             if (result.IsSuccess)
             {
-                return Ok(result.Result);
+                return Ok(result.Data);
             }
             return NotFound();
         }

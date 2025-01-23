@@ -83,7 +83,6 @@ namespace Dormy.WebService.Api
             // Add DI Services
             builder.Services.AddSingleton<ITokenRetriever, TokenRetriever>();
             builder.Services.AddScoped<IAdminService, AdminService>();
-            builder.Services.AddScoped<IBedService, BedService>();
             builder.Services.AddScoped<IBuildingService, BuildingService>();
             builder.Services.AddScoped<IContractExtensionService, ContractExtensionService>();
             builder.Services.AddScoped<IContractService, ContractService>();

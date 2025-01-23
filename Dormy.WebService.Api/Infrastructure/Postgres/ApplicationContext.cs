@@ -17,7 +17,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
         }
 
         public DbSet<AdminEntity> Admins { get; set; }
-        public DbSet<BedEntity> Beds { get; set; }
         public DbSet<BuildingEntity> Buildings { get; set; }
 
         public DbSet<ContractEntity> Contracts { get; set; }
@@ -53,7 +52,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AdminConfiguration());
-            modelBuilder.ApplyConfiguration(new BedConfiguration());
             modelBuilder.ApplyConfiguration(new BuildingConfiguration());
             modelBuilder.ApplyConfiguration(new ContractConfiguration());
             modelBuilder.ApplyConfiguration(new ContractExtensionConfiguration());

@@ -26,10 +26,6 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public AdminEntity Approver { get; set; } = null!;
 
-        public Guid BedId { get; set; }
-
-        public BedEntity Bed { get; set; } = null!;
-
         public Guid RoomId { get; set; }
 
         public RoomEntity Room { get; set; } = null!;

@@ -6,8 +6,6 @@ namespace Dormy.WebService.Api.Startup
     public interface IUnitOfWork
     {
         public IAdminRepository AdminRepository { get; }
-
-        public IBedRepository BedRepository { get; }
         
         public IBuildingRepository BuildingRepository { get; }
 

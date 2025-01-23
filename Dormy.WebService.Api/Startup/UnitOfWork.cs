@@ -10,8 +10,6 @@ namespace Dormy.WebService.Api.Startup
 
         public IAdminRepository AdminRepository { get; }
 
-        public IBedRepository BedRepository { get; }
-
         public IBuildingRepository BuildingRepository { get; }
 
         public IContractExtensionRepository ContractExtensionRepository { get; }
@@ -62,7 +60,6 @@ namespace Dormy.WebService.Api.Startup
         {
             _context = context;
             AdminRepository = new AdminRepository(_context);
-            BedRepository = new BedRepository(_context);
             BuildingRepository = new BuildingRepository(_context);
             ContractRepository = new ContractRepository(_context);
             ContractExtensionRepository = new ContractExtensionRepository(_context);
