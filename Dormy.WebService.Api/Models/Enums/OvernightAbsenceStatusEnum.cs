@@ -4,8 +4,8 @@ namespace Dormy.WebService.Api.Models.Enums
 {
     public enum OvernightAbsenceStatusEnum
     {
-        [Description("Draft")]
-        DRAFT,
+        //[Description("Draft")]
+        //DRAFT,
         [Description("Submitted")]
         SUBMITTED,
         [Description("Approved")]

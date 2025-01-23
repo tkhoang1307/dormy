@@ -6,13 +6,15 @@ namespace Dormy.WebService.Api.Core.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string RoomNumer { get; set; } = string.Empty;
+        public string RoomNumber { get; set; } = string.Empty;
 
         public int FloorNumber { get; set; } 
 
+        public int TotalUsedBed { get; set; }
+
         public int TotalAvailableBed { get; set; }
 
-        public RoomStatusEnum Status { get; set; }
+        public RoomStatusEnum Status { get; set; } = RoomStatusEnum.AVAILABLE;
 
         public Guid BuildingId { get; set; }
 
@@ -21,8 +23,6 @@ namespace Dormy.WebService.Api.Core.Entities
         public Guid RoomTypeId { get; set; }
 
         public RoomTypeEntity RoomType { get; set; } = null!;
-
-        public List<BedEntity>? Beds { get; set; }
 
         public List<InvoiceEntity>? Invoices { get; set; }
 

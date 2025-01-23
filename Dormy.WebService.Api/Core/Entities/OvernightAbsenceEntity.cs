@@ -12,7 +12,7 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string Reason { get; set; } = string.Empty;
 
-        public OvernightAbsenceStatusEnum Status { get; set; }
+        public OvernightAbsenceStatusEnum Status { get; set; } = OvernightAbsenceStatusEnum.SUBMITTED;
 
         public Guid UserId { get; set; }
 

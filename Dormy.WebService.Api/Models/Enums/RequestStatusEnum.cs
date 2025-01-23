@@ -10,5 +10,7 @@ namespace Dormy.WebService.Api.Models.Enums
         APPROVED,
         [Description("Rejected")]
         REJECTED,
+        [Description("Cancelled")]
+        CANCELLED,
     }
 }
