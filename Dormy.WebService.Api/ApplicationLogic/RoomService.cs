@@ -148,7 +148,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest("Some of room type is not found");
             }
 
-            entity.RoomNumer = model.RoomNumber;
+            entity.RoomNumber = model.RoomNumber;
             entity.FloorNumber = model.FloorNumber;
             entity.Status = model.RoomStatus;
             entity.RoomTypeId = model.RoomTypeId;

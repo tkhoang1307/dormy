@@ -11,7 +11,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             return new RoomEntity
             {
                 FloorNumber = model.FloorNumber,
-                RoomNumer = model.RoomNumber,
+                RoomNumber = model.RoomNumber,
                 RoomTypeId = model.RoomTypeId,
                 Status = model.RoomStatus,
                 TotalAvailableBed = model.TotalAvailableBed,
@@ -25,7 +25,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             {
                 Id = entity.Id,
                 FloorNumber = entity.FloorNumber,
-                RoomNumer = entity.RoomNumer,
+                RoomNumer = entity.RoomNumber,
                 RoomTypeId = entity.RoomTypeId,
                 RoomTypeName = entity.RoomType?.RoomTypeName ?? string.Empty,
                 Status = entity.Status,
