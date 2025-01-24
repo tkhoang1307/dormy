@@ -1,24 +1,10 @@
 version: '3.9'
 
 services:
-  # api:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "5000:80"
-  #     #- "5001:443"
-  #   depends_on:
-  #     - postgres
-  #   environment:
-  #     ASPNETCORE_ENVIRONMENT: "Development" # Corrected the environment variable here
-  #     ASPNETCORE_URLS: "http://+:80"
-  #   networks:
-  #     - my_network  
-
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: my_postgres
+  db:
+    container_name: db_container
+    image: postgres:latest
+    restart: always
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: myuser
@@ -26,26 +12,50 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      - "5431:5432"
+      - "5433:5432"
     networks:
-      - my_network
+      - mynetwork
 
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   container_name: my_pgadmin
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: my@email.com
-  #     PGADMIN_DEFAULT_PASSWORD: my_password
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: Huynhthekhoa19052016
+    ports:
+      - "5050:80"
+    networks:
+      - mynetwork
+    depends_on:
+      - db
+  
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:80
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker" 
+      ASPNETCORE_URLS: "http://+:80"
+    networks:
+      - mynetwork
+
+      # web:
+  #   build: ../dormy_web
   #   ports:
-  #     - "5050:80"
-  #   depends_on:
-  #     - postgres
+  #     - 3001:3000
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
   #   networks:
-  #     - my_network  
+  #     - mynetwork
 
 volumes:
   pg_data:
 
 networks:
-  my_network:
-    driver: bridge  
+  mynetwork:
+    driver: bridge

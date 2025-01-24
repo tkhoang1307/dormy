@@ -2,8 +2,6 @@ using Dormy.WebService.Api.ApplicationLogic;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.Middlewares;
 using Dormy.WebService.Api.Infrastructure.Postgres;
-using Dormy.WebService.Api.Infrastructure.Postgres.IRepositories;
-using Dormy.WebService.Api.Infrastructure.Postgres.Repositories;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Startup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,7 +55,7 @@ namespace Dormy.WebService.Api
 
             builder.Services.AddDbContext<ApplicationContext>(options =>
             {
-                options.UseNpgsql(builder.Configuration.GetConnectionString("LocalConnection"));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
             // Fix postgres datetime
@@ -76,9 +74,6 @@ namespace Dormy.WebService.Api
 
             // Add DI Repositories
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-            //builder.Services.AddTransient<IRoomTypeRepository, RoomTypeRepository>();
-            //builder.Services.AddTransient<IRoomRepository, RoomRepository>();
-            //builder.Services.AddTransient<IBuildingRepository, BuildingRepository>();
 
             // Add DI Services
             builder.Services.AddSingleton<ITokenRetriever, TokenRetriever>();
@@ -116,21 +111,28 @@ namespace Dormy.WebService.Api
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.UseRouting();
+            //app.UseRouting();
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
-            
+
             app.MapControllers();
 
             // Middlewares
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
             app.UseMiddleware<UserContextMiddleware>();
 
+            Console.WriteLine($"ENVIRONMENT: {builder.Configuration.GetValue<string>("Environment")}");
+
             // Migrate Db
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-                //context.Database.Migrate();
+                if (context.Database.GetPendingMigrations().Any())
+                {
+                    Console.WriteLine("Start Migration");
+                    context.Database.Migrate();
+                }
             }
 
             app.Run();
