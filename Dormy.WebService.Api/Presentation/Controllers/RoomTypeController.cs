@@ -25,6 +25,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(response);
         }
 
+        [HttpGet("id/{id:guid}")]
+        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
+        public async Task<IActionResult> GetRoomTypeById(Guid id)
+        {
+            var response = await _roomTypeService.GetRoomTypeById(id);
+            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+        }
+
         [HttpPost]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomType([FromBody] RoomTypeRequestModel model)

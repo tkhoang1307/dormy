@@ -16,9 +16,12 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Email = entity.Email,
                 PhoneNumber = entity.PhoneNumber,
                 Gender = entity.Gender.ToString(),
-                GuardianId = entity.GuardianId,
+                Guardians = entity.Guardians != null ? entity.Guardians.Select(x => new GuardiansResponseModel()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                }).ToList() : [],
                 DateOfBirth = entity.DateOfBirth,
-                GuardianName = entity.Guardian?.Name ?? string.Empty,
                 HealthInsuranceId = entity.HealthInsuranceId,
                 NationalIdNumber = entity.NationalIdNumber,
                 Status = entity.Status.ToString(),

@@ -1,6 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
-using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -92,12 +91,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id);
             }
 
-            if (BedHelper.IsBedOccupied([entity]))
+            if (entity.TotalUsedBed > 0)
             {
-                return new ApiResponse().SetBadRequest(entity.Id, ErrorMessages.BedIsOccupiedErrorMessage);
+                return new ApiResponse().SetBadRequest(entity.Id, ErrorMessages.RoomIsOccupiedErrorMessage);
             }
 
-            entity.isDeleted = true;
+            entity.IsDeleted = true;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 
@@ -115,14 +114,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound("Some of room is not found");
             }
 
-            if (BedHelper.IsBedOccupied(entities))
+            if (entities.Any(r => r.TotalUsedBed > 0))
             {
                 return new ApiResponse().SetBadRequest("There are some beds is in used.");
             }
 
             foreach (var entity in entities)
             {
-                entity.isDeleted = true;
+                entity.IsDeleted = true;
                 entity.LastUpdatedDateUtc = DateTime.UtcNow;
                 entity.LastUpdatedBy = _userContextService.UserId;
             }

@@ -1,7 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
-using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -82,7 +81,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             if (entity.LastUpdatedBy != null)
             {
                 var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(entity.LastUpdatedBy));
-                response.UpdatedByAdminName = author?.UserName ?? string.Empty;
+                response.LastUpdatedByAdminName = author?.UserName ?? string.Empty;
             }
 
             return new ApiResponse().SetOk(response);
@@ -113,7 +112,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 if (buildingResponseModel.LastUpdatedBy != null)
                 {
                     var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(buildingResponseModel.LastUpdatedBy));
-                    buildingResponseModel.UpdatedByAdminName = author?.UserName ?? string.Empty;
+                    buildingResponseModel.LastUpdatedByAdminName = author?.UserName ?? string.Empty;
                 }
             }
 
@@ -122,21 +121,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> SoftDeleteBuildingById(Guid id)
         {
-            var roomEntities = await _unitOfWork.RoomRepository.GetAllAsync(r => r.BuildingId.Equals(id));
-
-            if (BedHelper.IsBedOccupied(roomEntities))
-            {
-                return new ApiResponse().SetBadRequest(id, ErrorMessages.BedIsOccupiedErrorMessage);
-            }
-
-            var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(id));
+            var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(id), x => x.Include(x => x.Rooms));
 
             if (buildingEntity == null)
             {
                 return new ApiResponse().SetNotFound(id);
             }
 
-            buildingEntity.isDeleted = true;
+            if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
+            {
+                if (buildingEntity.Rooms.Any(r => r.TotalUsedBed > 0))
+                {
+                    return new ApiResponse().SetBadRequest(ErrorMessages.RoomIsOccupiedErrorMessage);
+                }
+            }
+
+            buildingEntity.IsDeleted = true;
             buildingEntity.LastUpdatedDateUtc = DateTime.UtcNow;
             buildingEntity.LastUpdatedBy = _userContextService.UserId;
 

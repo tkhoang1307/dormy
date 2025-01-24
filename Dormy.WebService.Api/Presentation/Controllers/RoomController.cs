@@ -17,7 +17,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _roomService = roomService;
         }
 
-        [HttpPost("create/batch/buildingId/{buildingId:guid}")]
+        [HttpPost("batch/create/buildingId/{buildingId:guid}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomRequestModel> rooms)
         {

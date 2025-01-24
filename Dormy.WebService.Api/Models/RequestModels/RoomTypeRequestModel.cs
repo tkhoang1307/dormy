@@ -9,6 +9,8 @@
         public int Capacity { get; set; }
 
         public decimal Price { get; set; }
+
+        public List<Guid> RoomServiceIds { get; set; } = [];
     }
 
     public class RoomTypeUpdateRequestModel
@@ -22,5 +24,7 @@
         public int Capacity { get; set; }
 
         public decimal Price { get; set; }
+
+        public List<Guid> RoomServiceIds { get; set;} = [];
     }
 }

@@ -16,6 +16,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Description = model.Description,
                 Price = model.Price,
                 RoomTypeName = model.RoomTypeName,
+                RoomTypeServices = model.RoomServiceIds.Select(id => MapToRoomTypeServiceEntity(id)).ToList(),
             };
         }
 
@@ -32,8 +33,36 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LastUpdatedBy = entity.LastUpdatedBy,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
                 CreatedBy = entity.CreatedBy,
-                isDeleted = entity.isDeleted
+                IsDeleted = entity.IsDeleted,
+                RoomServices = MapToRoomServiceModels(entity),
             };
+        }
+
+        public RoomTypeServiceEntity MapToRoomTypeServiceEntity(Guid roomServiceId)
+        {
+            return new RoomTypeServiceEntity
+            {
+                RoomServiceId = roomServiceId,
+                CreatedDateUtc = DateTime.UtcNow,
+            };
+        }
+
+        public List<RoomServiceResponseModel> MapToRoomServiceModels(RoomTypeEntity source)
+        {
+            if (source.RoomTypeServices == null || source.RoomTypeServices.Count == 0)
+            {
+                return [];
+            }
+
+            var roomServices = source.RoomTypeServices.Select(x => x.RoomService).DistinctBy(x => x.Id).ToList();
+
+            return roomServices.Select(x => new RoomServiceResponseModel
+            {
+                Id = x.Id,
+                Cost = x.Cost,
+                Unit = x.Unit,
+                RoomServiceName = x.RoomServiceName,
+            }).ToList();
         }
     }
 }

@@ -30,6 +30,11 @@ namespace Dormy.WebService.Api.Infrastructure.Middlewares
                 _logger.LogError($"Duplicated new password with current password: {ex}");
                 await HandleDuplicatedPasswordExceptionAsync(httpContext, ex);
             }
+            catch (EntityNotFoundException ex)
+            {
+                _logger.LogError($"Duplicated new password with current password: {ex}");
+                await HandleEntityNotFoundExceptionAsync(httpContext, ex);
+            }
             catch (Exception ex)
             {
                 _logger.LogError($"Something went wrong: {ex}");
@@ -50,6 +55,15 @@ namespace Dormy.WebService.Api.Infrastructure.Middlewares
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            var result = Newtonsoft.Json.JsonConvert.SerializeObject(new { error = exception.Message });
+            return context.Response.WriteAsync(result);
+        }
+
+        private static Task HandleEntityNotFoundExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
 
             var result = Newtonsoft.Json.JsonConvert.SerializeObject(new { error = exception.Message });
             return context.Response.WriteAsync(result);

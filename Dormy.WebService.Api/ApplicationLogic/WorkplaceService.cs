@@ -53,7 +53,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 entities = await _unitOfWork.WorkplaceRepository
                     .GetAllAsync(
-                        filter: x => x.isDeleted == false,
+                        filter: x => x.IsDeleted == false,
                         include: x => x.Include(workplace => workplace.Users),
                         pageIndex: pageIndex,
                         pageSize: pageSize,
@@ -184,7 +184,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetConflict(id, ErrorMessages.CanNotDeleteNotEmptyEntity);
             }
 
-            entity.isDeleted = true;
+            entity.IsDeleted = true;
 
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;

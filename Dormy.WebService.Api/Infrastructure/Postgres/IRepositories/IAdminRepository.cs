@@ -4,6 +4,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.IRepositories
 {
     public interface IAdminRepository : IBaseRepository<AdminEntity>
     {
-
+        Task<(AdminEntity?, AdminEntity?)> GetAuthors(Guid? createdUserId, Guid? lastUpdatedUserId);
     }
 }

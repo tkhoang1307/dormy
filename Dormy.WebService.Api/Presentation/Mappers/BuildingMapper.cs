@@ -41,7 +41,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LastUpdatedBy = entity.LastUpdatedBy,
                 TotalRooms = entity?.Rooms?.Count ?? 0,
                 Rooms = (entity != null && entity.Rooms != null) ? entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.FloorNumber).ToList() : [],
-                isDeleted = entity != null && entity.isDeleted,
+                IsDeleted = entity != null && entity.IsDeleted,
             };
 
             return buildingResponse;

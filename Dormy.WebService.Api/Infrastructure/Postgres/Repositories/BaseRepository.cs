@@ -42,6 +42,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
             {
                 return await _dbSet.Where(filter).ToListAsync();
             }
+
             return await _dbSet.ToListAsync();
         }
 

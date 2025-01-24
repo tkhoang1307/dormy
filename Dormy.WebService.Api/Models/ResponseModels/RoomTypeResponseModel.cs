@@ -1,8 +1,6 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-
-namespace Dormy.WebService.Api.Models.ResponseModels
+﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class RoomTypeResponseModel : BaseEntity
+    public class RoomTypeResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -13,5 +11,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public int Capacity { get; set; }
 
         public decimal Price { get; set; }
+
+        public List<RoomServiceResponseModel> RoomServices { get; set; } = [];
     }
 }

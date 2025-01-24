@@ -1,7 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
-using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
@@ -26,6 +25,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateRoomType(RoomTypeRequestModel model)
         {
+            var roomServices = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => model.RoomServiceIds.Contains(x.Id));
+
+            if (roomServices == null || roomServices.Count != model.RoomServiceIds.Count)
+            {
+                return new ApiResponse().SetBadRequest($"Some of room services are not found");
+            }
+
             var entity = _roomTypeMapper.MapToRoomTypeEnity(model);
             entity.CreatedBy = _userContextService.UserId;
 
@@ -42,14 +48,38 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (isAdmin)
             {
-                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => true);
+                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => true, x => x.Include(x => x.RoomTypeServices).ThenInclude(x => x.RoomService));
             }
             else
             {
-                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.isDeleted == false);
+                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false, x => x.Include(x => x.RoomTypeServices).ThenInclude(x => x.RoomService));
             }
 
             var response = entities.Select(entity => _roomTypeMapper.MapToRoomTypeResponseModel(entity)).ToList();
+
+            return new ApiResponse().SetOk(response);
+        }
+
+        public async Task<ApiResponse> GetRoomTypeById(Guid id)
+        {
+            RoomTypeEntity? entity = null;
+            var isAdmin = _userContextService.UserRoles.Any(x => x.Trim().Contains(Role.ADMIN.Trim(), StringComparison.CurrentCultureIgnoreCase));
+
+            if (isAdmin)
+            {
+                entity = await _unitOfWork.RoomTypeRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.RoomTypeServices).ThenInclude(x => x.RoomService));
+            }
+            else
+            {
+                entity = await _unitOfWork.RoomTypeRepository.GetAsync(x => x.Id == id && x.IsDeleted == false, x => x.Include(x => x.RoomTypeServices).ThenInclude(x => x.RoomService));
+            }
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(id);
+            }
+
+            var response = _roomTypeMapper.MapToRoomTypeResponseModel(entity);
 
             return new ApiResponse().SetOk(response);
         }
@@ -63,12 +93,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id);
             }
 
-            if (BedHelper.IsBedOccupied(entity.Rooms))
+            if (entity.Rooms != null && entity.Rooms.Any(r => r.TotalUsedBed > 0))
             {
-                return new ApiResponse().SetBadRequest(id, ErrorMessages.BedIsOccupiedErrorMessage);
+                return new ApiResponse().SetBadRequest(id, ErrorMessages.RoomIsOccupiedErrorMessage);
             }
 
-            entity.isDeleted = true;
+            entity.IsDeleted = true;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 
@@ -79,6 +109,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> UpdateRoomType(RoomTypeUpdateRequestModel model)
         {
+            var roomServices = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => model.RoomServiceIds.Contains(x.Id));
+
+            if (roomServices == null || roomServices.Count != model.RoomServiceIds.Count)
+            {
+                return new ApiResponse().SetBadRequest($"Some of room services are not found");
+            }
+
             var entity = await _unitOfWork.RoomTypeRepository.GetAsync(x => x.Id.Equals(model.Id), x => x.Include(x => x.Rooms));
 
             if (entity == null)
@@ -86,7 +123,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id);
             }
 
-            if (model.Capacity < entity.Rooms?.Count) 
+            if (model.Capacity < entity.Rooms?.Count)
             {
                 return new ApiResponse().SetBadRequest(model.Id, ErrorMessages.RoomCapacityIsSmallerThanCurrentErrorMessage);
             }
@@ -97,6 +134,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
             entity.Capacity = model.Capacity;
             entity.LastUpdatedBy = _userContextService.UserId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            // update roomTypeServices
+            foreach (var roomTypeServiceId in model.RoomServiceIds)
+            {
+                await _unitOfWork.RoomTypeServiceRepository.DeleteByIdAsync(roomTypeServiceId);
+            }
+
+            await _unitOfWork.RoomTypeServiceRepository
+                .AddRangeAsync(model.RoomServiceIds
+                .Select(x => new RoomTypeServiceEntity()
+                {
+                    Id = Guid.NewGuid(),
+                    RoomServiceId = x,
+                    RoomTypeId = entity.Id,
+                    CreatedBy = _userContextService.UserId,
+                    CreatedDateUtc = DateTime.UtcNow,
+                    IsDeleted = false,
+                }).ToList());
 
             await _unitOfWork.SaveChangeAsync();
 

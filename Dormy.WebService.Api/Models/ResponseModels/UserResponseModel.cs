@@ -22,14 +22,19 @@
 
         public string Gender { get; set; } = string.Empty;
 
-        public Guid GuardianId { get; set; }
-
-        public string GuardianName { get; set; } = string.Empty;
+        public List<GuardiansResponseModel> Guardians { get; set; } = [];
 
         public Guid WorkplaceId { get; set; }
 
         public string WorkplaceName { get; set; } = string.Empty;
 
         public Guid HealthInsuranceId { get; set; }
+    }
+
+    public class GuardiansResponseModel
+    {
+        public Guid Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
     }
 }

@@ -12,10 +12,4 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public List<RoomRequestModel> Rooms { get; set; } = [];
     }
-
-    public class BuildingBatchRequestModel
-    {
-        public bool IsGetAll { get; set; } = false;
-        public List<Guid> Ids { get; set; } = [];
-    }
 }

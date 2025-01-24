@@ -1,8 +1,6 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-
-namespace Dormy.WebService.Api.Models.ResponseModels
+﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class WorkplaceResponseModel: BaseEntity
+    public class WorkplaceResponseModel: BaseResponseModel
     {
         public Guid Id { get; set; }
 
@@ -13,10 +11,5 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public string Abbrevation { get; set; } = string.Empty;
 
         public List<UserResponseModel> Users { get; set; } = [];
-
-        public string CreatedByAdminName { get; set; } = string.Empty;
-
-        public string LastUpdatedByAdminName { get; set; } = string.Empty;
-
     }
 }

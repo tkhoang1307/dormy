@@ -1,9 +1,8 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-using Dormy.WebService.Api.Models.Enums;
+﻿using Dormy.WebService.Api.Models.Enums;
 
 namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class BuildingResponseModel : BaseEntity
+    public class BuildingResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; }
 
@@ -16,9 +15,5 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public GenderEnum GenderRestriction { get; set; }
 
         public List<RoomResponseModel> Rooms { get; set; } = [];
-
-        public string CreatedByAdminName { get; set; } = string.Empty;
-
-        public string UpdatedByAdminName { get; set; } = string.Empty;
     }
 }

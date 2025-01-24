@@ -28,7 +28,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -48,6 +48,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasColumnType("text");
@@ -59,7 +62,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Password")
@@ -74,9 +77,6 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
@@ -84,57 +84,20 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("df37a0be-632f-41d5-b2c9-86c96eaaf222"),
-                            CreatedDateUtc = new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6291),
-                            DateOfBirth = new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6297),
+                            Id = new Guid("30781543-a772-497a-b6cc-f17a08e23578"),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDateUtc = new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9483),
+                            DateOfBirth = new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9487),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = 0,
+                            IsDeleted = false,
                             JobTitle = "Admin",
                             LastName = "",
-                            LastUpdatedDateUtc = new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6292),
                             Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
                             PhoneNumber = "",
-                            UserName = "admin",
-                            isDeleted = false
+                            UserName = "admin"
                         });
-                });
-
-            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BedEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("BedNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDateUtc")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("LastUpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LastUpdatedDateUtc")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoomId");
-
-                    b.ToTable("Beds");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BuildingEntity", b =>
@@ -143,7 +106,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -152,10 +115,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("GenderRestriction")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
@@ -164,9 +130,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<int>("TotalFloors")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -182,10 +145,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("ApproverId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BedId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -197,10 +157,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid?>("InvoiceId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("NumberExtension")
@@ -221,14 +184,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ApproverId");
-
-                    b.HasIndex("BedId");
 
                     b.HasIndex("RoomId");
 
@@ -246,7 +204,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("ApproverId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -258,10 +216,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid?>("InvoiceId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("StartDate")
@@ -272,9 +233,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<DateTime>("SubmissionDate")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -293,7 +251,7 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -303,10 +261,13 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
@@ -321,10 +282,12 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Guardians");
                 });
@@ -335,7 +298,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -348,18 +311,18 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("RegisteredHospital")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -378,7 +341,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<decimal>("AmountBeforePromotion")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -391,10 +354,13 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("Month")
@@ -412,9 +378,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int?>("Year")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");
@@ -431,7 +394,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<decimal>("Cost")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -440,10 +403,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Metadata")
@@ -461,9 +427,6 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.HasIndex("InvoiceId");
@@ -477,7 +440,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -486,17 +449,17 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -520,7 +483,7 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -533,10 +496,16 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Title")
@@ -545,12 +514,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("isRead")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -570,7 +533,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("AdminId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -579,10 +542,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime>("EndDateTime")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Reason")
@@ -597,9 +563,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -619,7 +582,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("ApproverId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -629,10 +592,13 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("ParkingSpotId")
@@ -646,9 +612,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -672,7 +635,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("CapacitySpots")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -681,17 +644,21 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("CurrentQuantity")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ParkingSpotName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -707,7 +674,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid?>("ApproverId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -717,10 +684,13 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("RequestType")
@@ -735,9 +705,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -759,7 +726,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("BuildingId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -768,13 +735,16 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("FloorNumber")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("RoomNumer")
+                    b.Property<string>("RoomNumber")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -787,8 +757,8 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("TotalAvailableBed")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
+                    b.Property<int>("TotalUsedBed")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -808,16 +778,19 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<decimal>("Cost")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("RoomServiceName")
@@ -827,9 +800,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -845,7 +815,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -855,10 +825,13 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Price")
@@ -867,9 +840,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<string>("RoomTypeName")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -882,16 +852,19 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("RoomServiceId")
@@ -899,9 +872,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<Guid>("RoomTypeId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -921,16 +891,19 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("AdminId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Month")
@@ -955,9 +928,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("Year")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AdminId");
@@ -978,16 +948,19 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("AdminId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
@@ -999,9 +972,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<DateTime>("ParameterDate")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -1016,7 +986,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -1036,11 +1006,11 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("GuardianId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("HealthInsuranceId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -1049,7 +1019,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("NationalIdNumber")
@@ -1074,13 +1044,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("WorkplaceId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("GuardianId")
-                        .IsUnique();
 
                     b.HasIndex("HealthInsuranceId")
                         .IsUnique();
@@ -1096,16 +1060,19 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("LicensePlate")
@@ -1121,9 +1088,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<string>("VehicleType")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -1141,16 +1105,19 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<int>("Action")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("ParkingSpotId")
@@ -1158,9 +1125,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -1177,7 +1141,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -1187,10 +1151,13 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Penalty")
@@ -1201,9 +1168,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<DateTime>("ViolationDate")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -1226,39 +1190,28 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LastUpdatedDateUtc")
+                    b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.ToTable("Workplaces");
-                });
-
-            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BedEntity", b =>
-                {
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.RoomEntity", "Room")
-                        .WithMany("Beds")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ContractEntity", b =>
@@ -1266,12 +1219,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Approver")
                         .WithMany("Contracts")
                         .HasForeignKey("ApproverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.BedEntity", "Bed")
-                        .WithMany("Contracts")
-                        .HasForeignKey("BedId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1289,8 +1236,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Navigation("Approver");
 
-                    b.Navigation("Bed");
-
                     b.Navigation("Room");
 
                     b.Navigation("User");
@@ -1305,6 +1250,17 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Approver");
+                });
+
+            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.GuardianEntity", b =>
+                {
+                    b.HasOne("Dormy.WebService.Api.Core.Entities.UserEntity", "User")
+                        .WithMany("Guardians")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.InvoiceEntity", b =>
@@ -1524,12 +1480,6 @@ namespace Dormy.WebService.Api.Migrations
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.UserEntity", b =>
                 {
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.GuardianEntity", "Guardian")
-                        .WithOne("User")
-                        .HasForeignKey("Dormy.WebService.Api.Core.Entities.UserEntity", "GuardianId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Dormy.WebService.Api.Core.Entities.HealthInsuranceEntity", "HealthInsurance")
                         .WithOne("User")
                         .HasForeignKey("Dormy.WebService.Api.Core.Entities.UserEntity", "HealthInsuranceId")
@@ -1541,8 +1491,6 @@ namespace Dormy.WebService.Api.Migrations
                         .HasForeignKey("WorkplaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Guardian");
 
                     b.Navigation("HealthInsurance");
 
@@ -1609,20 +1557,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Navigation("Settings");
                 });
 
-            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BedEntity", b =>
-                {
-                    b.Navigation("Contracts");
-                });
-
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BuildingEntity", b =>
                 {
                     b.Navigation("Rooms");
-                });
-
-            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.GuardianEntity", b =>
-                {
-                    b.Navigation("User")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.HealthInsuranceEntity", b =>
@@ -1647,8 +1584,6 @@ namespace Dormy.WebService.Api.Migrations
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.RoomEntity", b =>
                 {
-                    b.Navigation("Beds");
-
                     b.Navigation("Contracts");
 
                     b.Navigation("Invoices");
@@ -1675,6 +1610,8 @@ namespace Dormy.WebService.Api.Migrations
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.UserEntity", b =>
                 {
                     b.Navigation("Contracts");
+
+                    b.Navigation("Guardians");
 
                     b.Navigation("InvoiceUsers");
 

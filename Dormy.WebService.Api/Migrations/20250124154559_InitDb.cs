@@ -26,10 +26,10 @@ namespace Dormy.WebService.Api.Migrations
                     JobTitle = table.Column<string>(type: "text", nullable: false),
                     Gender = table.Column<int>(type: "integer", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,35 +45,14 @@ namespace Dormy.WebService.Api.Migrations
                     TotalFloors = table.Column<int>(type: "integer", nullable: false),
                     GenderRestriction = table.Column<int>(type: "integer", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Buildings", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Guardians",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: false),
-                    RelationshipToUser = table.Column<string>(type: "text", nullable: false),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Guardians", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -85,10 +64,10 @@ namespace Dormy.WebService.Api.Migrations
                     RegisteredHospital = table.Column<string>(type: "text", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,14 +79,15 @@ namespace Dormy.WebService.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ParkingSpotName = table.Column<string>(type: "text", nullable: false),
                     CapacitySpots = table.Column<int>(type: "integer", nullable: false),
                     CurrentQuantity = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -123,10 +103,10 @@ namespace Dormy.WebService.Api.Migrations
                     Unit = table.Column<string>(type: "text", nullable: false),
                     Cost = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,10 +123,10 @@ namespace Dormy.WebService.Api.Migrations
                     Capacity = table.Column<int>(type: "integer", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -162,10 +142,10 @@ namespace Dormy.WebService.Api.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Abbrevation = table.Column<string>(type: "text", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -184,10 +164,10 @@ namespace Dormy.WebService.Api.Migrations
                     InvoiceId = table.Column<Guid>(type: "uuid", nullable: true),
                     ApproverId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -210,10 +190,10 @@ namespace Dormy.WebService.Api.Migrations
                     ParameterDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     AdminId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -234,10 +214,10 @@ namespace Dormy.WebService.Api.Migrations
                     RoomTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     RoomServiceId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -261,17 +241,18 @@ namespace Dormy.WebService.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoomNumer = table.Column<string>(type: "text", nullable: false),
+                    RoomNumber = table.Column<string>(type: "text", nullable: false),
                     FloorNumber = table.Column<int>(type: "integer", nullable: false),
+                    TotalUsedBed = table.Column<int>(type: "integer", nullable: false),
                     TotalAvailableBed = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     BuildingId = table.Column<Guid>(type: "uuid", nullable: false),
                     RoomTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -305,24 +286,17 @@ namespace Dormy.WebService.Api.Migrations
                     NationalIdNumber = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Gender = table.Column<int>(type: "integer", nullable: false),
-                    GuardianId = table.Column<Guid>(type: "uuid", nullable: false),
                     WorkplaceId = table.Column<Guid>(type: "uuid", nullable: false),
                     HealthInsuranceId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Users_Guardians_GuardianId",
-                        column: x => x.GuardianId,
-                        principalTable: "Guardians",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Users_HealthInsurances_HealthInsuranceId",
                         column: x => x.HealthInsuranceId,
@@ -333,31 +307,6 @@ namespace Dormy.WebService.Api.Migrations
                         name: "FK_Users_Workplaces_WorkplaceId",
                         column: x => x.WorkplaceId,
                         principalTable: "Workplaces",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Beds",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    BedNumber = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Beds", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Beds_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -377,10 +326,10 @@ namespace Dormy.WebService.Api.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     RoomId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -407,10 +356,10 @@ namespace Dormy.WebService.Api.Migrations
                     RoomId = table.Column<Guid>(type: "uuid", nullable: false),
                     AdminId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -436,6 +385,77 @@ namespace Dormy.WebService.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Contracts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    NumberExtension = table.Column<int>(type: "integer", nullable: false),
+                    InvoiceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApproverId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Contracts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Contracts_Admins_ApproverId",
+                        column: x => x.ApproverId,
+                        principalTable: "Admins",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Contracts_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Contracts_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Guardians",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
+                    RelationshipToUser = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Guardians", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Guardians_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
@@ -444,14 +464,14 @@ namespace Dormy.WebService.Api.Migrations
                     Date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    isRead = table.Column<bool>(type: "boolean", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     AdminId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -482,10 +502,10 @@ namespace Dormy.WebService.Api.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     AdminId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -516,10 +536,10 @@ namespace Dormy.WebService.Api.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     RoomId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -553,10 +573,10 @@ namespace Dormy.WebService.Api.Migrations
                     ParkingSpotId = table.Column<Guid>(type: "uuid", nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -579,66 +599,16 @@ namespace Dormy.WebService.Api.Migrations
                     Penalty = table.Column<decimal>(type: "numeric", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Violations", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Violations_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Contracts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    SubmissionDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    NumberExtension = table.Column<int>(type: "integer", nullable: false),
-                    InvoiceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ApproverId = table.Column<Guid>(type: "uuid", nullable: false),
-                    BedId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Contracts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Admins_ApproverId",
-                        column: x => x.ApproverId,
-                        principalTable: "Admins",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Beds_BedId",
-                        column: x => x.BedId,
-                        principalTable: "Beds",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -657,10 +627,10 @@ namespace Dormy.WebService.Api.Migrations
                     Metadata = table.Column<string>(type: "text", nullable: false),
                     InvoiceId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -681,10 +651,10 @@ namespace Dormy.WebService.Api.Migrations
                     InvoiceId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -715,10 +685,10 @@ namespace Dormy.WebService.Api.Migrations
                     VehicleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ApproverId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -758,10 +728,10 @@ namespace Dormy.WebService.Api.Migrations
                     VehicleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ParkingSpotId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -782,13 +752,8 @@ namespace Dormy.WebService.Api.Migrations
 
             migrationBuilder.InsertData(
                 table: "Admins",
-                columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName", "isDeleted" },
-                values: new object[] { new Guid("df37a0be-632f-41d5-b2c9-86c96eaaf222"), null, new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6291), new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6297), "hungdv190516@gmail.com", "Admin", 0, "Admin", "", null, new DateTime(2025, 1, 19, 19, 6, 51, 815, DateTimeKind.Local).AddTicks(6292), "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin", false });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Beds_RoomId",
-                table: "Beds",
-                column: "RoomId");
+                columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "IsDeleted", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName" },
+                values: new object[] { new Guid("30781543-a772-497a-b6cc-f17a08e23578"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9483), new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9487), "hungdv190516@gmail.com", "Admin", 0, false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContractExtensions_ApproverId",
@@ -801,11 +766,6 @@ namespace Dormy.WebService.Api.Migrations
                 column: "ApproverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contracts_BedId",
-                table: "Contracts",
-                column: "BedId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Contracts_RoomId",
                 table: "Contracts",
                 column: "RoomId");
@@ -813,6 +773,11 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Contracts_UserId",
                 table: "Contracts",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Guardians_UserId",
+                table: "Guardians",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -921,12 +886,6 @@ namespace Dormy.WebService.Api.Migrations
                 column: "AdminId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_GuardianId",
-                table: "Users",
-                column: "GuardianId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_HealthInsuranceId",
                 table: "Users",
                 column: "HealthInsuranceId",
@@ -978,6 +937,9 @@ namespace Dormy.WebService.Api.Migrations
                 name: "Contracts");
 
             migrationBuilder.DropTable(
+                name: "Guardians");
+
+            migrationBuilder.DropTable(
                 name: "InvoiceItems");
 
             migrationBuilder.DropTable(
@@ -1011,9 +973,6 @@ namespace Dormy.WebService.Api.Migrations
                 name: "invoiceUsers");
 
             migrationBuilder.DropTable(
-                name: "Beds");
-
-            migrationBuilder.DropTable(
                 name: "RoomServices");
 
             migrationBuilder.DropTable(
@@ -1033,9 +992,6 @@ namespace Dormy.WebService.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Rooms");
-
-            migrationBuilder.DropTable(
-                name: "Guardians");
 
             migrationBuilder.DropTable(
                 name: "HealthInsurances");

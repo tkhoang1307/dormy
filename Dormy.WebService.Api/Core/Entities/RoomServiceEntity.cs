@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.RequestModels;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
     public class RoomServiceEntity : BaseEntity
     {

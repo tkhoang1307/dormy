@@ -35,7 +35,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Address = entity.Address,
                 CreatedBy = entity.CreatedBy,
                 CreatedDateUtc = entity.CreatedDateUtc,
-                isDeleted = entity.isDeleted,
+                IsDeleted = entity.IsDeleted,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
                 Users = entity.Users.Select(user => _userMapper.MapToUserResponseModel(user)).ToList(),

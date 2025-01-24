@@ -1,9 +1,8 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-using Dormy.WebService.Api.Models.Enums;
+﻿using Dormy.WebService.Api.Models.Enums;
 
 namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class RoomResponseModel : BaseEntity
+    public class RoomResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; }
 
