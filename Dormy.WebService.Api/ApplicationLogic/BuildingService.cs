@@ -50,6 +50,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 foreach (var room in buildingEntity.Rooms)
                 {
                     room.CreatedBy = _userContextService.UserId;
+                    room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed; 
                 }
             }
 
@@ -193,6 +194,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     foreach (var room in buildingEntity.Rooms)
                     {
                         room.CreatedBy = _userContextService.UserId;
+                        room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed;
                     }
                 }
 

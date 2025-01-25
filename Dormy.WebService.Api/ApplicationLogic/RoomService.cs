@@ -45,6 +45,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 entity.BuildingId = buildingId;
                 entity.CreatedBy = _userContextService.UserId;
+                entity.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == entity.RoomTypeId)?.Capacity ?? entity.TotalAvailableBed;
+
             }
 
             await _unitOfWork.RoomRepository.AddRangeAsync(entities);
