@@ -84,6 +84,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 response.LastUpdatedByAdminName = author?.UserName ?? string.Empty;
             }
 
+            for (int i = 0; i < response.Rooms.Count; i++)
+            {
+                var roomResponseModel = response.Rooms[i];
+
+                var (createRoomAuthor, lastUpdateRoomAuthor) = await _unitOfWork.AdminRepository.GetAuthors(roomResponseModel.CreatedBy, roomResponseModel.LastUpdatedBy);
+
+                roomResponseModel.CreatedByAdminName = createRoomAuthor?.UserName ?? string.Empty;
+                roomResponseModel.LastUpdatedByAdminName = lastUpdateRoomAuthor?.UserName ?? string.Empty;
+            }
+
             return new ApiResponse().SetOk(response);
         }
 
@@ -105,14 +115,20 @@ namespace Dormy.WebService.Api.ApplicationLogic
             for (int i = 0; i < buildingListResponseModel.Count; i++)
             {
                 var buildingResponseModel = buildingListResponseModel[i];
-                var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(buildingResponseModel.CreatedBy));
 
-                buildingResponseModel.CreatedByAdminName = author?.UserName ?? string.Empty;
+                var (createAuthor, lastUpdateAuthor) = await _unitOfWork.AdminRepository.GetAuthors(buildingResponseModel.CreatedBy, buildingResponseModel.LastUpdatedBy);
 
-                if (buildingResponseModel.LastUpdatedBy != null)
+                buildingResponseModel.CreatedByAdminName = createAuthor?.UserName ?? string.Empty;
+                buildingResponseModel.LastUpdatedByAdminName = lastUpdateAuthor?.UserName ?? string.Empty;
+
+                for (int j = 0; j < buildingResponseModel.Rooms.Count; j++)
                 {
-                    var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(buildingResponseModel.LastUpdatedBy));
-                    buildingResponseModel.LastUpdatedByAdminName = author?.UserName ?? string.Empty;
+                    var roomResponseModel = buildingResponseModel.Rooms[j];
+
+                    var (createRoomAuthor, lastUpdateRoomAuthor) = await _unitOfWork.AdminRepository.GetAuthors(roomResponseModel.CreatedBy, roomResponseModel.LastUpdatedBy);
+
+                    roomResponseModel.CreatedByAdminName = createRoomAuthor?.UserName ?? string.Empty;
+                    roomResponseModel.LastUpdatedByAdminName = lastUpdateRoomAuthor?.UserName ?? string.Empty;
                 }
             }
 
