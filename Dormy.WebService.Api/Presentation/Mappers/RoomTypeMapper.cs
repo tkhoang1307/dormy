@@ -62,6 +62,11 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Cost = x.Cost,
                 Unit = x.Unit,
                 RoomServiceName = x.RoomServiceName,
+                CreatedBy = x.CreatedBy,
+                IsDeleted = x.IsDeleted,
+                CreatedDateUtc = x.CreatedDateUtc,
+                LastUpdatedBy = x.LastUpdatedBy,
+                LastUpdatedDateUtc = x.LastUpdatedDateUtc,
             }).ToList();
         }
     }
