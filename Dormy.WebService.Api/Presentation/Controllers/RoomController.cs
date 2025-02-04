@@ -21,7 +21,6 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPost("batch/create/buildingId/{buildingId:guid}")]
         [Authorize(Roles = Role.ADMIN)]
-        //public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomRequestModel> rooms)
         public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomCreationRequestModel> rooms)
         {
             foreach(var room in rooms)
@@ -38,10 +37,22 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                         string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.RoomTypeId))));
                 }
 
+                if (room?.TotalRoomsWantToCreate == null)
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.TotalRoomsWantToCreate))));
+                }
+
                 if (room.FloorNumber < 0)
                 {
                     return StatusCode(412, new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.FloorNumber))));
+                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(room.FloorNumber))));
+                }
+
+                if (room.TotalRoomsWantToCreate <= 0)
+                {
+                    return StatusCode(412, new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(room.TotalRoomsWantToCreate))));
                 }
             }
             var response = await _roomService.CreateRoomBatch(rooms, buildingId);

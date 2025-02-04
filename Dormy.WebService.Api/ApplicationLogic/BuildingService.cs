@@ -44,6 +44,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             if (_userContextService.UserId != Guid.Empty)
             {
                 buildingEntity.CreatedBy = _userContextService.UserId;
+                buildingEntity.LastUpdatedBy = _userContextService.UserId;
             }
 
             if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
@@ -51,6 +52,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 foreach (var room in buildingEntity.Rooms)
                 {
                     room.CreatedBy = _userContextService.UserId;
+                    room.LastUpdatedBy = _userContextService.UserId;
                     room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed; 
                 }
             }
@@ -188,6 +190,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 if (_userContextService.UserId != Guid.Empty)
                 {
                     buildingEntity.CreatedBy = _userContextService.UserId;
+                    buildingEntity.LastUpdatedBy = _userContextService.UserId;
                 }
 
                 if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
@@ -195,6 +198,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     foreach (var room in buildingEntity.Rooms)
                     {
                         room.CreatedBy = _userContextService.UserId;
+                        room.LastUpdatedBy = _userContextService.UserId;
                         room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed;
                     }
                 }

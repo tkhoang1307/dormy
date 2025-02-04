@@ -34,6 +34,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var entity = _roomTypeMapper.MapToRoomTypeEnity(model);
             entity.CreatedBy = _userContextService.UserId;
+            entity.LastUpdatedBy = _userContextService.UserId;
 
             await _unitOfWork.RoomTypeRepository.AddAsync(entity);
             await _unitOfWork.SaveChangeAsync();

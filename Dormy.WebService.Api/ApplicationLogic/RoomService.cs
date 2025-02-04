@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -22,7 +23,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _roomMapper = new RoomMapper();
         }
 
-        //public async Task<ApiResponse> CreateRoomBatch(List<RoomRequestModel> rooms, Guid buildingId)
         public async Task<ApiResponse> CreateRoomBatch(List<RoomCreationRequestModel> rooms, Guid buildingId)
         {
             var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(buildingId), x => x.Include(x => x.Rooms));
@@ -41,20 +41,41 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest(message: ErrorMessages.SomeRoomTypesAreNotExisted);
             }
 
-            var entities = rooms.Select(r => _roomMapper.MapToRoomEntity(new RoomRequestModel()
-            {
-                RoomStatus = RoomStatusEnum.AVAILABLE,
-                RoomTypeId = r.RoomTypeId,
-                FloorNumber = r.FloorNumber
-            })).ToList();
+            var entities = new List<RoomEntity>();
 
-            foreach (var entity in entities)
+            foreach(var room in rooms)
             {
-                int roomCountOnFloor = buildingEntity.Rooms.Count(r => r.FloorNumber == entity.FloorNumber);
-                entity.BuildingId = buildingId;
-                entity.CreatedBy = _userContextService.UserId;
-                entity.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == entity.RoomTypeId)?.Capacity ?? entity.TotalAvailableBed;
-                entity.RoomNumber = entity.FloorNumber * 100 + roomCountOnFloor + 1;
+                int maxRoomNumberOnFloor = buildingEntity.Rooms
+                                                         .Where(r => r.FloorNumber == room.FloorNumber)
+                                                         .Max(r => (int?)r.RoomNumber) ?? 0;
+                int roomNumberStartToMark = 0;
+                if (maxRoomNumberOnFloor > 0)
+                {
+                    roomNumberStartToMark = maxRoomNumberOnFloor + 1;
+                }
+                else
+                {
+                    roomNumberStartToMark = room.FloorNumber * 100;
+                }
+                
+                for (var i = 0; i < room.TotalRoomsWantToCreate; i++)
+                {
+                    var entity = _roomMapper.MapToRoomEntity(new RoomRequestModel()
+                    {
+                        RoomStatus = RoomStatusEnum.AVAILABLE,
+                        RoomTypeId = room.RoomTypeId,
+                        FloorNumber = room.FloorNumber,
+                    });
+                    entity.BuildingId = buildingId;
+                    entity.CreatedBy = _userContextService.UserId;
+                    entity.LastUpdatedBy = _userContextService.UserId;
+                    entity.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == entity.RoomTypeId)?.Capacity ?? entity.TotalAvailableBed;
+                    entity.RoomNumber = roomNumberStartToMark;
+
+                    entities.Add(entity);
+
+                    roomNumberStartToMark = roomNumberStartToMark + 1;
+                }    
             }
 
             await _unitOfWork.RoomRepository.AddRangeAsync(entities);

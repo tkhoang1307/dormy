@@ -130,8 +130,8 @@ namespace Dormy.WebService.Api
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
                 if (context.Database.GetPendingMigrations().Any())
                 {
-                    Console.WriteLine("Start Migration");
-                    context.Database.Migrate();
+                    //Console.WriteLine("Start Migration");
+                    //context.Database.Migrate();
                 }
             }
 

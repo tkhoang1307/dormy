@@ -20,11 +20,17 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public Guid RoomTypeId { get; set; }
 
         public int FloorNumber { get; set; }
+
+        public int TotalRoomsWantToCreate { get; set; }
     }
 
-    public class RoomUpdateRequestModel : RoomCreationRequestModel
+    public class RoomUpdateRequestModel
     {
         public Guid Id { get; set; }
+
+        public Guid RoomTypeId { get; set; }
+
+        public int FloorNumber { get; set; }
     }
 
     public class RoomUpdateStatusRequestModel
