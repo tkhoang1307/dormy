@@ -16,6 +16,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Status = model.RoomStatus,
                 TotalAvailableBed = model.TotalAvailableBed,
                 CreatedDateUtc = DateTime.Now,
+                LastUpdatedDateUtc = DateTime.Now,
             };
         }
 
@@ -25,7 +26,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             {
                 Id = entity.Id,
                 FloorNumber = entity.FloorNumber,
-                RoomNumer = entity.RoomNumber,
+                RoomNumber = entity.RoomNumber,
                 RoomTypeId = entity.RoomTypeId,
                 RoomTypeName = entity.RoomType?.RoomTypeName ?? string.Empty,
                 Status = entity.Status,

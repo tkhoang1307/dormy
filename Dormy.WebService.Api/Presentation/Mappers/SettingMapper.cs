@@ -13,6 +13,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Id = Guid.NewGuid(),
                 Name = model.Name,
                 CreatedDateUtc = DateTime.Now,
+                LastUpdatedDateUtc = DateTime.Now,
                 ParameterBool = model.ParameterBool,
                 ParameterDate = model.ParameterDate,
             };

@@ -1,5 +1,7 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -28,6 +30,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             foreach (var entity in entities)
             {
                 entity.CreatedBy = _userContextService.UserId;
+                entity.LastUpdatedBy = _userContextService.UserId;
             }
 
             await _unitOfWork.RoomServiceRepository.AddRangeAsync(entities);
@@ -56,8 +59,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(roomService.CreatedBy, roomService.LastUpdatedBy);
 
-                roomService.CreatedByAdminName = createdUser?.UserName ?? string.Empty;
-                roomService.LastUpdatedByAdminName = lastUpdatedUser?.UserName ?? string.Empty;
+                roomService.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+                roomService.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
             }
 
             return new ApiResponse().SetOk(roomServiceModels);
@@ -69,15 +72,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(id);
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room service"));
             }
 
             var roomServiceModel = _roomServiceMapper.MapToRoomServiceModel(entity);
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(roomServiceModel.CreatedBy, roomServiceModel.LastUpdatedBy);
 
-            roomServiceModel.CreatedByAdminName = createdUser?.UserName ?? string.Empty;
-            roomServiceModel.LastUpdatedByAdminName = lastUpdatedUser?.UserName ?? string.Empty;
+            roomServiceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+            roomServiceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
             return new ApiResponse().SetOk(roomServiceModel);
         }
@@ -96,7 +99,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var foundedIds = entities?.Select(x => x.Id).ToList() ?? new List<Guid>();
                 var notFoundEntities = ids.Except(foundedIds).ToList();
 
-                return new ApiResponse().SetNotFound(notFoundEntities);
+                return new ApiResponse().SetNotFound(notFoundEntities, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room service"));
             }
 
             foreach (var entity in entities)
@@ -115,7 +118,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(model.Id);
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room service"));
             }
 
             entity.RoomServiceName = model.RoomServiceName;
@@ -126,7 +129,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(entity.Id);
+            return new ApiResponse().SetAccepted(entity.Id);
         }
     }
 }

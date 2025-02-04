@@ -1,6 +1,8 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,8 +39,38 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomType([FromBody] RoomTypeRequestModel model)
         {
+            if (string.IsNullOrEmpty(model.RoomTypeName))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomTypeName))));
+            }
+
+            if (model?.Capacity == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Capacity))));
+            }
+
+            if (model?.Price == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Price))));
+            }
+
+            if (model.Capacity <= 0)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.Capacity))));
+            }
+
+            if (model.Price < 0)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Price))));
+            }
+
             var response = await _roomTypeService.CreateRoomType(model);
-            return Ok(response);
+            return StatusCode(201, response);
         }
 
         [HttpPut]
@@ -48,7 +80,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var response = await _roomTypeService.UpdateRoomType(model);
             if (response.IsSuccess)
             {
-                return Ok(response);
+                return StatusCode(202, response);
             }
             return NotFound();
         }

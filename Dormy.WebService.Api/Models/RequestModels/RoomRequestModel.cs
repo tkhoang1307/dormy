@@ -4,18 +4,25 @@ namespace Dormy.WebService.Api.Models.RequestModels
 {
     public class RoomRequestModel
     {
-        public string RoomNumber { get; set; } = string.Empty;
+        public int RoomNumber { get; set; }
 
         public int TotalAvailableBed { get; set; }
 
-        public RoomStatusEnum RoomStatus { get; set; } = RoomStatusEnum.UNDER_MAINTENANCE;
+        public RoomStatusEnum RoomStatus { get; set; } = RoomStatusEnum.AVAILABLE;
 
         public Guid RoomTypeId { get; set; }
 
         public int FloorNumber { get; set; }
     }
 
-    public class RoomUpdateRequestModel : RoomRequestModel
+    public class RoomCreationRequestModel
+    {
+        public Guid RoomTypeId { get; set; }
+
+        public int FloorNumber { get; set; }
+    }
+
+    public class RoomUpdateRequestModel : RoomCreationRequestModel
     {
         public Guid Id { get; set; }
     }

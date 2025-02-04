@@ -1,6 +1,8 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,10 +21,31 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPost("batch/create/buildingId/{buildingId:guid}")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomRequestModel> rooms)
+        //public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomRequestModel> rooms)
+        public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomCreationRequestModel> rooms)
         {
+            foreach(var room in rooms)
+            {
+                if (room?.FloorNumber == null)
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.FloorNumber))));
+                }
+
+                if (room?.RoomTypeId == null)
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.RoomTypeId))));
+                }
+
+                if (room.FloorNumber < 0)
+                {
+                    return StatusCode(412, new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.FloorNumber))));
+                }
+            }
             var response = await _roomService.CreateRoomBatch(rooms, buildingId);
-            return Ok(response);
+            return StatusCode(201, response);
         }
 
         [HttpGet("batch/buildingId/{buildingId:guid}")]

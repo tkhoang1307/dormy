@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250124154559_InitDb")]
+    [Migration("20250204151344_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -87,10 +87,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("30781543-a772-497a-b6cc-f17a08e23578"),
+                            Id = new Guid("f5438a84-c15e-44c2-9ef5-f35e201dadb9"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9483),
-                            DateOfBirth = new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9487),
+                            CreatedDateUtc = new DateTime(2025, 2, 4, 22, 13, 43, 690, DateTimeKind.Local).AddTicks(3924),
+                            DateOfBirth = new DateTime(2025, 2, 4, 22, 13, 43, 690, DateTimeKind.Local).AddTicks(3930),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = 0,
@@ -747,9 +747,8 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("RoomNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("RoomNumber")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("RoomTypeId")
                         .HasColumnType("uuid");

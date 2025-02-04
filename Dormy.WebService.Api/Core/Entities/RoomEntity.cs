@@ -6,7 +6,7 @@ namespace Dormy.WebService.Api.Core.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string RoomNumber { get; set; } = string.Empty;
+        public int RoomNumber { get; set; }
 
         public int FloorNumber { get; set; }
 

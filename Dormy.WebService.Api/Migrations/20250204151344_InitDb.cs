@@ -241,7 +241,7 @@ namespace Dormy.WebService.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoomNumber = table.Column<string>(type: "text", nullable: false),
+                    RoomNumber = table.Column<int>(type: "integer", nullable: false),
                     FloorNumber = table.Column<int>(type: "integer", nullable: false),
                     TotalUsedBed = table.Column<int>(type: "integer", nullable: false),
                     TotalAvailableBed = table.Column<int>(type: "integer", nullable: false),
@@ -753,7 +753,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "IsDeleted", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName" },
-                values: new object[] { new Guid("30781543-a772-497a-b6cc-f17a08e23578"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9483), new DateTime(2025, 1, 24, 22, 45, 59, 418, DateTimeKind.Local).AddTicks(9487), "hungdv190516@gmail.com", "Admin", 0, false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
+                values: new object[] { new Guid("f5438a84-c15e-44c2-9ef5-f35e201dadb9"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 2, 4, 22, 13, 43, 690, DateTimeKind.Local).AddTicks(3924), new DateTime(2025, 2, 4, 22, 13, 43, 690, DateTimeKind.Local).AddTicks(3930), "hungdv190516@gmail.com", "Admin", 0, false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContractExtensions_ApproverId",

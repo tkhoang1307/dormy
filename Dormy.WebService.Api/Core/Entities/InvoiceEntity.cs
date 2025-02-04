@@ -19,7 +19,7 @@ namespace Dormy.WebService.Api.Core.Entities
         public int? Year { get; set; }
 
         public InvoiceTypeEnum Type { get; set; }
-        public InvoiceStatusEnum Status { get; set; }
+        public InvoiceStatusEnum Status { get; set; } = InvoiceStatusEnum.DRAFT;
 
         public Guid RoomId { get; set; }
 

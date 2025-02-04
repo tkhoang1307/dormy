@@ -21,6 +21,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Password = EncryptHelper.HashPassword(model.Password),
                 PhoneNumber = model.PhoneNumber,
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
         }
 

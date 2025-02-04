@@ -13,6 +13,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Id = Guid.NewGuid(),
                 Capacity = model.Capacity,
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
                 Description = model.Description,
                 Price = model.Price,
                 RoomTypeName = model.RoomTypeName,
@@ -44,6 +45,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             {
                 RoomServiceId = roomServiceId,
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
         }
 

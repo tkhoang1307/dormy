@@ -22,6 +22,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Abbrevation = request.Abbrevation,
                 Address = request.Address,
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
         }
 

@@ -1,5 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -21,13 +22,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _roomMapper = new RoomMapper();
         }
 
-        public async Task<ApiResponse> CreateRoomBatch(List<RoomRequestModel> rooms, Guid buildingId)
+        //public async Task<ApiResponse> CreateRoomBatch(List<RoomRequestModel> rooms, Guid buildingId)
+        public async Task<ApiResponse> CreateRoomBatch(List<RoomCreationRequestModel> rooms, Guid buildingId)
         {
-            var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(buildingId));
+            var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(buildingId), x => x.Include(x => x.Rooms));
 
             if (buildingEntity == null)
             {
-                return new ApiResponse().SetNotFound(buildingId);
+                return new ApiResponse().SetNotFound(buildingId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Building"));
             }
 
             var roomTypeIds = rooms.Select(x => x.RoomTypeId).Distinct().ToList();
@@ -36,17 +38,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (roomTypes == null || (roomTypes != null && roomTypes.Count != roomTypeIds.Count))
             {
-                return new ApiResponse().SetBadRequest("Some of room type is not found");
+                return new ApiResponse().SetBadRequest(message: ErrorMessages.SomeRoomTypesAreNotExisted);
             }
 
-            var entities = rooms.Select(r => _roomMapper.MapToRoomEntity(r)).ToList();
+            var entities = rooms.Select(r => _roomMapper.MapToRoomEntity(new RoomRequestModel()
+            {
+                RoomStatus = RoomStatusEnum.AVAILABLE,
+                RoomTypeId = r.RoomTypeId,
+                FloorNumber = r.FloorNumber
+            })).ToList();
 
             foreach (var entity in entities)
             {
+                int roomCountOnFloor = buildingEntity.Rooms.Count(r => r.FloorNumber == entity.FloorNumber);
                 entity.BuildingId = buildingId;
                 entity.CreatedBy = _userContextService.UserId;
                 entity.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == entity.RoomTypeId)?.Capacity ?? entity.TotalAvailableBed;
-
+                entity.RoomNumber = entity.FloorNumber * 100 + roomCountOnFloor + 1;
             }
 
             await _unitOfWork.RoomRepository.AddRangeAsync(entities);
@@ -62,7 +70,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(id);
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
             var response = _roomMapper.MapToRoomResponseModel(entity);
@@ -75,12 +83,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(buildingId);
+                return new ApiResponse().SetNotFound(buildingId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Building"));
             }
 
             entity.Rooms ??= [];
 
-            var response = entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.RoomNumer).ToList();
+            var response = entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.RoomNumber).ToList();
             return new ApiResponse().SetOk(response);
         }
 
@@ -90,7 +98,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(id);
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
             if (entity.TotalUsedBed > 0)
@@ -113,7 +121,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entities == null || (entities.Count != ids.Count))
             {
-                return new ApiResponse().SetNotFound("Some of room is not found");
+                return new ApiResponse().SetNotFound(message: ErrorMessages.SomeRoomTypesAreNotExisted);
             }
 
             if (entities.Any(r => r.TotalUsedBed > 0))
@@ -139,27 +147,35 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(model.Id);
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
             var roomType = await _unitOfWork.RoomTypeRepository.GetAsync(x => x.Id.Equals(model.RoomTypeId));
 
             if (roomType == null)
             {
-                return new ApiResponse().SetBadRequest("Some of room type is not found");
+                return new ApiResponse().SetBadRequest(message: ErrorMessages.SomeRoomTypesAreNotExisted);
             }
 
-            entity.RoomNumber = model.RoomNumber;
-            entity.FloorNumber = model.FloorNumber;
-            entity.Status = model.RoomStatus;
+            if (entity.FloorNumber != model.FloorNumber)
+            {
+                entity.FloorNumber = model.FloorNumber;
+
+                var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(entity.BuildingId), x => x.Include(x => x.Rooms));
+                int roomCountOnFloor = buildingEntity.Rooms.Count(r => r.FloorNumber == entity.FloorNumber);
+                entity.RoomNumber = entity.FloorNumber * 100 + roomCountOnFloor + 1;
+            }
+            //entity.RoomNumber = model.RoomNumber;
+            //entity.FloorNumber = model.FloorNumber;
+            //entity.Status = model.RoomStatus;
             entity.RoomTypeId = model.RoomTypeId;
-            entity.TotalAvailableBed = model.TotalAvailableBed;
+            //entity.TotalAvailableBed = model.TotalAvailableBed;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(model.Id);
+            return new ApiResponse().SetAccepted(model.Id);
         }
 
         public async Task<ApiResponse> UpdateRoomStatus(RoomUpdateStatusRequestModel model)
@@ -168,7 +184,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(model.Id);
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
             entity.Status = model.Status;
@@ -177,7 +193,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(model.Id);
+            return new ApiResponse().SetAccepted(model.Id);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Unit = model.Unit,
                 RoomServiceName = model.RoomServiceName,
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
         }
 

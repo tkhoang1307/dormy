@@ -18,6 +18,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             var buildingEntity = new BuildingEntity
             {
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
                 GenderRestriction = model.GenderRestriction,
                 Name = model.Name,
                 TotalFloors = model.TotalFloors,

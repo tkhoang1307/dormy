@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -77,12 +78,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(entity.CreatedBy));
 
-            response.CreatedByAdminName = author?.UserName ?? string.Empty;
+            response.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(author);
 
             if (entity.LastUpdatedBy != null)
             {
                 var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(entity.LastUpdatedBy));
-                response.LastUpdatedByAdminName = author?.UserName ?? string.Empty;
+                response.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
             }
 
             for (int i = 0; i < response.Rooms.Count; i++)
@@ -91,8 +92,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createRoomAuthor, lastUpdateRoomAuthor) = await _unitOfWork.AdminRepository.GetAuthors(roomResponseModel.CreatedBy, roomResponseModel.LastUpdatedBy);
 
-                roomResponseModel.CreatedByAdminName = createRoomAuthor?.UserName ?? string.Empty;
-                roomResponseModel.LastUpdatedByAdminName = lastUpdateRoomAuthor?.UserName ?? string.Empty;
+                roomResponseModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createRoomAuthor);
+                roomResponseModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdateRoomAuthor);
             }
 
             return new ApiResponse().SetOk(response);
@@ -119,8 +120,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createAuthor, lastUpdateAuthor) = await _unitOfWork.AdminRepository.GetAuthors(buildingResponseModel.CreatedBy, buildingResponseModel.LastUpdatedBy);
 
-                buildingResponseModel.CreatedByAdminName = createAuthor?.UserName ?? string.Empty;
-                buildingResponseModel.LastUpdatedByAdminName = lastUpdateAuthor?.UserName ?? string.Empty;
+                buildingResponseModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createAuthor);
+                buildingResponseModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdateAuthor);
 
                 for (int j = 0; j < buildingResponseModel.Rooms.Count; j++)
                 {
@@ -128,8 +129,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                     var (createRoomAuthor, lastUpdateRoomAuthor) = await _unitOfWork.AdminRepository.GetAuthors(roomResponseModel.CreatedBy, roomResponseModel.LastUpdatedBy);
 
-                    roomResponseModel.CreatedByAdminName = createRoomAuthor?.UserName ?? string.Empty;
-                    roomResponseModel.LastUpdatedByAdminName = lastUpdateRoomAuthor?.UserName ?? string.Empty;
+                    roomResponseModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createRoomAuthor);
+                    roomResponseModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdateRoomAuthor);
                 }
             }
 
@@ -142,7 +143,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (buildingEntity == null)
             {
-                return new ApiResponse().SetNotFound(id);
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Building"));
             }
 
             if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)

@@ -1,6 +1,8 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,20 +45,70 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomServiceBatch(List<RoomServiceRequestModel> models)
         {
+            foreach(var model in models)
+            {
+                if (string.IsNullOrEmpty(model.RoomServiceName))
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceName))));
+                }
+
+                if (string.IsNullOrEmpty(model.Unit))
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Unit))));
+                }
+
+                if (model?.Cost == null)
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Cost))));
+                }
+
+                if (model.Cost < 0)
+                {
+                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message: 
+                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Cost))));
+                }
+            }
+
             var result = await _roomServiceService.AddRoomServiceBatch(models);
 
-            return Ok(result);
+            return StatusCode(201, result);
         }
 
         [HttpPut]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateRoomService(RoomServiceUpdateRequestModel model)
         {
+            if (string.IsNullOrEmpty(model.RoomServiceName))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceName))));
+            }
+
+            if (string.IsNullOrEmpty(model.Unit))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Unit))));
+            }
+
+            if (model?.Cost == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Cost))));
+            }
+
+            if (model.Cost < 0)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message: string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Cost))));
+            }
+
             var result = await _roomServiceService.UpdateRoomService(model);
 
             if (result.IsSuccess)
             {
-                return Ok(result);
+                return StatusCode(202, result);
             }
             return NotFound(model.Id);
         }

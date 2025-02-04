@@ -6,7 +6,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
     {
         public Guid Id { get; set; }
 
-        public string RoomNumer { get; set; } = string.Empty;
+        public int RoomNumber { get; set; }
 
         public int FloorNumber { get; set; }
 

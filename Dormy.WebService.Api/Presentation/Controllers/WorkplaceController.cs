@@ -1,8 +1,11 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
@@ -58,21 +61,56 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateWorkplace([FromBody] WorkplaceRequestModel model)
         {
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message: 
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
+            }
+
+            if (string.IsNullOrEmpty(model.Address))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Address))));
+            }
+
+            if (string.IsNullOrEmpty(model.Abbrevation))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Abbrevation))));
+            }
             var response = await _workplaceService.CreateWorkplace(model);
-            return Ok(response);
+            return StatusCode(201, response);
         }
 
         [HttpPut]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateWorkplace([FromBody] WorkplaceUpdateRequestModel model)
         {
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
+            }
+
+            if (string.IsNullOrEmpty(model.Address))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Address))));
+            }
+
+            if (string.IsNullOrEmpty(model.Abbrevation))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Abbrevation))));
+            }
+
             var response = await _workplaceService.UpdateWorkplace(model);
 
             if (response.IsSuccess)
             {
-                return Ok(response);
+                return StatusCode(202, response);
             }
-            return NotFound(response.Result);
+            return NotFound(response);
         }
 
         [HttpDelete("id/{id:guid}")]
