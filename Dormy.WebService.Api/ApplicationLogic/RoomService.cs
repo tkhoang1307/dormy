@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
@@ -43,20 +44,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var entities = new List<RoomEntity>();
 
-            foreach(var room in rooms)
+            for (int iRoom = 0; iRoom < rooms.Count; iRoom++)
             {
+                var room = rooms[iRoom];
+                int totalRoomsCreated = RoomHelper.CalculateTotalRoomsWereCreatedBeforeInARequest(rooms, iRoom); ;
+                
                 int maxRoomNumberOnFloor = buildingEntity.Rooms
                                                          .Where(r => r.FloorNumber == room.FloorNumber)
                                                          .Max(r => (int?)r.RoomNumber) ?? 0;
-                int roomNumberStartToMark = 0;
-                if (maxRoomNumberOnFloor > 0)
-                {
-                    roomNumberStartToMark = maxRoomNumberOnFloor + 1;
-                }
-                else
-                {
-                    roomNumberStartToMark = room.FloorNumber * 100;
-                }
+                int roomNumberStartToMark = RoomHelper.CalculateStartedRoomNumberInARequest(room.FloorNumber, maxRoomNumberOnFloor, totalRoomsCreated);
                 
                 for (var i = 0; i < room.TotalRoomsWantToCreate; i++)
                 {
@@ -186,11 +182,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 int roomCountOnFloor = buildingEntity.Rooms.Count(r => r.FloorNumber == entity.FloorNumber);
                 entity.RoomNumber = entity.FloorNumber * 100 + roomCountOnFloor + 1;
             }
-            //entity.RoomNumber = model.RoomNumber;
-            //entity.FloorNumber = model.FloorNumber;
-            //entity.Status = model.RoomStatus;
             entity.RoomTypeId = model.RoomTypeId;
-            //entity.TotalAvailableBed = model.TotalAvailableBed;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 
