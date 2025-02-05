@@ -13,6 +13,10 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .ValueGeneratedOnAdd();
 
             builder
+                .Property(parkingRequest => parkingRequest.Status)
+                .HasConversion<string>();
+
+            builder
                 .HasOne(parkingRequest => parkingRequest.User)
                 .WithMany(user => user.ParkingRequests)
                 .HasForeignKey(parkingRequest => parkingRequest.UserId);

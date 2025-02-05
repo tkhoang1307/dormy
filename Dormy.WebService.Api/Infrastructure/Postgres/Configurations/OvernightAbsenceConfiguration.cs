@@ -13,6 +13,10 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .ValueGeneratedOnAdd();
 
             builder
+                .Property(overnightAbsence => overnightAbsence.Status)
+                .HasConversion<string>();
+
+            builder
                 .HasOne(overnightAbsence => overnightAbsence.User)
                 .WithMany(user => user.OvernightAbsences)
                 .HasForeignKey(overnightAbsence => overnightAbsence.UserId);

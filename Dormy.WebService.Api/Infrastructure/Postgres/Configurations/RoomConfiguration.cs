@@ -9,8 +9,12 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
         public void Configure(EntityTypeBuilder<RoomEntity> builder)
         {
             builder
-                .Property(building => building.Id)
+                .Property(room => room.Id)
                 .ValueGeneratedOnAdd();
+
+            builder
+                .Property(room => room.Status)
+                .HasConversion<string>();
 
             builder
                 .HasOne(room => room.Building)

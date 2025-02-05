@@ -11,6 +11,10 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
             builder
                 .Property(parkingSpot => parkingSpot.Id)
                 .ValueGeneratedOnAdd();
+
+            builder
+                .Property(parkingSpot => parkingSpot.Status)
+                .HasConversion<string>();
         }
     }
 }

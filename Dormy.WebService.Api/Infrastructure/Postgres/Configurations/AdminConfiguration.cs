@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
@@ -11,6 +12,10 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
             builder
                 .Property(admin => admin.Id)
                 .ValueGeneratedOnAdd();
+
+            builder
+                .Property(admin => admin.Gender)
+                .HasConversion<string>();
 
             builder.HasData(new AdminEntity()
             {

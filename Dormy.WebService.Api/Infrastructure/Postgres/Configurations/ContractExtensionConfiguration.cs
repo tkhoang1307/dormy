@@ -13,6 +13,10 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .ValueGeneratedOnAdd();
 
             builder
+                .Property(contractExtension => contractExtension.Status)
+                .HasConversion<string>();
+
+            builder
                 .HasOne(contractExtension => contractExtension.Approver)
                 .WithMany(admin => admin.ContractExtensions)
                 .HasForeignKey(contractExtension => contractExtension.ApproverId);

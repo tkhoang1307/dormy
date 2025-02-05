@@ -13,6 +13,14 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .ValueGeneratedOnAdd();
 
             builder
+                .Property(invoice => invoice.Type)
+                .HasConversion<string>();
+
+            builder
+                .Property(invoice => invoice.Status)
+                .HasConversion<string>();
+
+            builder
                 .HasOne(invoice => invoice.Room)
                 .WithMany(room => room.Invoices)
                 .HasForeignKey(invoice => invoice.RoomId);
