@@ -121,7 +121,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("id/hard-delete{id:guid}")]
+        [HttpDelete("id/hard-delete/{id:guid}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> HardDeleteWorkplace(Guid id)
         {

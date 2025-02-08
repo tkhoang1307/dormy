@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Core.Utilities;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -23,7 +24,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _userContextService = userContextService;
         }
 
-        public async Task<ApiResponse> CreateBuilding(BuildingRequestModel model)
+        public async Task<ApiResponse> CreateBuilding(BuildingCreationRequestModel model)
         {
             var roomTypeIds = model.Rooms
                        .Select(room => room.RoomTypeId)
@@ -39,7 +40,37 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest($"Room Types with IDs: {string.Join(", ", missingIds)} were not found");
             }
 
-            var buildingEntity = _buildingMapper.MapToBuildingEntity(model);
+            var roomsRequestModel = new List<RoomRequestModel>();
+
+            for (int iRoom = 0; iRoom < model.Rooms.Count; iRoom++)
+            {
+                var room = model.Rooms[iRoom];
+                int totalRoomsCreated = RoomHelper.CalculateTotalRoomsWereCreatedBeforeInARequest(model.Rooms, iRoom);
+
+                int maxRoomNumberOnFloor = 0;
+                int roomNumberStartToMark = RoomHelper.CalculateStartedRoomNumberInARequest(room.FloorNumber, maxRoomNumberOnFloor, totalRoomsCreated);
+
+                for (var i = 0; i < room.TotalRoomsWantToCreate; i++)
+                {
+                    roomsRequestModel.Add(new RoomRequestModel()
+                    {
+                        RoomStatus = RoomStatusEnum.AVAILABLE,
+                        RoomTypeId = room.RoomTypeId,
+                        FloorNumber = room.FloorNumber,
+                        RoomNumber = roomNumberStartToMark,
+                    });
+
+                    roomNumberStartToMark = roomNumberStartToMark + 1;
+                }
+            }
+            var buildingRequestModel = new BuildingRequestModel()
+            {
+                Name = model.Name,
+                TotalFloors = model.TotalFloors,
+                GenderRestriction = model.GenderRestriction,
+                Rooms = roomsRequestModel,
+            };
+            var buildingEntity = _buildingMapper.MapToBuildingEntity(buildingRequestModel);
 
             if (_userContextService.UserId != Guid.Empty)
             {
@@ -62,6 +93,85 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetCreated(buildingEntity.Id);
+        }
+
+        public async Task<ApiResponse> CreateBuildingBatch(List<BuildingCreationRequestModel> models)
+        {
+            var roomTypeIds = models
+                       .SelectMany(b => b.Rooms)
+                       .Select(room => room.RoomTypeId)
+                       .Distinct()
+                       .ToList();
+
+            var roomTypes = await _unitOfWork.RoomTypeRepository
+                                             .GetAllAsync(rt => roomTypeIds.Contains(rt.Id));
+
+            if (roomTypes.Count != roomTypeIds.Count)
+            {
+                var missingIds = roomTypeIds.Except(roomTypes.Select(rt => rt.Id));
+                return new ApiResponse().SetBadRequest($"Room Types with IDs: {string.Join(", ", missingIds)} were not found");
+            }
+
+            var listBuildingEntities = new List<BuildingEntity>();
+
+            foreach (var model in models)
+            {
+                var roomsRequestModel = new List<RoomRequestModel>();
+
+                for (int iRoom = 0; iRoom < model.Rooms.Count; iRoom++)
+                {
+                    var room = model.Rooms[iRoom];
+                    int totalRoomsCreated = RoomHelper.CalculateTotalRoomsWereCreatedBeforeInARequest(model.Rooms, iRoom);
+
+                    int maxRoomNumberOnFloor = 0;
+                    int roomNumberStartToMark = RoomHelper.CalculateStartedRoomNumberInARequest(room.FloorNumber, maxRoomNumberOnFloor, totalRoomsCreated);
+
+                    for (var i = 0; i < room.TotalRoomsWantToCreate; i++)
+                    {
+                        roomsRequestModel.Add(new RoomRequestModel()
+                        {
+                            RoomStatus = RoomStatusEnum.AVAILABLE,
+                            RoomTypeId = room.RoomTypeId,
+                            FloorNumber = room.FloorNumber,
+                            RoomNumber = roomNumberStartToMark,
+                        });
+
+                        roomNumberStartToMark = roomNumberStartToMark + 1;
+                    }
+                }
+                var buildingRequestModel = new BuildingRequestModel()
+                {
+                    Name = model.Name,
+                    TotalFloors = model.TotalFloors,
+                    GenderRestriction = model.GenderRestriction,
+                    Rooms = roomsRequestModel,
+                };
+                var buildingEntity = _buildingMapper.MapToBuildingEntity(buildingRequestModel);
+
+                if (_userContextService.UserId != Guid.Empty)
+                {
+                    buildingEntity.CreatedBy = _userContextService.UserId;
+                    buildingEntity.LastUpdatedBy = _userContextService.UserId;
+                }
+
+                if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
+                {
+                    foreach (var room in buildingEntity.Rooms)
+                    {
+                        room.CreatedBy = _userContextService.UserId;
+                        room.LastUpdatedBy = _userContextService.UserId;
+                        room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed;
+                    }
+                }
+
+                listBuildingEntities.Add(buildingEntity);
+            }
+
+            await _unitOfWork.BuildingRepository.AddRangeAsync(listBuildingEntities);
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetCreated(listBuildingEntities.Select(b => b.Id).ToList());
         }
 
         public async Task<ApiResponse> GetBuildingById(Guid id)
@@ -162,55 +272,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetOk(buildingEntity.Id);
-        }
-
-        public async Task<ApiResponse> CreateBuildingBatch(List<BuildingRequestModel> models)
-        {
-            var roomTypeIds = models
-                       .SelectMany(b => b.Rooms)
-                       .Select(room => room.RoomTypeId)
-                       .Distinct()
-                       .ToList();
-
-            var roomTypes = await _unitOfWork.RoomTypeRepository
-                                             .GetAllAsync(rt => roomTypeIds.Contains(rt.Id));
-
-            if (roomTypes.Count != roomTypeIds.Count)
-            {
-                var missingIds = roomTypeIds.Except(roomTypes.Select(rt => rt.Id));
-                return new ApiResponse().SetBadRequest($"Room Types with IDs: {string.Join(", ", missingIds)} were not found");
-            }
-
-            var listBuildingEntities = new List<BuildingEntity>();
-
-            foreach (var model in models)
-            {
-                var buildingEntity = _buildingMapper.MapToBuildingEntity(model);
-
-                if (_userContextService.UserId != Guid.Empty)
-                {
-                    buildingEntity.CreatedBy = _userContextService.UserId;
-                    buildingEntity.LastUpdatedBy = _userContextService.UserId;
-                }
-
-                if (buildingEntity.Rooms != null && buildingEntity.Rooms.Count > 0)
-                {
-                    foreach (var room in buildingEntity.Rooms)
-                    {
-                        room.CreatedBy = _userContextService.UserId;
-                        room.LastUpdatedBy = _userContextService.UserId;
-                        room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed;
-                    }
-                }
-
-                listBuildingEntities.Add(buildingEntity);
-            }
-
-            await _unitOfWork.BuildingRepository.AddRangeAsync(listBuildingEntities);
-
-            await _unitOfWork.SaveChangeAsync();
-
-            return new ApiResponse().SetCreated(listBuildingEntities.Select(b => b.Id).ToList());
         }
     }
 }

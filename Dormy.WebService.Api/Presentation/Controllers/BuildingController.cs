@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
@@ -49,7 +50,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPost]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> CreateBuilding(BuildingRequestModel model)
+        public async Task<IActionResult> CreateBuilding(BuildingCreationRequestModel model)
         {
             if (string.IsNullOrEmpty(model.Name))
             {
@@ -57,7 +58,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
             }
 
-            if (model?.GenderRestriction == null)
+            if (string.IsNullOrEmpty(model.GenderRestriction))
             {
                 return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.GenderRestriction))));
@@ -68,6 +69,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.TotalFloors))));
             }
+
+            if (!Enum.TryParse(model.GenderRestriction, out GenderEnum result))
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.GenderRestriction, nameof(GenderEnum))));
+            }    
 
             if (model.TotalFloors <= 0)
             {
@@ -82,7 +89,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPost("create/batch")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> CreateBuildingBatch(List<BuildingRequestModel> models)
+        public async Task<IActionResult> CreateBuildingBatch(List<BuildingCreationRequestModel> models)
         {
             foreach(var model in models)
             {
@@ -92,7 +99,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                         string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
                 }
 
-                if (model?.GenderRestriction == null)
+                if (string.IsNullOrEmpty(model.GenderRestriction))
                 {
                     return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
                         string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.GenderRestriction))));
@@ -102,6 +109,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 {
                     return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
                         string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.TotalFloors))));
+                }
+
+                if (!Enum.TryParse(model.GenderRestriction, out GenderEnum result))
+                {
+                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                        string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.GenderRestriction, nameof(GenderEnum))));
                 }
 
                 if (model.TotalFloors <= 0)

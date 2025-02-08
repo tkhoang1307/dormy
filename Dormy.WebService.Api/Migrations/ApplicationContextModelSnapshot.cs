@@ -45,8 +45,9 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("integer");
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -84,13 +85,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("51e845d9-732b-4244-9e6b-4d589f58a519"),
+                            Id = new Guid("81e2e829-2126-4cdf-b0d2-319b44c3ed78"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 2, 4, 22, 49, 32, 80, DateTimeKind.Local).AddTicks(3031),
-                            DateOfBirth = new DateTime(2025, 2, 4, 22, 49, 32, 80, DateTimeKind.Local).AddTicks(3037),
+                            CreatedDateUtc = new DateTime(2025, 2, 8, 13, 8, 10, 54, DateTimeKind.Local).AddTicks(2875),
+                            DateOfBirth = new DateTime(2025, 2, 8, 13, 8, 10, 54, DateTimeKind.Local).AddTicks(2879),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
-                            Gender = 0,
+                            Gender = "MALE",
                             IsDeleted = false,
                             JobTitle = "Admin",
                             LastName = "",
@@ -112,8 +113,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("GenderRestriction")
-                        .HasColumnType("integer");
+                    b.Property<string>("GenderRestriction")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -175,8 +177,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("SubmissionDate")
                         .HasColumnType("timestamp without time zone");
@@ -228,8 +231,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("SubmissionDate")
                         .HasColumnType("timestamp without time zone");
@@ -369,11 +373,13 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int?>("Year")
                         .HasColumnType("integer");
@@ -558,8 +564,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime>("StartDateTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -604,8 +611,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("ParkingSpotId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -657,8 +665,9 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -700,8 +709,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -750,8 +760,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("RoomTypeId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("TotalAvailableBed")
                         .HasColumnType("integer");
@@ -1002,8 +1013,9 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("integer");
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("HealthInsuranceId")
                         .HasColumnType("uuid");
@@ -1033,8 +1045,9 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("UserName")
                         .IsRequired()

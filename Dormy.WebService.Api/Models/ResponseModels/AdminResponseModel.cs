@@ -20,6 +20,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string JobTitle { get; set; } = string.Empty;
 
+        // GenderEnum
         public string Gender { get; set; } = string.Empty;
     }
 }

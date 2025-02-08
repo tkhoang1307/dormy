@@ -1,6 +1,8 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using System;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
 {
@@ -19,7 +21,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             {
                 CreatedDateUtc = DateTime.UtcNow,
                 LastUpdatedDateUtc = DateTime.UtcNow,
-                GenderRestriction = model.GenderRestriction,
+                GenderRestriction = (GenderEnum)Enum.Parse(typeof(GenderEnum), model.GenderRestriction),
                 Name = model.Name,
                 TotalFloors = model.TotalFloors,
                 Rooms = model.Rooms.Select(r => _roomMapper.MapToRoomEntity(r)).ToList(),
@@ -33,7 +35,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             var buildingResponse = new BuildingResponseModel
             {
                 Id = entity.Id,
-                GenderRestriction = entity.GenderRestriction,
+                GenderRestriction = entity.GenderRestriction.ToString(),
                 Name = entity.Name,
                 TotalFloors = entity.TotalFloors,
                 CreatedBy = entity.CreatedBy,

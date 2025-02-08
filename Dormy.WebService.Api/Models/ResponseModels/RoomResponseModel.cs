@@ -16,9 +16,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string RoomTypeName { get; set; } = string.Empty;
 
-        public RoomStatusEnum Status { get; set; }
-
-        public string StatusName { get; set; } = string.Empty;
+        // RoomStatusEnum
+        public string Status { get; set; } = string.Empty;
 
         public Guid BuildingId { get; set; }
     }

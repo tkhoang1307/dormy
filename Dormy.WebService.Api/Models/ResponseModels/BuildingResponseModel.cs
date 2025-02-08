@@ -12,7 +12,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public int TotalRooms { get; set; }
 
-        public GenderEnum GenderRestriction { get; set; }
+        // GenderEnum
+        public string GenderRestriction { get; set; } = string.Empty;
 
         public List<RoomResponseModel> Rooms { get; set; } = [];
     }

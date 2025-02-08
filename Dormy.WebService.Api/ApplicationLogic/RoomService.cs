@@ -47,7 +47,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             for (int iRoom = 0; iRoom < rooms.Count; iRoom++)
             {
                 var room = rooms[iRoom];
-                int totalRoomsCreated = RoomHelper.CalculateTotalRoomsWereCreatedBeforeInARequest(rooms, iRoom); ;
+                int totalRoomsCreated = RoomHelper.CalculateTotalRoomsWereCreatedBeforeInARequest(rooms, iRoom);
                 
                 int maxRoomNumberOnFloor = buildingEntity.Rooms
                                                          .Where(r => r.FloorNumber == room.FloorNumber)

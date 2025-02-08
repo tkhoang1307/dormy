@@ -14,5 +14,6 @@
         public const string PropertyMustBeMoreThan0 = "{0} must be more than 0.";
         public const string SomeServicesAreNotExisted = "Some of room services are not found";
         public const string SomeRoomTypesAreNotExisted = "Some of room types are not found";
+        public const string ValueDoesNotExistInEnum = "{0} doesn't exist in {1}";
     }
 }
