@@ -6,13 +6,6 @@ namespace Dormy.WebService.Api.Presentation.Mappers
 {
     public class HealthInsuranceMapper
     {
-        private readonly UserMapper _userMapper;
-
-        public HealthInsuranceMapper()
-        {
-            _userMapper = new UserMapper();
-        }
-
         public HealthInsuranceEntity MapToHealthInsuranceEntity(HealthInsuranceRequestModel model)
         {
             return new HealthInsuranceEntity

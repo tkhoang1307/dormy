@@ -1,6 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.CustomExceptions;
-using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Models.Constants;
@@ -24,21 +23,31 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _tokenRetriever = tokenRetriever;
         }
 
-        public async Task<ApiResponse> ChangeAdminPassword(Guid id, string newPassword)
+        public async Task<ApiResponse> ChangeAdminPassword(ChangePasswordRequestModel model)
         {
-            var adminAccount = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(id));
+            if (model is null)
+            {
+                return new ApiResponse().SetBadRequest();
+            }
+
+            var adminAccount = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(model.Id));
 
             if (adminAccount == null)
             {
                 return new ApiResponse().SetNotFound();
             }
 
-            if (EncryptHelper.VerifyPassword(newPassword, adminAccount.Password))
+            if (!EncryptHelper.VerifyPassword(model.OldPassword, adminAccount.Password))
+            {
+                throw new DuplicatedPasswordUpdateException(ErrorMessages.PasswordDoesNotMatchErrorMessage);
+            }
+
+            if (EncryptHelper.VerifyPassword(model.NewPassword, adminAccount.Password))
             {
                 throw new DuplicatedPasswordUpdateException(ErrorMessages.DuplicatedErrorMessage);
             }
 
-            adminAccount.Password = EncryptHelper.HashPassword(newPassword);
+            adminAccount.Password = EncryptHelper.HashPassword(model.NewPassword);
             await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetOk();
         }

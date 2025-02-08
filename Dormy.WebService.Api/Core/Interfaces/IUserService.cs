@@ -9,7 +9,10 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> Login(LoginRequestModel model);
         Task<ApiResponse> GetUserBatch(bool isGetAll, List<Guid> ids);
         Task<ApiResponse> GetUserInformation(Guid id);
-        Task<ApiResponse> ChangePassword(Guid id, string newPassword);
+        Task<ApiResponse> ChangePassword(ChangePasswordRequestModel model);
         Task<ApiResponse> UpdateProfile(Guid id, UserUpdateRequestModel model);
+        Task<ApiResponse> ResetPassword(Guid id);
+        Task<ApiResponse> UpdateUserWorkplace(Guid workplaceId, Guid userId);
+        Task<ApiResponse> UpdateUserHealthInsurance(HealthInsuranceRequestModel? model, Guid userId);
     }
 }

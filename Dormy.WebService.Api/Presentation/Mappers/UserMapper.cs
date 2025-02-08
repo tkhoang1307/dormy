@@ -7,6 +7,13 @@ namespace Dormy.WebService.Api.Presentation.Mappers
 {
     public class UserMapper
     {
+        private readonly HealthInsuranceMapper _healthInsuranceMapper;
+
+        public UserMapper()
+        {
+            _healthInsuranceMapper = new();
+        }
+
         public UserResponseModel MapToUserResponseModel(UserEntity entity)
         {
             return new UserResponseModel
@@ -29,6 +36,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Status = entity.Status.ToString(),
                 WorkplaceId = entity.WorkplaceId,
                 WorkplaceName = entity.Workplace?.Name ?? string.Empty,
+                HealthInsurance = entity.HealthInsurance != null ? _healthInsuranceMapper.MapToHealthInsuranceResponseModel(entity.HealthInsurance) : null,
             };
         }
 

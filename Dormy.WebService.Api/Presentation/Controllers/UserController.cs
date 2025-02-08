@@ -61,8 +61,30 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             {
                 return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
             }
-            var response = await _userService.ChangePassword(id, model.NewPassword);
+
+            model.Id = id;
+
+            var response = await _userService.ChangePassword(model);
             return Ok();
+        }
+
+        [HttpPut("user/reset-password")]
+        [Authorize(Roles = Role.USER)]
+        public async Task<IActionResult> ResetPassword()
+        {
+            var userClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+            {
+                return NotFound(new ApiResponse().SetNotFound("invalid_user"));
+            }
+            var isValidUserGuidId = Guid.TryParse(userClaim.Value, out Guid id);
+
+            if (!isValidUserGuidId)
+            {
+                return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
+            }
+            var response = await _userService.ResetPassword(id);
+            return response.IsSuccess ? Ok(response.Result) : NotFound(id);
         }
 
         [HttpPut("user/update-profile")]
@@ -98,6 +120,48 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _userService.GetUserBatch(request.IsGetAll, request.Ids);
             return response.IsSuccess ? Ok(response.Result) : NotFound(response);
+        }
+
+        [HttpPut("user/update-workplace/workplaceId/{workplaceId:guid}")]
+        [Authorize(Roles = Role.USER)]
+        public async Task<IActionResult> UpdateUserWorkplace([FromRoute] Guid workplaceId)
+        {
+            var userClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+            {
+                return NotFound(new ApiResponse().SetNotFound("invalid_user"));
+            }
+            var isValidUserGuidId = Guid.TryParse(userClaim.Value, out Guid id);
+
+            if (!isValidUserGuidId)
+            {
+                return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
+            }
+
+            var response = await _userService.UpdateUserWorkplace(workplaceId, id);
+
+            return Ok(response);
+        }
+
+        [HttpPut("user/update-health-insurance")]
+        [Authorize(Roles = Role.USER)]
+        public async Task<IActionResult> UpdateUserHealthInsurance([FromBody] HealthInsuranceRequestModel? model)
+        {
+            var userClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+            {
+                return NotFound(new ApiResponse().SetNotFound("invalid_user"));
+            }
+            var isValidUserGuidId = Guid.TryParse(userClaim.Value, out Guid id);
+
+            if (!isValidUserGuidId)
+            {
+                return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
+            }
+
+            var response = await _userService.UpdateUserHealthInsurance(model, id);
+
+            return Ok(response);
         }
     }
 }

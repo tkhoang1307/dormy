@@ -78,7 +78,36 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(dataResponse);
         }
 
-        public async Task<ApiResponse> ChangePassword(Guid id, string newPassword)
+        public async Task<ApiResponse> ChangePassword(ChangePasswordRequestModel model)
+        {
+            if (model is null)
+            {
+                return new ApiResponse().SetBadRequest();
+            }
+
+            var userAccount = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(model.Id));
+
+            if (userAccount == null)
+            {
+                return new ApiResponse().SetNotFound();
+            }
+
+            if (!EncryptHelper.VerifyPassword(model.OldPassword, userAccount.Password))
+            {
+                throw new DuplicatedPasswordUpdateException(ErrorMessages.PasswordDoesNotMatchErrorMessage);
+            }
+
+            if (EncryptHelper.VerifyPassword(model.NewPassword, userAccount.Password))
+            {
+                throw new DuplicatedPasswordUpdateException(ErrorMessages.DuplicatedErrorMessage);
+            }
+
+            userAccount.Password = EncryptHelper.HashPassword(model.NewPassword);
+            await _unitOfWork.SaveChangeAsync();
+            return new ApiResponse().SetOk();
+        }
+
+        public async Task<ApiResponse> ResetPassword(Guid id)
         {
             var userAccount = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(id));
 
@@ -87,14 +116,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound();
             }
 
-            if (EncryptHelper.VerifyPassword(newPassword, userAccount.Password))
-            {
-                throw new DuplicatedPasswordUpdateException(ErrorMessages.DuplicatedErrorMessage);
-            }
+            var newPassword = GeneratePassword();
 
             userAccount.Password = EncryptHelper.HashPassword(newPassword);
             await _unitOfWork.SaveChangeAsync();
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetOk(newPassword);
         }
 
         public async Task<ApiResponse> UpdateProfile(Guid id, UserUpdateRequestModel model)
@@ -138,12 +164,107 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetUserInformation(Guid id)
         {
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == id, x => x.Include(y => y.Guardians)?.Include(z => z.Workplace));
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == id, x => x.Include(y => y.Guardians)?.Include(z => z.Workplace)?.Include(w => w.HealthInsurance));
             if (userEntity == null)
             {
                 return new ApiResponse().SetNotFound(id);
             }
             return new ApiResponse().SetOk(_userMapper.MapToUserResponseModel(userEntity));
+        }
+
+        private static string GeneratePassword(int length = 8)
+        {
+            const string validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            Random random = new Random();
+
+            // Ensure at least one character from each required set
+            string password = "";
+            password += GetRandomChar(random, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"); // At least one uppercase
+            password += GetRandomChar(random, "abcdefghijklmnopqrstuvwxyz"); // At least one lowercase
+            password += GetRandomChar(random, "0123456789"); // At least one digit
+
+            // Fill the remaining length with random characters
+            for (int i = password.Length; i < length; i++)
+            {
+                password += validChars[random.Next(validChars.Length)];
+            }
+
+            // Shuffle the password to randomize character positions
+            return new string(password.ToCharArray().OrderBy(s => random.NextDouble()).ToArray());
+        }
+
+        private static char GetRandomChar(Random random, string charSet)
+        {
+            return charSet[random.Next(charSet.Length)];
+        }
+
+        public async Task<ApiResponse> UpdateUserWorkplace(Guid workplaceId, Guid userId)
+        {
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == userId);
+
+            if (userEntity == null)
+            {
+                return new ApiResponse().SetNotFound(userId);
+            }
+
+            if (workplaceId == Guid.Empty)
+            {
+                userEntity.WorkplaceId = null;
+                await _unitOfWork.SaveChangeAsync();
+                return new ApiResponse().SetOk();
+            }
+
+            var workPlaceEntity = await _unitOfWork.WorkplaceRepository.GetAsync(x => x.Id == workplaceId);
+
+            if (workPlaceEntity == null)
+            {
+                return new ApiResponse().SetNotFound(workplaceId);
+            }
+
+            userEntity.WorkplaceId = workPlaceEntity.Id;
+            await _unitOfWork.SaveChangeAsync();
+            return new ApiResponse().SetOk();
+        }
+
+        public async Task<ApiResponse> UpdateUserHealthInsurance(HealthInsuranceRequestModel? model, Guid userId)
+        {
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == userId, x => x.Include(x => x.HealthInsurance));
+
+            if (userEntity == null)
+            {
+                return new ApiResponse().SetNotFound(userId);
+            }
+
+            if (model == null)
+            {
+                userEntity.HealthInsurance = null;
+                await _unitOfWork.SaveChangeAsync();
+                return new ApiResponse().SetOk();
+            }
+
+            if (userEntity.HealthInsurance != null)
+            {
+                await _unitOfWork.HealthInsuranceRepository.DeleteByIdAsync(userEntity.HealthInsurance.Id);
+                await _unitOfWork.SaveChangeAsync();
+            }
+
+            var healthInsurance = new HealthInsuranceEntity()
+            {
+                Id = Guid.NewGuid(),
+                ExpirationDate = model.ExpirationDate,
+                RegisteredHospital = model.RegisteredHospital,
+                InsuranceCardNumber = model.InsuranceCardNumber,
+                CreatedBy = userId,
+                CreatedDateUtc = DateTime.UtcNow,
+            };
+
+            await _unitOfWork.HealthInsuranceRepository.AddAsync(healthInsurance);
+            await _unitOfWork.SaveChangeAsync();
+
+            userEntity.HealthInsuranceId = healthInsurance.Id;
+
+            await _unitOfWork.SaveChangeAsync();
+            return new ApiResponse().SetOk(healthInsurance.Id);
         }
     }
 }

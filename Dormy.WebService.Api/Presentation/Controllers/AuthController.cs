@@ -61,7 +61,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             {
                 return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
             }
-            var response = await _adminService.ChangeAdminPassword(id, model.NewPassword);
+
+            model.Id = id;
+
+            var response = await _adminService.ChangeAdminPassword(model);
             return Ok();
         }
 
@@ -69,7 +72,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ChangePasswordAccount(ChangePasswordRequestModel model)
         {
-            var response = await _adminService.ChangeAdminPassword(model.Id ?? Guid.Empty, model.NewPassword);
+            var response = await _adminService.ChangeAdminPassword(model);
             return Ok();
         }
 

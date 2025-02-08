@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Models.ResponseModels
+﻿using Dormy.WebService.Api.Core.Entities;
+
+namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class UserResponseModel
     {
@@ -29,6 +31,8 @@
         public string WorkplaceName { get; set; } = string.Empty;
 
         public Guid? HealthInsuranceId { get; set; }
+
+        public HealthInsuranceResponseModel? HealthInsurance { get; set; } = null;
     }
 
     public class GuardiansResponseModel
