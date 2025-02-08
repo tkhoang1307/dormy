@@ -15,5 +15,6 @@
         public const string SomeServicesAreNotExisted = "Some of room services are not found";
         public const string SomeRoomTypesAreNotExisted = "Some of room types are not found";
         public const string ValueDoesNotExistInEnum = "{0} doesn't exist in {1}";
+        public const string AccountDoesNotHavePermission = "Your account doesn’t have permission";
     }
 }
