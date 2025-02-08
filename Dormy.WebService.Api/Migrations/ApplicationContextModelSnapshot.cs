@@ -85,10 +85,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("81e2e829-2126-4cdf-b0d2-319b44c3ed78"),
+                            Id = new Guid("44590948-e232-402c-ad49-bc6251fdd0de"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 2, 8, 13, 8, 10, 54, DateTimeKind.Local).AddTicks(2875),
-                            DateOfBirth = new DateTime(2025, 2, 8, 13, 8, 10, 54, DateTimeKind.Local).AddTicks(2879),
+                            CreatedDateUtc = new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6674),
+                            DateOfBirth = new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6678),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",
@@ -1017,7 +1017,7 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("HealthInsuranceId")
+                    b.Property<Guid?>("HealthInsuranceId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
@@ -1053,7 +1053,7 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("WorkplaceId")
+                    b.Property<Guid?>("WorkplaceId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -1494,15 +1494,11 @@ namespace Dormy.WebService.Api.Migrations
                 {
                     b.HasOne("Dormy.WebService.Api.Core.Entities.HealthInsuranceEntity", "HealthInsurance")
                         .WithOne("User")
-                        .HasForeignKey("Dormy.WebService.Api.Core.Entities.UserEntity", "HealthInsuranceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Dormy.WebService.Api.Core.Entities.UserEntity", "HealthInsuranceId");
 
                     b.HasOne("Dormy.WebService.Api.Core.Entities.WorkplaceEntity", "Workplace")
                         .WithMany("Users")
-                        .HasForeignKey("WorkplaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WorkplaceId");
 
                     b.Navigation("HealthInsurance");
 

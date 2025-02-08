@@ -26,13 +26,13 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public GenderEnum Gender { get; set; }
 
-        public Guid WorkplaceId { get; set; }
+        public Guid? WorkplaceId { get; set; }
 
-        public WorkplaceEntity Workplace { get; set; } = null!;
+        public WorkplaceEntity? Workplace { get; set; }
 
-        public Guid HealthInsuranceId { get; set; }
+        public Guid? HealthInsuranceId { get; set; }
 
-        public HealthInsuranceEntity HealthInsurance { get; set; } = null!;
+        public HealthInsuranceEntity? HealthInsurance { get; set; }
 
         public List<GuardianEntity>? Guardians { get; set; }
 
