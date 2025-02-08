@@ -1,4 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Infrastructure.TokenRetriever;
+using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
@@ -27,6 +29,23 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Status = entity.Status.ToString(),
                 WorkplaceId = entity.WorkplaceId,
                 WorkplaceName = entity.Workplace?.Name ?? string.Empty,
+            };
+        }
+
+        public UserEntity MapToUserEntity(UserRequestModel model)
+        {
+            return new UserEntity()
+            {
+                Email = model.Email,
+                DateOfBirth = model.DateOfBirth,
+                Gender = model.Gender,
+                UserName = model.UserName,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Password = EncryptHelper.HashPassword(model.Password),
+                PhoneNumber = model.PhoneNumber,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
         }
     }

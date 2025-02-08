@@ -24,11 +24,11 @@
 
         public List<GuardiansResponseModel> Guardians { get; set; } = [];
 
-        public Guid WorkplaceId { get; set; }
+        public Guid? WorkplaceId { get; set; }
 
         public string WorkplaceName { get; set; } = string.Empty;
 
-        public Guid HealthInsuranceId { get; set; }
+        public Guid? HealthInsuranceId { get; set; }
     }
 
     public class GuardiansResponseModel

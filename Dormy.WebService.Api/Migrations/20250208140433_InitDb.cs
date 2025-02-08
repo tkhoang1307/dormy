@@ -286,8 +286,8 @@ namespace Dormy.WebService.Api.Migrations
                     NationalIdNumber = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     Gender = table.Column<string>(type: "text", nullable: false),
-                    WorkplaceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    HealthInsuranceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WorkplaceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    HealthInsuranceId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -301,14 +301,12 @@ namespace Dormy.WebService.Api.Migrations
                         name: "FK_Users_HealthInsurances_HealthInsuranceId",
                         column: x => x.HealthInsuranceId,
                         principalTable: "HealthInsurances",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Users_Workplaces_WorkplaceId",
                         column: x => x.WorkplaceId,
                         principalTable: "Workplaces",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -753,7 +751,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "IsDeleted", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName" },
-                values: new object[] { new Guid("81e2e829-2126-4cdf-b0d2-319b44c3ed78"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 2, 8, 13, 8, 10, 54, DateTimeKind.Local).AddTicks(2875), new DateTime(2025, 2, 8, 13, 8, 10, 54, DateTimeKind.Local).AddTicks(2879), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
+                values: new object[] { new Guid("44590948-e232-402c-ad49-bc6251fdd0de"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6674), new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6678), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContractExtensions_ApproverId",
