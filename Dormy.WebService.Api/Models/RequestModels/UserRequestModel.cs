@@ -18,7 +18,8 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public GenderEnum Gender { get; set; }
+        // GenderEnum
+        public string Gender { get; set; } = string.Empty;
     }
 
     public class UserUpdateRequestModel

@@ -1,5 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 
@@ -46,7 +47,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             {
                 Email = model.Email,
                 DateOfBirth = model.DateOfBirth,
-                Gender = model.Gender,
+                Gender = (GenderEnum)Enum.Parse(typeof(GenderEnum), model.Gender),
                 UserName = model.UserName,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
