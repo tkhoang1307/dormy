@@ -751,7 +751,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "IsDeleted", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName" },
-                values: new object[] { new Guid("44590948-e232-402c-ad49-bc6251fdd0de"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6674), new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6678), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
+                values: new object[] { new Guid("a2445db0-6852-4ce9-bb98-b2e1df5748b7"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 2, 10, 15, 42, 44, 320, DateTimeKind.Local).AddTicks(2385), new DateTime(2025, 2, 10, 15, 42, 44, 320, DateTimeKind.Local).AddTicks(2404), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContractExtensions_ApproverId",

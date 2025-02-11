@@ -48,6 +48,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Email = model.Email,
                 DateOfBirth = model.DateOfBirth,
                 Gender = (GenderEnum)Enum.Parse(typeof(GenderEnum), model.Gender),
+                NationalIdNumber = model.NationalIdNumber,
                 UserName = model.UserName,
                 FirstName = model.FirstName,
                 LastName = model.LastName,

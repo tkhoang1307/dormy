@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250208140433_InitDb")]
+    [Migration("20250210084244_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -88,10 +88,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("44590948-e232-402c-ad49-bc6251fdd0de"),
+                            Id = new Guid("a2445db0-6852-4ce9-bb98-b2e1df5748b7"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6674),
-                            DateOfBirth = new DateTime(2025, 2, 8, 21, 4, 32, 957, DateTimeKind.Local).AddTicks(6678),
+                            CreatedDateUtc = new DateTime(2025, 2, 10, 15, 42, 44, 320, DateTimeKind.Local).AddTicks(2385),
+                            DateOfBirth = new DateTime(2025, 2, 10, 15, 42, 44, 320, DateTimeKind.Local).AddTicks(2404),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",

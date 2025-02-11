@@ -18,6 +18,8 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public string PhoneNumber { get; set; } = string.Empty;
 
+        public string NationalIdNumber { get; set; } = string.Empty;
+
         // GenderEnum
         public string Gender { get; set; } = string.Empty;
     }
@@ -28,12 +30,14 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public string LastName { get; set; } = string.Empty;
 
+        public string Email { get; set; } = string.Empty;
+
         public DateTime DateOfBirth { get; set; } = DateTime.Now;
 
         public string PhoneNumber { get; set; } = string.Empty;
 
         public string NationalIdNumber { get; set; } = string.Empty;
 
-        public GenderEnum Gender { get; set; }
+        public string Gender { get; set; } = string.Empty;
     }
 }

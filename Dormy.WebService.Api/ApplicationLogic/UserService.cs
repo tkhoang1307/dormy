@@ -4,6 +4,7 @@ using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -134,9 +135,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             userEntity.FirstName = model.FirstName;
             userEntity.LastName = model.LastName;
+            userEntity.Email = model.Email;
             userEntity.PhoneNumber = model.PhoneNumber;
             userEntity.DateOfBirth = model.DateOfBirth;
-            userEntity.Gender = model.Gender;
+            userEntity.Gender = (GenderEnum)Enum.Parse(typeof(GenderEnum), model.Gender);
             userEntity.NationalIdNumber = model.NationalIdNumber;
 
             await _unitOfWork.SaveChangeAsync();
