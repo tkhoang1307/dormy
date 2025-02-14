@@ -122,7 +122,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             model.Id = id;
 
             var response = await _userService.ChangePassword(model);
-            return Ok();
+            return Ok(response);
         }
 
         [HttpPut("user/reset-password")]
@@ -141,7 +141,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
             }
             var response = await _userService.ResetPassword(id);
-            return response.IsSuccess ? Ok(response.Result) : NotFound(id);
+            return response.IsSuccess ? Ok(response) : NotFound(id);
         }
 
         [HttpPut("user/update-profile")]
@@ -178,7 +178,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Email))));
             }
 
-            if (model?.DateOfBirth != null)
+            if (model?.DateOfBirth == null)
             {
                 return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.DateOfBirth))));
