@@ -1,6 +1,6 @@
 ﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class GuardianResponseModel : BaseResponseModel
+    public class GuardianResponseModel : BaseUserResponseModel
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 

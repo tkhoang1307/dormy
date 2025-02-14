@@ -14,5 +14,16 @@ namespace Dormy.WebService.Api.Core.Utilities
 
             return adminFullname;
         }
+
+        public static string ConvertUserIdToUserFullname(UserEntity? userEntity)
+        {
+            string userFullname = "";
+            if (userEntity?.FirstName != null || userEntity?.LastName != null)
+            {
+                userFullname = userEntity.FirstName + " " + userEntity.LastName;
+            }
+
+            return userFullname;
+        }
     }
 }
