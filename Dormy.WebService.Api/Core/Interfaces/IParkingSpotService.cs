@@ -7,6 +7,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     {
         Task<ApiResponse> AddNewParkingSpot(ParkingSpotRequestModel model);
         Task<ApiResponse> UpdateParkingSpot(ParkingSpotUpdationRequestModel model);
+        Task<ApiResponse> UpdateStatusParkingSpot(ParkingSpotUpdateStatusRequestModel model);
         Task<ApiResponse> GetParkingSpotBatch(GetBatchRequestModel model);
         Task<ApiResponse> GetDetailParkingSpot(Guid id);
         Task<ApiResponse> SoftDeleteParkingSpot(Guid id);

@@ -11,4 +11,11 @@
     {
         public Guid Id { get; set; }
     }
+
+    public class ParkingSpotUpdateStatusRequestModel
+    {
+        public Guid Id { get; set; }
+
+        public string Status { get; set; } = string.Empty;
+    }
 }

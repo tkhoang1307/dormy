@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
@@ -78,6 +79,33 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var result = await _parkingSpotService.UpdateParkingSpot(model);
 
             return StatusCode((int)result.StatusCode, result);
+        }
+
+        [HttpPut("status")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> UpdateStatusParkingSpot(ParkingSpotUpdateStatusRequestModel model)
+        {
+            if (model?.Id == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
+            }
+
+            if (string.IsNullOrEmpty(model.Status))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Status))));
+            }
+
+            if (!Enum.TryParse(model.Status, out ParkingSpotStatusEnum result))
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.Status, nameof(ParkingSpotStatusEnum))));
+            }
+
+            var response = await _parkingSpotService.UpdateStatusParkingSpot(model);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("id/{id:guid}")]

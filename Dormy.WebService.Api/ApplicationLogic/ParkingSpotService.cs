@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -128,6 +129,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(id);
+        }
+
+        public async Task<ApiResponse> UpdateStatusParkingSpot(ParkingSpotUpdateStatusRequestModel model)
+        {
+            var entity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == model.Id);
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
+            }
+
+            entity.Status = (ParkingSpotStatusEnum)Enum.Parse(typeof(GenderEnum), model.Status);
+            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(entity.Id);
         }
     }
 }
