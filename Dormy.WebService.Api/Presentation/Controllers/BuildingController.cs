@@ -128,6 +128,48 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode(201, response);
         }
 
+        [HttpPut]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> UpdateBuilding(BuildingUpdationRequestModel model)
+        {
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
+            }
+
+            if (string.IsNullOrEmpty(model.GenderRestriction))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.GenderRestriction))));
+            }
+
+            if (model?.TotalFloors == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.TotalFloors))));
+            }
+
+            if (!Enum.TryParse(model.GenderRestriction, out GenderEnum result))
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.GenderRestriction, nameof(GenderEnum))));
+            }
+
+            if (model.TotalFloors <= 0)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.TotalFloors))));
+            }
+
+            var response = await _buildingService.UpdateBuilding(model);
+            if (response.IsSuccess)
+            {
+                return StatusCode(202, response);
+            }
+            return NotFound(response);
+        }
+
         [HttpDelete("id/{id:guid}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteBuilding(Guid id)

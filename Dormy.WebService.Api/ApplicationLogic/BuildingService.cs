@@ -273,5 +273,25 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetOk(buildingEntity.Id);
         }
+
+        public async Task<ApiResponse> UpdateBuilding(BuildingUpdationRequestModel model)
+        {
+            var buildingEntity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(model.Id));
+
+            if (buildingEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Building"));
+            }
+
+            buildingEntity.Name = model.Name;
+            buildingEntity.TotalFloors = model.TotalFloors;
+            buildingEntity.GenderRestriction = (GenderEnum)Enum.Parse(typeof(GenderEnum), model.GenderRestriction);
+            buildingEntity.LastUpdatedBy = _userContextService.UserId;
+            buildingEntity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(buildingEntity.Id);
+        }
     }
 }

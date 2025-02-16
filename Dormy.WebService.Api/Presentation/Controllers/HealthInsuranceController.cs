@@ -21,8 +21,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = Role.ADMIN)]
-        // [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
+        [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateHealthInsurance(HealthInsuranceRequestModel model)
         {
             if (string.IsNullOrEmpty(model.InsuranceCardNumber))
@@ -49,7 +48,6 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPut]
-        //[Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateHealthInsurance(HealthInsuranceUpdationRequestModel model)
         {
@@ -77,17 +75,23 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpGet("id/{id:guid}")]
-        // [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
-        [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> GetRoomServiceById(Guid id)
+        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
+        public async Task<IActionResult> GetHealthInsuranceById(Guid id)
         {
             var result = await _healthInsuranceService.GetDetailHealthInsurance(id);
 
-            //if (result.IsSuccess)
-            //{
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return NotFound(result);
+        }
 
-            //}
-            //return NotFound(id);
+        [HttpPost("batch")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetBatchHealthInsurances(GetBatchRequestModel model)
+        {
+            var result = await _healthInsuranceService.GetHealthInsuranceBatch(model);
 
             return Ok(result);
         }

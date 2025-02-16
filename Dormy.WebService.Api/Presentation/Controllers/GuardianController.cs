@@ -118,6 +118,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
+        [HttpPost("batch")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetBatchGuardiansByAdmin(GetBatchGuardianRequestModel model)
+        {
+            var result = await _guardianService.GetGuardianBatch(model);
+
+            return Ok(result);
+        }
+
         [HttpDelete("hard-delete/id/{id:guid}")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> HardDeleteGuardian(Guid id)

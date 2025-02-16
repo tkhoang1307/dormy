@@ -5,4 +5,9 @@
         public bool IsGetAll { get; set; } = false;
         public List<Guid> Ids { get; set; } = [];
     }
+
+    public class GetBatchGuardianRequestModel : GetBatchRequestModel
+    {
+        public Guid? UserId { get; set; }
+    }
 }

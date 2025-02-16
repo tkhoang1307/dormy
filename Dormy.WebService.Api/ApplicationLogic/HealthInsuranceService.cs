@@ -1,6 +1,8 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Core.Utilities;
+using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -44,19 +46,91 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Health insurance"));
             }
 
-            //if (entity.User.Id != _userContextService.UserId && _userContextService.UserRoles.FirstOrDefault() == "User")
-            //{
-            //    return new ApiResponse().SetForbidden(id, message: ErrorMessages.AccountDoesNotHavePermission);
-            //}
+            if (_userContextService.UserRoles.FirstOrDefault() == Role.USER && entity.CreatedBy != _userContextService.UserId)
+            {
+                return new ApiResponse().SetForbidden(message: ErrorMessages.AccountDoesNotHavePermission);
+            }
 
             var healthInsuranceModel = _healthInsuranceMapper.MapToHealthInsuranceResponseModel(entity);
 
-            var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(healthInsuranceModel.CreatedBy, healthInsuranceModel.LastUpdatedBy);
+            var (createdAdmin, lastUpdatedAdmin) = await _unitOfWork.AdminRepository.GetAuthors(healthInsuranceModel.CreatedBy, healthInsuranceModel.LastUpdatedBy);
+            var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(healthInsuranceModel.CreatedBy, healthInsuranceModel.LastUpdatedBy);
 
-            healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-            healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+            if (createdAdmin != null)
+            {
+                healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdAdmin);
+            }
+            else
+            {
+                if (createdUser != null)
+                {
+                    healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                }
+            }
+
+            if (lastUpdatedAdmin != null)
+            {
+                healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedAdmin);
+            }
+            else
+            {
+                if (lastUpdatedUser != null)
+                {
+                    healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                }
+            }
 
             return new ApiResponse().SetOk(healthInsuranceModel);
+        }
+
+        public async Task<ApiResponse> GetHealthInsuranceBatch(GetBatchRequestModel model)
+        {
+            var entities = new List<HealthInsuranceEntity>();
+
+            if (model.IsGetAll)
+            {
+                entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => true);
+            }
+            else
+            {
+                entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+            }
+
+            var healthInsuranceModels = entities.Select(x => _healthInsuranceMapper.MapToHealthInsuranceResponseModel(x)).ToList();
+
+            for (int i = 0; i < healthInsuranceModels.Count; i++)
+            {
+                var healthInsuranceModel = healthInsuranceModels[i];
+
+                var (createdAdmin, lastUpdatedAdmin) = await _unitOfWork.AdminRepository.GetAuthors(healthInsuranceModel.CreatedBy, healthInsuranceModel.LastUpdatedBy);
+                var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(healthInsuranceModel.CreatedBy, healthInsuranceModel.LastUpdatedBy);
+
+                if (createdAdmin != null)
+                {
+                    healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdAdmin);
+                }
+                else
+                {
+                    if (createdUser != null)
+                    {
+                        healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                    }
+                }
+
+                if (lastUpdatedAdmin != null)
+                {
+                    healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedAdmin);
+                }
+                else
+                {
+                    if (lastUpdatedUser != null)
+                    {
+                        healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                    }
+                }
+            }
+
+            return new ApiResponse().SetOk(healthInsuranceModels);
         }
 
         public async Task<ApiResponse> UpdateHealthInsurance(HealthInsuranceUpdationRequestModel model)
@@ -68,11 +142,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Health insurance"));
             }
-
-            //if (entity.User.Id != _userContextService.UserId && _userContextService.UserRoles.FirstOrDefault() == "User")
-            //{
-            //    return new ApiResponse().SetForbidden(model.Id, message: ErrorMessages.AccountDoesNotHavePermission);
-            //}
 
             entity.InsuranceCardNumber = model.InsuranceCardNumber;
             entity.RegisteredHospital = model.RegisteredHospital;

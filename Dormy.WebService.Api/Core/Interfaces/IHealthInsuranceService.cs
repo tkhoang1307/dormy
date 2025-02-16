@@ -8,5 +8,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> AddHealthInsurance(HealthInsuranceRequestModel model);
         Task<ApiResponse> UpdateHealthInsurance(HealthInsuranceUpdationRequestModel model);
         Task<ApiResponse> GetDetailHealthInsurance(Guid id);
+        Task<ApiResponse> GetHealthInsuranceBatch(GetBatchRequestModel model);
     }
 }

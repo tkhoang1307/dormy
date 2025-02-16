@@ -9,6 +9,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> UpdateGuardian(GuardianUpdationRequestModel model);
         Task<ApiResponse> GetAllGuardiansOfUser();
         Task<ApiResponse> GetDetailGuardianById(Guid id);
+        Task<ApiResponse> GetGuardianBatch(GetBatchGuardianRequestModel model);
         Task<ApiResponse> HardDeleteParkingSpot(Guid id);
     }
 }

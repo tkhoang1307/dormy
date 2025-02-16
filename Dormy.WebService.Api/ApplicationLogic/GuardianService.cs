@@ -130,5 +130,41 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetOk(id);
         }
+
+        public async Task<ApiResponse> GetGuardianBatch(GetBatchGuardianRequestModel model)
+        {
+            var entities = new List<GuardianEntity>();
+
+            if (model.IsGetAll)
+            {
+                entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => true);
+            }
+            else
+            {
+                if (model.UserId != null)
+                {
+                    entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => x.UserId == model.UserId);
+                }
+                else
+                {
+                    entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+
+                }
+            }
+
+            var guardianModels = entities.Select(x => _guardianMapper.MapToGuardianResponseModel(x)).ToList();
+
+            for (int i = 0; i < guardianModels.Count; i++)
+            {
+                var guardian = guardianModels[i];
+
+                var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(guardian.CreatedBy, guardian.LastUpdatedBy);
+
+                guardian.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                guardian.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+            }
+
+            return new ApiResponse().SetOk(guardianModels);
+        }
     }
 }
