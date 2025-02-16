@@ -22,7 +22,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetSettingById(Guid id)
         {
             var response = await _settingService.GetSettingById(id);
-            return response.IsSuccess ? Ok(response) : NotFound(id);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("all")]
@@ -30,7 +31,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetSettings()
         {
             var response = await _settingService.GetSettings();
-            return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost]
@@ -38,7 +40,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> CreateSetting(SettingRequestModel model)
         {
             var response = await _settingService.CreateSetting(model);
-            return response.IsSuccess ? Ok(response) : BadRequest();
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut]
@@ -46,7 +49,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> UpdateSetting(SettingUpdateRequestModel model)
         {
             var response = await _settingService.UpdateSetting(model);
-            return response.IsSuccess ? Ok(response) : BadRequest();
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("id/{id:guid}")]
@@ -54,7 +58,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> DeleteSetting(Guid id)
         {
             var response = await _settingService.SoftDeleteSetting(id);
-            return response.IsSuccess ? Ok(response) : NotFound(id);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

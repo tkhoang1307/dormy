@@ -25,11 +25,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetWorkplace(Guid id)
         {
             var response = await _workplaceService.GetSingleWorkplaceById(id);
-            if (response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            return NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("batch")]
@@ -37,11 +34,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetWorkplaceBatch([FromBody] List<Guid> ids)
         {
             var response = await _workplaceService.GetWorkplaceBatch(ids);
-            if (response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            return NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("all")]
@@ -49,11 +43,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetAllWorkplace(int pageIndex = 1, int pageSize = 25)
         {
             var response = await _workplaceService.GetAllWorkplace(pageIndex, pageSize);
-            if (response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            return NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
 
@@ -79,7 +70,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Abbrevation))));
             }
             var response = await _workplaceService.CreateWorkplace(model);
-            return StatusCode(201, response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut]
@@ -106,11 +98,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var response = await _workplaceService.UpdateWorkplace(model);
 
-            if (response.IsSuccess)
-            {
-                return StatusCode(202, response);
-            }
-            return NotFound(response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("id/{id:guid}")]
@@ -118,7 +106,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> DeleteWorkplace(Guid id)
         {
             var response = await _workplaceService.SoftDeleteWorkplace(id);
-            return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("id/hard-delete/{id:guid}")]
@@ -126,7 +115,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> HardDeleteWorkplace(Guid id)
         {
             var response = await _workplaceService.HardDeleteWorkplace(id);
-            return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

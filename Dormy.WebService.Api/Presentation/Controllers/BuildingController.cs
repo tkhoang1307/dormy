@@ -26,12 +26,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _buildingService.GetBuildingById(id);
 
-            if (response.IsSuccess)
-            {
-                return Ok(response.Result);
-            }
-
-            return NotFound(response.Result);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("batch")]
@@ -40,12 +35,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _buildingService.GetBuildingBatch(request.Ids, request.IsGetAll);
 
-            if (response.IsSuccess)
-            {
-                return Ok(response.Result);
-            }
-
-            return NotFound(response.Result);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost]
@@ -84,7 +74,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var response = await _buildingService.CreateBuilding(model);
 
-            return StatusCode(201, response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("create/batch")]
@@ -125,7 +115,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
             var response = await _buildingService.CreateBuildingBatch(models);
 
-            return StatusCode(201, response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut]
@@ -163,11 +153,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _buildingService.UpdateBuilding(model);
-            if (response.IsSuccess)
-            {
-                return StatusCode(202, response);
-            }
-            return NotFound(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("id/{id:guid}")]
@@ -175,7 +162,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> SoftDeleteBuilding(Guid id)
         {
             var response = await _buildingService.SoftDeleteBuildingById(id);
-            return Ok(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

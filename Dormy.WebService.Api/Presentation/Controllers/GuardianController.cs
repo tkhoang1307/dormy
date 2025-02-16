@@ -50,7 +50,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _guardianService.AddNewGuardian(model);
 
-            return StatusCode(201, result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut]
@@ -89,11 +89,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _guardianService.UpdateGuardian(model);
 
-            if (result.IsSuccess)
-            {
-                return StatusCode(202, result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet("id/{id:guid}")]
@@ -102,11 +98,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _guardianService.GetDetailGuardianById(id);
 
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet("all")]
@@ -115,7 +107,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _guardianService.GetAllGuardiansOfUser();
 
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch")]
@@ -124,7 +116,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _guardianService.GetGuardianBatch(model);
 
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpDelete("hard-delete/id/{id:guid}")]
@@ -133,11 +125,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _guardianService.HardDeleteParkingSpot(id);
 
-            if (result.IsSuccess)
-            {
-                return StatusCode(200, result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

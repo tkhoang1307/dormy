@@ -39,11 +39,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetAdminAccount(Guid id)
         {
             var result = await _adminService.GetAdminAccount(id);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Result);
-            }
-            return NotFound();
+
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

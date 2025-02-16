@@ -29,5 +29,7 @@ namespace Dormy.WebService.Api.Core.Entities
         public Guid RoomId { get; set; }
 
         public RoomEntity Room { get; set; } = null!;
+
+        public List<ContractExtensionEntity>? ContractExtensions { get; set; }
     }
 }

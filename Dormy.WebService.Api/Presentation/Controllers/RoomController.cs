@@ -56,7 +56,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 }
             }
             var response = await _roomService.CreateRoomBatch(rooms, buildingId);
-            return StatusCode(201, response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("batch/buildingId/{buildingId:guid}")]
@@ -64,7 +65,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetRoomsByBuildingId(Guid buildingId)
         {
             var response = await _roomService.GetRoomsByBuildingId(buildingId);
-            return response.IsSuccess ? Ok(response) : NotFound(response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("id/{id:guid}")]
@@ -72,7 +73,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetRoomById(Guid id)
         {
             var response = await _roomService.GetRoomById(id);
-            return response.IsSuccess ? Ok(response) : NotFound(response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut]
@@ -80,7 +81,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> UpdateRoom(RoomUpdateRequestModel room)
         {
             var response = await _roomService.UpdateRoom(room);
-            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("status")]
@@ -88,7 +89,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> UpdateRoomStatus(RoomUpdateStatusRequestModel room)
         {
             var response = await _roomService.UpdateRoomStatus(room);
-            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("id/{id:guid}")]
@@ -96,7 +98,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> SoftDelete(Guid id)
         {
             var response = await _roomService.SoftDeleteRoom(id);
-            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("delete/batch")]
@@ -104,7 +107,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> SoftDeleteBatch([FromBody] List<Guid> ids)
         {
             var response = await _roomService.SoftDeleteRoomBatch(ids);
-            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

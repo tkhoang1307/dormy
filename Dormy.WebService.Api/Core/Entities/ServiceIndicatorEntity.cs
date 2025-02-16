@@ -21,9 +21,5 @@
         public Guid RoomId { get; set; }
 
         public RoomEntity Room { get; set; } = null!;
-
-        public Guid AdminId { get; set; }
-
-        public AdminEntity Admin { get; set; } = null!;
     }
 }

@@ -34,7 +34,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> CreateAdminAccount(AdminRequestModel request)
         {
             var result = await _adminService.CreateAdminAccount(request);
-            return Ok(result);
+
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("admin/sign-in")]
@@ -42,7 +43,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _adminService.Login(request);
 
-            return response.IsSuccess ? Ok(response) : BadRequest(response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("admin/change-password")]
@@ -65,7 +66,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             model.Id = id;
 
             var response = await _adminService.ChangeAdminPassword(model);
-            return Ok();
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("admin/change-password/account")]
@@ -73,7 +75,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ChangePasswordAccount(ChangePasswordRequestModel model)
         {
             var response = await _adminService.ChangeAdminPassword(model);
-            return Ok();
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("verify-email")]

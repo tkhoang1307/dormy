@@ -44,7 +44,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _healthInsuranceService.AddHealthInsurance(model);
 
-            return StatusCode(201, result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut]
@@ -71,7 +71,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _healthInsuranceService.UpdateHealthInsurance(model);
 
-            return StatusCode(202, result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet("id/{id:guid}")]
@@ -80,11 +80,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _healthInsuranceService.GetDetailHealthInsurance(id);
 
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch")]
@@ -93,7 +89,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _healthInsuranceService.GetHealthInsuranceBatch(model);
 
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

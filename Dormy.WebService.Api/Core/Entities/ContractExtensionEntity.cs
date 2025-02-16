@@ -19,5 +19,9 @@ namespace Dormy.WebService.Api.Core.Entities
         public Guid ApproverId { get; set; }
 
         public AdminEntity Approver { get; set; } = null!;
+
+        public Guid ContractId { get; set; }
+
+        public ContractEntity Contract { get; set; } = null!;
     }
 }

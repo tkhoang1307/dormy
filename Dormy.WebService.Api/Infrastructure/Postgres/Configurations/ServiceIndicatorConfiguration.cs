@@ -21,11 +21,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .HasOne(serviceIndicator => serviceIndicator.Room)
                 .WithMany(room => room.ServiceIndicators)
                 .HasForeignKey(serviceIndicator => serviceIndicator.RoomId);
-
-            builder
-                .HasOne(serviceIndicator => serviceIndicator.Admin)
-                .WithMany(admin => admin.ServiceIndicators)
-                .HasForeignKey(serviceIndicator => serviceIndicator.AdminId);
         }
     }
 }

@@ -91,7 +91,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _userService.SignUp(request);
-            return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("user/sign-in")]
@@ -100,7 +101,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _userService.Login(request);
 
-            return response.IsSuccess ? Ok(response) : BadRequest(response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("user/change-password")]
@@ -122,7 +123,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             model.Id = id;
 
             var response = await _userService.ChangePassword(model);
-            return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("user/reset-password")]
@@ -141,7 +143,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
             }
             var response = await _userService.ResetPassword(id);
-            return response.IsSuccess ? Ok(response) : NotFound(id);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("user/update-profile")]
@@ -203,7 +206,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _userService.UpdateProfile(id, model);
-            return response.IsSuccess ? Ok(response.Result) : NotFound(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("user/id/{id:guid}")]
@@ -211,7 +215,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetProfile(Guid id)
         {
             var response = await _userService.GetUserInformation(id);
-            return response.IsSuccess ? Ok(response.Result) : NotFound(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("user/batch")]
@@ -219,7 +224,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetUserBatch([FromBody] GetBatchRequestModel request)
         {
             var response = await _userService.GetUserBatch(request.IsGetAll, request.Ids);
-            return response.IsSuccess ? Ok(response.Result) : NotFound(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("user/update-workplace/workplaceId/{workplaceId:guid}")]
@@ -240,7 +246,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var response = await _userService.UpdateUserWorkplace(workplaceId, id);
 
-            return Ok(response);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("user/update-health-insurance")]
@@ -261,7 +267,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var response = await _userService.UpdateUserHealthInsurance(model, id);
 
-            return Ok(response);
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

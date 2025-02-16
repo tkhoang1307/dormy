@@ -44,7 +44,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _parkingSpotService.AddNewParkingSpot(model);
 
-            return StatusCode(201, result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut]
@@ -77,11 +77,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _parkingSpotService.UpdateParkingSpot(model);
 
-            if (result.IsSuccess)
-            {
-                return StatusCode(202, result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet("id/{id:guid}")]
@@ -90,11 +86,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _parkingSpotService.GetDetailParkingSpot(id);
 
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch")]
@@ -103,7 +95,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _parkingSpotService.GetParkingSpotBatch(model);
 
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpDelete("soft-delete/id/{id:guid}")]
@@ -112,11 +104,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _parkingSpotService.SoftDeleteParkingSpot(id);
 
-            if (result.IsSuccess)
-            {
-                return StatusCode(200, result);
-            }
-            return NotFound(result);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

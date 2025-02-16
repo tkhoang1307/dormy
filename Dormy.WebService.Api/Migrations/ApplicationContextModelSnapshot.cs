@@ -85,10 +85,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a2445db0-6852-4ce9-bb98-b2e1df5748b7"),
+                            Id = new Guid("159fb5f2-aff8-4075-ad17-b73ea64d6940"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 2, 10, 15, 42, 44, 320, DateTimeKind.Local).AddTicks(2385),
-                            DateOfBirth = new DateTime(2025, 2, 10, 15, 42, 44, 320, DateTimeKind.Local).AddTicks(2404),
+                            CreatedDateUtc = new DateTime(2025, 2, 16, 22, 16, 10, 688, DateTimeKind.Local).AddTicks(7276),
+                            DateOfBirth = new DateTime(2025, 2, 16, 22, 16, 10, 688, DateTimeKind.Local).AddTicks(7282),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",
@@ -207,6 +207,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid>("ApproverId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
@@ -241,6 +244,8 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApproverId");
+
+                    b.HasIndex("ContractId");
 
                     b.ToTable("ContractExtensions");
                 });
@@ -425,7 +430,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("ServiceName")
+                    b.Property<Guid>("RoomServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RoomServiceName")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -898,9 +906,6 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AdminId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
@@ -939,8 +944,6 @@ namespace Dormy.WebService.Api.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AdminId");
 
                     b.HasIndex("RoomId");
 
@@ -1261,7 +1264,15 @@ namespace Dormy.WebService.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Dormy.WebService.Api.Core.Entities.ContractEntity", "Contract")
+                        .WithMany("ContractExtensions")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Approver");
+
+                    b.Navigation("Contract");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.GuardianEntity", b =>
@@ -1454,12 +1465,6 @@ namespace Dormy.WebService.Api.Migrations
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ServiceIndicatorEntity", b =>
                 {
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Admin")
-                        .WithMany("ServiceIndicators")
-                        .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Dormy.WebService.Api.Core.Entities.RoomEntity", "Room")
                         .WithMany("ServiceIndicators")
                         .HasForeignKey("RoomId")
@@ -1471,8 +1476,6 @@ namespace Dormy.WebService.Api.Migrations
                         .HasForeignKey("RoomServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Admin");
 
                     b.Navigation("Room");
 
@@ -1560,14 +1563,17 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Navigation("Requests");
 
-                    b.Navigation("ServiceIndicators");
-
                     b.Navigation("Settings");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BuildingEntity", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ContractEntity", b =>
+                {
+                    b.Navigation("ContractExtensions");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.HealthInsuranceEntity", b =>

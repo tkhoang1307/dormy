@@ -25,11 +25,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _roomServiceService.GetRoomSeviceSingle(id);
 
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
-            return NotFound(id);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch")]
@@ -38,7 +34,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _roomServiceService.GetRoomServiceBatch(model);
 
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch/create")]
@@ -74,7 +70,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _roomServiceService.AddRoomServiceBatch(models);
 
-            return StatusCode(201, result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut]
@@ -106,11 +102,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var result = await _roomServiceService.UpdateRoomService(model);
 
-            if (result.IsSuccess)
-            {
-                return StatusCode(202, result);
-            }
-            return NotFound(model.Id);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpDelete("batch/soft-delete")]
@@ -119,7 +111,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var result = await _roomServiceService.SoftDeleteRoomServiceBatch(ids);
 
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

@@ -24,7 +24,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetAllRoomType()
         {
             var response = await _roomTypeService.GetRoomTypes();
-            return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("id/{id:guid}")]
@@ -32,7 +33,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetRoomTypeById(Guid id)
         {
             var response = await _roomTypeService.GetRoomTypeById(id);
-            return response.IsSuccess ? Ok(response) : NotFound(response.Result);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost]
@@ -70,7 +72,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _roomTypeService.CreateRoomType(model);
-            return StatusCode(201, response);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut]
@@ -78,11 +81,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> UpdateRoomType([FromBody] RoomTypeUpdateRequestModel model)
         {
             var response = await _roomTypeService.UpdateRoomType(model);
-            if (response.IsSuccess)
-            {
-                return StatusCode(202, response);
-            }
-            return NotFound();
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("id/{id:guid}")]
@@ -90,11 +90,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> SoftDeleteRoomType(Guid id)
         {
             var response = await _roomTypeService.SoftDeleteRoomType(id);
-            if (response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            return NotFound();
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }
