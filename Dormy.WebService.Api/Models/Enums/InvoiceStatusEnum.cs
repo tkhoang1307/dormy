@@ -12,7 +12,7 @@ namespace Dormy.WebService.Api.Models.Enums
         PAID,
         [Description("Overdue")]
         OVERDUE,
-        [Description("cancelled")]
+        [Description("Cancelled")]
         CANCELLED
     }
 }

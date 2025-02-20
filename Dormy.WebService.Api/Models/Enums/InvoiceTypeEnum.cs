@@ -4,12 +4,8 @@ namespace Dormy.WebService.Api.Models.Enums
 {
     public enum InvoiceTypeEnum
     {
-        [Description("Monthly")]
-        MONTHLY,
-        [Description("Quarterly")]
-        QUARTERLY,
-        [Description("Yearly")]
-        YEARLY,
+        [Description("Room serivce monthly")]
+        ROOM_SERVICE_MONTHLY,
         [Description("Payment contract")]
         PAYMENT_CONTRACT
     }
