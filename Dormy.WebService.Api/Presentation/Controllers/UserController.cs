@@ -66,7 +66,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.Password))));
             }
 
-            if (request?.DateOfBirth != null)
+            if (request?.DateOfBirth == null)
             {
                 return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.DateOfBirth))));
