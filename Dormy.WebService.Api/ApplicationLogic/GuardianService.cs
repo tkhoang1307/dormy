@@ -43,14 +43,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var guardianModels = new List<GuardianResponseModel>();
 
-            for (int i = 0; i < guardianModels.Count; i++)
+            for (int i = 0; i < entities.Count; i++)
             {
-                var guardian = guardianModels[i];
+                var guardian = _guardianMapper.MapToGuardianResponseModel(entities[i]);
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(guardian.CreatedBy, guardian.LastUpdatedBy);
 
                 guardian.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
                 guardian.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+
+                guardianModels.Add(guardian);
             }
 
             return new ApiResponse().SetOk(guardianModels);
