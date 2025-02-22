@@ -10,4 +10,9 @@
     {
         public Guid? UserId { get; set; }
     }
+
+    public class GetBatchVehicleRequestModel : GetBatchRequestModel
+    {
+        public Guid? UserId { get; set; }
+    }
 }
