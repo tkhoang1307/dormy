@@ -24,6 +24,24 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateNewParkingRequest(ParkingRequestModel model)
         {
+            if (string.IsNullOrEmpty(model.Description))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Description))));
+            }
+
+            if (model?.ParkingSpotId == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ParkingSpotId))));
+            }
+
+            if (model?.VehicleId == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.VehicleId))));
+            }
+
             var result = await _parkingRequestService.CreateParkingRequest(model);
 
             return StatusCode((int)result.StatusCode, result);
@@ -39,35 +57,53 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
             }
 
+            if (string.IsNullOrEmpty(model.Description))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Description))));
+            }
+
+            if (model?.ParkingSpotId == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ParkingSpotId))));
+            }
+
             var result = await _parkingRequestService.UpdateParkingRequest(model);
 
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpPut("admin/approve/id/{id:guid}")]
+        [HttpPut("admin/approve-or-reject/id/{id:guid}")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> AcceptParkingRequest(Guid id)
+        public async Task<IActionResult> AcceptParkingRequest(ApproveOrRejectParkingRequestModel model)
         {
-            var response = await _parkingRequestService.UpdateParkingRequestStatus(
-                new() 
-                { 
-                    Id = id,
-                    Status = RequestStatusEnum.APPROVED
-                });  
+            if (model?.Id == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
+            }
 
-            return StatusCode((int)response.StatusCode, response);
-        }
+            if (model?.IsAccepted == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.IsAccepted))));
+            }
 
-        [HttpPut("admin/reject/id/{id:guid}")]
-        [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> RejectParkingRequest(Guid id)
-        {
-            var response = await _parkingRequestService.UpdateParkingRequestStatus(
-                new()
-                {
-                    Id = id,
-                    Status = RequestStatusEnum.REJECTED
-                });
+            var payload = new ParkingRequestStatusModel();
+
+            if (model.IsAccepted)
+            {
+                payload.Id = model.Id;
+                payload.Status = RequestStatusEnum.APPROVED;
+            }
+            else
+            {
+                payload.Id = model.Id;
+                payload.Status = RequestStatusEnum.REJECTED;
+            }
+
+            var response = await _parkingRequestService.UpdateParkingRequestStatus(payload);
 
             return StatusCode((int)response.StatusCode, response);
         }

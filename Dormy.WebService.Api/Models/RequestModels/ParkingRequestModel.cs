@@ -11,10 +11,20 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public Guid VehicleId { get; set; }
     }
 
-    public class UpdateParkingRequestModel : ParkingRequestModel
+    public class UpdateParkingRequestModel
     {
         public Guid Id { get; set; }
 
+        public string Description { get; set; } = string.Empty;
+
+        public Guid ParkingSpotId { get; set; }
+
+    }
+
+    public class ApproveOrRejectParkingRequestModel
+    {
+        public Guid Id { get; set; }
+        public bool IsAccepted { get; set; }
     }
 
     public class ParkingRequestStatusModel

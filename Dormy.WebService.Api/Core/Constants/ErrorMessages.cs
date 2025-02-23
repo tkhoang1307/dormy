@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Core.Constants
+﻿using MimeKit.Cryptography;
+
+namespace Dormy.WebService.Api.Core.Constants
 {
     public static class ErrorMessages
     {
@@ -18,5 +20,10 @@
         public const string SomeTypeServicesAreNotExisted = "Some of room type services are not found";
         public const string ValueDoesNotExistInEnum = "{0} doesn't exist in {1}";
         public const string AccountDoesNotHavePermission = "Your account doesn’t have permission";
+        public const string UpdateEntityConflict = "You only update {0} which has status 'SUBMITTED'";
+        public const string ChangeRequestStatusSubmittedConflict = "{0} was SUBMITTED. You can change to other statuses except SUBMITTED.";
+        public const string ChangeRequestStatusApproveConflict = "{0} was APPROVED. You can not change to other statuses except CANCELLED.";
+        public const string ChangeRequestStatusCancelledConflict = "{0} was CANCELLED. You can not change to other statuses.";
+        public const string ChangeRequestStatusRejectedConflict = "{0} was REJECTED. You can not change to other statuses.";
     }
 }

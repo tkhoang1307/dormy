@@ -1,9 +1,11 @@
-﻿using Dormy.WebService.Api.Core.CustomExceptions;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +39,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.ParkingRequestRepository.AddAsync(parkingRequest);
             await _unitOfWork.SaveChangeAsync();
-            return new ApiResponse().SetCreated();
+            return new ApiResponse().SetCreated(parkingRequest.Id);
         }
 
         public async Task<ApiResponse> GetParkingRequestBatch(List<Guid> ids, bool isGetAll = false)
@@ -78,6 +80,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 .Include(x => x.Approver)
                 .Include(x => x.ParkingSpot));
 
+            if (parkingRequest == null)
+            {
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking request"));
+            }
+
             var result = new ParkingRequestResponseModel
             {
                 Id = parkingRequest.Id,
@@ -106,7 +113,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (parkingRequest == null)
             {
-                return new ApiResponse().SetNotFound();
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking request"));
+            }
+
+            var (isError, errorMessage) = RequestStatusChangeValidator.VerifyRequestStatusChangeValidator(parkingRequest.Status, model.Status);
+            if (isError)
+            {
+                return new ApiResponse().SetConflict(parkingRequest.Id,
+                                                     message: string.Format(errorMessage, "parking request"));
             }
 
             parkingRequest.Status = model.Status;
@@ -115,9 +129,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.Status == Models.Enums.RequestStatusEnum.APPROVED)
+                if (model.Status == Models.Enums.RequestStatusEnum.APPROVED || model.Status == Models.Enums.RequestStatusEnum.REJECTED)
                 {
                     parkingRequest.ApproverId = _userContextService.UserId;
+                }
+
+                if (model.Status == Models.Enums.RequestStatusEnum.APPROVED)
+                {
+                    var vehicle = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == parkingRequest.VehicleId);
+                    vehicle.ParkingSpotId = parkingRequest.ParkingSpotId;
                 }
             };
 
@@ -132,14 +152,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (parkingRequest == null)
             {
-                return new ApiResponse().SetNotFound();
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking request"));
             }
 
-            await VerirfyParkingRequest(model.ParkingSpotId, model.VehicleId);
+            if (parkingRequest.Status != Models.Enums.RequestStatusEnum.SUBMITTED)
+            {
+                return new ApiResponse().SetConflict(parkingRequest.Id,
+                                                     message: string.Format(ErrorMessages.UpdateEntityConflict, "parking request"));
+            }    
+
+            await VerirfyParkingRequest(model.ParkingSpotId, parkingRequest.VehicleId);
 
             parkingRequest.Description = model.Description;
             parkingRequest.ParkingSpotId = model.ParkingSpotId;
-            parkingRequest.VehicleId = model.VehicleId;
             parkingRequest.LastUpdatedBy = _userContextService.UserId;
             parkingRequest.LastUpdatedDateUtc = DateTime.Now;
 
@@ -154,7 +179,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (parkingRequest == null)
             {
-                return new ApiResponse().SetNotFound();
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking request"));
             }
 
             parkingRequest.IsDeleted = true;
