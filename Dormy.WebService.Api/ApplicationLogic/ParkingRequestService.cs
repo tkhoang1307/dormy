@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.CustomExceptions;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -21,6 +22,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateParkingRequest(ParkingRequestModel model)
         {
+            await VerirfyParkingRequest(model.ParkingSpotId, model.VehicleId);
+
             var parkingRequest = new ParkingRequestEntity
             {
                 Id = Guid.NewGuid(),
@@ -100,7 +103,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         public async Task<ApiResponse> UpdateParkingRequestStatus(ParkingRequestStatusModel model)
         {
             var parkingRequest = await _unitOfWork.ParkingRequestRepository.GetAsync(x => x.Id == model.Id);
-            
+
             if (parkingRequest == null)
             {
                 return new ApiResponse().SetNotFound();
@@ -132,6 +135,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound();
             }
 
+            await VerirfyParkingRequest(model.ParkingSpotId, model.VehicleId);
+
             parkingRequest.Description = model.Description;
             parkingRequest.ParkingSpotId = model.ParkingSpotId;
             parkingRequest.VehicleId = model.VehicleId;
@@ -159,6 +164,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(parkingRequest.Id);
+        }
+
+        private async Task VerirfyParkingRequest(Guid parkingSpotId, Guid vehicleId)
+        {
+            var parkingSpot = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == parkingSpotId);
+            var vehicle = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == vehicleId);
+
+            if (parkingSpot is null || vehicle is null)
+            {
+                var entityName = parkingSpot is null ? "Parking Spot" : "Vehicle";
+                var entityId = parkingSpot is null ? parkingSpotId : vehicleId;
+                throw new EntityNotFoundException($"{entityName} with Id: {entityId} Not Found.");
+            }
         }
     }
 }
