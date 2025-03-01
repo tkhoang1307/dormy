@@ -25,5 +25,18 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string ChangeRequestStatusApproveConflict = "{0} was APPROVED. You can not change to other statuses except CANCELLED.";
         public const string ChangeRequestStatusCancelledConflict = "{0} was CANCELLED. You can not change to other statuses.";
         public const string ChangeRequestStatusRejectedConflict = "{0} was REJECTED. You can not change to other statuses.";
+        public const string ChangeInvoiceStatusDraftConflict = "{0} is DRAFT version. You only can change to UNPAID or CANCELLED.";
+        public const string ChangeInvoiceStatusUnpaidConflict = "{0} is still UNPAID. You only can change to PAID or OVERDUE or CANCELLED.";
+        public const string ChangeInvoiceStatusPaidConflict = "{0} was PAID. You can not change to other statuses.";
+        public const string ChangeInvoiceStatusOverdueConflict = "{0} was OVERDUE. You only can change to CANCELLED.";
+        public const string ChangeInvoiceStatusCancelledConflict = "{0} was CANCELLED. You can not change to other statuses.";
+        public const string ChangeContractStatusPendingConflict = "{0} is PENDING. You only can change to WAITING_PAYMENT or REJECTED.";
+        public const string ChangeContractStatusWaitingPaymentConflict = "{0} is still WAITING_PAYMENT. You only can change to ACTIVE.";
+        public const string ChangeContractStatusActiveConflict = "{0} is being ACTIVE. You only can change to EXTENDED or EXPIRED or TERMINATED.";
+        public const string ChangeContractStatusExtendedConflict = "{0} was EXTENDED. You only can keep this status.";
+        public const string ChangeContractStatusExpiredConflict = "{0} was EXPIRED. You only can change to EXTENDED.";
+        public const string ChangeContractStatusTerminatedConflict = "{0} was TERMINATED. You can not change to other statuses.";
+        public const string ChangeContractStatusRejectedConflict = "{0} was REJECTED. You can not change to other statuses.";
+        public const string ChangeContractExtensionStatusActiveConflict = "{0} is being ACTIVE. You only can change to EXPIRED or TERMINATED.";
     }
 }

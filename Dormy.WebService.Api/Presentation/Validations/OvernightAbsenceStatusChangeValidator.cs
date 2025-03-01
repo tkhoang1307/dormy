@@ -1,38 +1,36 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Models.Enums;
-using Dormy.WebService.Api.Models.RequestModels;
-using Dormy.WebService.Api.Models.ResponseModels;
 
 namespace Dormy.WebService.Api.Presentation.Validations
 {
-    public class RequestStatusChangeValidator
+    public class OvernightAbsenceStatusChangeValidator
     {
-        public static (bool, string) VerifyRequestStatusChangeValidator(RequestStatusEnum currentStatus, RequestStatusEnum changedStatus)
+        public static (bool, string) VerifyOvernightAbsenceStatusChangeValidator(OvernightAbsenceStatusEnum currentStatus, OvernightAbsenceStatusEnum changedStatus)
         {
             switch (currentStatus)
             {
-                case RequestStatusEnum.SUBMITTED: //SUBMITTED => all statuses
-                    if (changedStatus == RequestStatusEnum.SUBMITTED)
+                case OvernightAbsenceStatusEnum.SUBMITTED: //SUBMITTED => all statuses
+                    if (changedStatus == OvernightAbsenceStatusEnum.SUBMITTED)
                     {
                         return (true, ErrorMessages.ChangeRequestStatusSubmittedConflict);
                         // {0} was SUBMITTED. You can change to other statuses except SUBMITTED.
                     }
                     break;
-                case RequestStatusEnum.APPROVED: //APPROVED => CANCELLED
-                    if (changedStatus != RequestStatusEnum.CANCELLED)
+                case OvernightAbsenceStatusEnum.APPROVED: //APPROVED => CANCELLED
+                    if (changedStatus != OvernightAbsenceStatusEnum.CANCELLED)
                     {
                         return (true, ErrorMessages.ChangeRequestStatusApproveConflict);
                         // {0} was APPROVED. You can not change to other statuses except CANCELLED.
                     }
                     break;
-                case RequestStatusEnum.REJECTED: //REJECTED => x
+                case OvernightAbsenceStatusEnum.REJECTED: //REJECTED => x
                     if (changedStatus != null)
                     {
                         return (true, ErrorMessages.ChangeRequestStatusRejectedConflict);
                         // {0} was REJECTED. You can not change to other statuses.
                     }
                     break;
-                case RequestStatusEnum.CANCELLED: //CANCELLED => x
+                case OvernightAbsenceStatusEnum.CANCELLED: //CANCELLED => x
                     if (changedStatus != null)
                     {
                         return (true, ErrorMessages.ChangeRequestStatusCancelledConflict);
