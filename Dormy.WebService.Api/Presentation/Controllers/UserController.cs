@@ -92,7 +92,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             var response = await _userService.SignUp(request);
 
-            return StatusCode((int)response.StatusCode, response);
+            return StatusCode((int)response.StatusCode, response); 
         }
 
         [HttpPost("user/sign-in")]
