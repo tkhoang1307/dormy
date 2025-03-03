@@ -21,7 +21,5 @@ namespace Dormy.WebService.Api.Core.Entities
         public Guid AdminId { get; set; }
 
         public AdminEntity Admin { get; set; } = null!;
-
-
     }
 }
