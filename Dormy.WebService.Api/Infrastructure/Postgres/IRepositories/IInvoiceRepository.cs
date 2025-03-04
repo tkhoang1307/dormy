@@ -4,5 +4,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.IRepositories
 {
     public interface IInvoiceRepository : IBaseRepository<InvoiceEntity>
     {
+        
     }
 }

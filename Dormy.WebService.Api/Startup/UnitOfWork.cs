@@ -24,6 +24,8 @@ namespace Dormy.WebService.Api.Startup
 
         public IInvoiceRepository InvoiceRepository { get; }
 
+        public IInvoiceUserRepository InvoiceUserRepository { get; }
+
         public INotificationRepository NotificationRepository { get; }
 
         public IOvernightAbsenceRepository OvernightAbsenceRepository { get; }
@@ -67,6 +69,7 @@ namespace Dormy.WebService.Api.Startup
             HealthInsuranceRepository  = new HealthInsuranceRepository(_context);
             InvoiceItemRepository  = new InvoiceItemRepository(_context);
             InvoiceRepository = new InvoiceRepository(_context);
+            InvoiceUserRepository = new InvoiceUserRepository(_context);
             NotificationRepository = new NotificationRepository(_context);
             OvernightAbsenceRepository = new OvernightAbsenceRepository(_context);
             ParkingRequestRepository = new ParkingRequestRepository(_context);

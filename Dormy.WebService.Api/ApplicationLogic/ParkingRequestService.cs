@@ -143,7 +143,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(parkingRequest.Id);
+            return new ApiResponse().SetAccepted(parkingRequest.Id);
         }
 
         public async Task<ApiResponse> UpdateParkingRequest(UpdateParkingRequestModel model)
@@ -170,7 +170,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(parkingRequest.Id);
+            return new ApiResponse().SetAccepted(parkingRequest.Id);
         }
 
         public async Task<ApiResponse> SoftDeleteParkingRequest(Guid id)

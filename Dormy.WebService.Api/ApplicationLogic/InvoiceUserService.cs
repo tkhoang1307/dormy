@@ -1,31 +1,30 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
-using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
-    public class InvoiceItemService : IInvoiceItemService
+    public class InvoiceUserService : IInvoiceUserService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
-        private readonly InvoiceItemMapper _invoiceItemMapper;
+        private readonly InvoiceUserMapper _invoiceUserMapper;
 
-        public InvoiceItemService(IUnitOfWork unitOfWork, IUserContextService userContextService)
+        public InvoiceUserService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
-            _invoiceItemMapper = new InvoiceItemMapper();
+            _invoiceUserMapper = new InvoiceUserMapper();
             _userContextService = userContextService;
         }
 
-        public Task<ApiResponse> CreateInvoiceItemsBatch(List<InvoiceItemRequestModel> models)
+        public Task<ApiResponse> CreateInvoiceUsersBatch(Guid roomId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<ApiResponse> HardDeleteInvoiceItemsBatchByInvoiceId(Guid invoiceId)
+        public async Task<ApiResponse> HardDeleteInvoiceUsersBatchByInvoiceId(Guid invoiceId)
         {
             var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == invoiceId);
             if (invoiceEntity == null)
@@ -33,11 +32,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(invoiceId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
             }
 
-            var invoiceItems = await _unitOfWork.InvoiceItemRepository.GetAllAsync(x => x.InvoiceId == invoiceId);
-            var invoiceItemIds = invoiceItems.Select(x => x.Id).ToList();
-            foreach (var invoiceItemId in invoiceItemIds)
+            var invoiceUsers = await _unitOfWork.InvoiceUserRepository.GetAllAsync(x => x.InvoiceId == invoiceId);
+            var invoiceUserIds = invoiceUsers.Select(x => x.Id).ToList();
+            foreach (var invoiceUserId in invoiceUserIds)
             {
-                await _unitOfWork.InvoiceItemRepository.DeleteByIdAsync(invoiceItemId);
+                await _unitOfWork.InvoiceUserRepository.DeleteByIdAsync(invoiceUserId);
             }
 
             return new ApiResponse().SetOk(invoiceId);

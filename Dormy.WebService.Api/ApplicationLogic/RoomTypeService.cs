@@ -133,10 +133,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room type"));
             }
 
-            if (model.Capacity < entity.Rooms?.Count)
-            {
-                return new ApiResponse().SetBadRequest(model.Id, ErrorMessages.RoomCapacityIsSmallerThanCurrentErrorMessage);
-            }
+            //if (model.Capacity < entity.Rooms?.Count)
+            //{
+            //    return new ApiResponse().SetBadRequest(model.Id, ErrorMessages.RoomCapacityIsSmallerThanCurrentErrorMessage);
+            //}
 
             entity.RoomTypeName = model.RoomTypeName;
             entity.Price = model.Price;
@@ -146,17 +146,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
 
             // update roomTypeServices
-            foreach (var roomTypeServiceId in model.RoomServiceIds)
+            var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == model.Id);
+            var roomTypeServiceIds = roomTypeServices.Select(x => x.Id).ToList();
+            foreach (var roomTypeServiceId in roomTypeServiceIds)
             {
                 await _unitOfWork.RoomTypeServiceRepository.DeleteByIdAsync(roomTypeServiceId);
             }
 
             await _unitOfWork.RoomTypeServiceRepository
                 .AddRangeAsync(model.RoomServiceIds
-                .Select(x => new RoomTypeServiceEntity()
+                .Select(rs => new RoomTypeServiceEntity()
                 {
                     Id = Guid.NewGuid(),
-                    RoomServiceId = x,
+                    RoomServiceId = rs,
                     RoomTypeId = entity.Id,
                     CreatedBy = _userContextService.UserId,
                     LastUpdatedBy = _userContextService.UserId,

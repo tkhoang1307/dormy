@@ -15,4 +15,9 @@
     {
         public Guid? UserId { get; set; }
     }
+
+    public class GetBatchInvoiceRequestModel : GetBatchRequestModel
+    {
+        public Guid? RoomId { get; set; }
+    }
 }

@@ -28,7 +28,5 @@ namespace Dormy.WebService.Api.Core.Entities
         public List<InvoiceItemEntity>? InvoiceItems { get; set; }
 
         public List<InvoiceUserEntity>? InvoiceUsers { get; set; }
-
-
     }
 }

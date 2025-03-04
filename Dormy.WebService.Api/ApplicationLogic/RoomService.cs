@@ -208,5 +208,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetAccepted(model.Id);
         }
+
+        public async Task<List<Guid>> GetAllUsersOfRoomByRoomId(Guid roomId)
+        {
+            var entityContracts = await _unitOfWork.ContractRepository
+                                                 .GetAllAsync(x => x.RoomId.Equals(roomId)
+                                                              && (x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED));
+            
+            var userIds = entityContracts.Select(c => c.UserId).ToList();
+
+            return userIds;
+        }
     }
 }

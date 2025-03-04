@@ -85,6 +85,7 @@ namespace Dormy.WebService.Api
             builder.Services.AddScoped<IHealthInsuranceService, HealthInsuranceService>();
             builder.Services.AddScoped<IInvoiceItemService, InvoiceItemService>();
             builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+            builder.Services.AddScoped<IInvoiceUserService, InvoiceUserService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IOvernightAbsenceService, OvernightAbsenceService>();
             builder.Services.AddScoped<IParkingRequestService, ParkingRequestService>();

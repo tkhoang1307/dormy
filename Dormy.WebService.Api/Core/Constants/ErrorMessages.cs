@@ -11,6 +11,7 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string RoomIsOccupiedErrorMessage = "Can not delete data, room is current in used";
         public const string RoomCapacityIsSmallerThanCurrentErrorMessage = "Can not set room capicity smnaller than actual value";
         public const string PropertyDoesNotExist = "{0} does not exist.";
+        public const string InvalidMonth = "{0} is in range [1, 12]";
         public const string TwoPropertiesMustBeUnique = "{0} and {1} must be unique.";
         public const string RequiredFieldErrorMessage = "{0} is required field.";
         public const string PropertyMustBeMoreThanOrEqual0 = "{0} must be more than or equal to 0.";
@@ -21,6 +22,10 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string ValueDoesNotExistInEnum = "{0} doesn't exist in {1}";
         public const string AccountDoesNotHavePermission = "Your account doesn’t have permission";
         public const string UpdateEntityConflict = "You only update {0} which has status 'SUBMITTED'";
+        public const string CreateInvoiceConflict = "Invoice for month {0}/{1} was created.";
+        public const string UpdateInvoiceConflict = "Invoice was only updated when status is DRAFT.";
+        public const string DeleteInvoiceConflict = "Invoice was only deleted when status is DRAFT.";
+        public const string AccountDoesNotHavePermissionInvoice = "Your account doesn’t have permission to access this invoice";
         public const string ChangeRequestStatusSubmittedConflict = "{0} was SUBMITTED. You can change to other statuses except SUBMITTED.";
         public const string ChangeRequestStatusApproveConflict = "{0} was APPROVED. You can not change to other statuses except CANCELLED.";
         public const string ChangeRequestStatusCancelledConflict = "{0} was CANCELLED. You can not change to other statuses.";
