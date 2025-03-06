@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
     public class ServiceIndicatorEntity : BaseEntity
     {
@@ -11,6 +13,8 @@
         public decimal OldIndicator { get; set; }
 
         public decimal NewIndicator { get; set; }
+
+        public ServiceIndicatorStatusEnum Status { get; set; }
 
         public string RoomServiceName { get; set; } = string.Empty;
 

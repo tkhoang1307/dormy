@@ -16,6 +16,7 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string RequiredFieldErrorMessage = "{0} is required field.";
         public const string PropertyMustBeMoreThanOrEqual0 = "{0} must be more than or equal to 0.";
         public const string PropertyMustBeMoreThan0 = "{0} must be more than 0.";
+        public const string PropertyAMustBeLessThanOrEqualToPropertyB = "{0} must be less than or equal to {1}.";
         public const string SomeServicesAreNotExisted = "Some of room services are not found";
         public const string SomeRoomTypesAreNotExisted = "Some of room types are not found";
         public const string SomeTypeServicesAreNotExisted = "Some of room type services are not found";
@@ -43,5 +44,6 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string ChangeContractStatusTerminatedConflict = "{0} was TERMINATED. You can not change to other statuses.";
         public const string ChangeContractStatusRejectedConflict = "{0} was REJECTED. You can not change to other statuses.";
         public const string ChangeContractExtensionStatusActiveConflict = "{0} is being ACTIVE. You only can change to EXPIRED or TERMINATED.";
+        public const string CreateServiceIndicatorConflict = "{0} indicator for month {1}/{2} existed.";
     }
 }

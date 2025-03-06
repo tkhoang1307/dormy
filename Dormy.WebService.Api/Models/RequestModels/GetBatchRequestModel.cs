@@ -20,4 +20,11 @@
     {
         public Guid? RoomId { get; set; }
     }
+
+    public class GetBatchServiceIndicatorRequestModel
+    {
+        public Guid? RoomServiceId { get; set; }
+        public Guid? RoomId { get; set; }
+        public List<Guid> Ids { get; set; } = [];
+    }
 }
