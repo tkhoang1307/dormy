@@ -85,10 +85,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f8072fbf-9d7d-4994-980f-a185f7fd881f"),
+                            Id = new Guid("c62a7e77-107e-4056-a3b6-9fed7c5189e3"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 3, 4, 2, 45, 43, 945, DateTimeKind.Local).AddTicks(3078),
-                            DateOfBirth = new DateTime(2025, 3, 4, 2, 45, 43, 945, DateTimeKind.Local).AddTicks(3114),
+                            CreatedDateUtc = new DateTime(2025, 3, 8, 23, 23, 20, 412, DateTimeKind.Local).AddTicks(7484),
+                            DateOfBirth = new DateTime(2025, 3, 8, 23, 23, 20, 412, DateTimeKind.Local).AddTicks(7490),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",
@@ -481,7 +481,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("invoiceUsers");
+                    b.ToTable("InvoiceUsers");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.NotificationEntity", b =>
@@ -805,6 +805,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsServiceIndicatorUsed")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
 
@@ -812,6 +815,10 @@ namespace Dormy.WebService.Api.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("RoomServiceName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoomServiceType")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -939,6 +946,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<string>("RoomServiceName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Year")
                         .HasColumnType("integer");

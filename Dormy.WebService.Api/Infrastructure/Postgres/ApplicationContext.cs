@@ -28,7 +28,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
         public DbSet<InvoiceEntity> Invoices { get; set; }
 
         public DbSet<InvoiceItemEntity> InvoiceItems { get; set; }
-        public DbSet<InvoiceUserEntity> invoiceUsers { get; set; }
+        public DbSet<InvoiceUserEntity> InvoiceUsers { get; set; }
         public DbSet<NotificationEntity> Notifications { get; set; }
         public DbSet<OvernightAbsenceEntity> OvernightAbsences { get; set; }
         public DbSet<ParkingRequestEntity> ParkingRequests { get; set; }
