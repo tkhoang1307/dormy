@@ -6,9 +6,10 @@ namespace Dormy.WebService.Api.Core.Interfaces
     public interface IServiceIndicatorService
     {
         Task<ApiResponse> AddServiceIndicator(ServiceIndicatorRequestModel model);
+        Task<ApiResponse> AddBatchServiceIndicators(ServiceIndicatorCreationBatchRequestModel model);
         Task<ApiResponse> UpdateServiceIndicator(ServiceIndicatorUpdationRequestModel model);
         Task<ApiResponse> GetDetailServiceIndicatorById(Guid id);
         Task<ApiResponse> GetServiceIndicatorBatch(GetBatchServiceIndicatorRequestModel model);
-        Task<ApiResponse> HardDeleteServiceIndicator(Guid id);
+        Task<ApiResponse> HardDeleteBatchServiceIndicators(List<Guid> ids);
     }
 }

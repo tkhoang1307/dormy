@@ -14,7 +14,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 RoomId = model.RoomId,
                 Month = model.Month,
                 Year = model.Year,
-                OldIndicator = model.OldIndicator,
+                //OldIndicator = model.OldIndicator,
                 NewIndicator = model.NewIndicator,
                 CreatedDateUtc = DateTime.UtcNow,
                 LastUpdatedDateUtc = DateTime.UtcNow,

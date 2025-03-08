@@ -211,6 +211,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<List<Guid>> GetAllUsersOfRoomByRoomId(Guid roomId)
         {
+            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(roomId));
+            if (roomEntity == null)
+            {
+                return [];
+            }
+
             var entityContracts = await _unitOfWork.ContractRepository
                                                  .GetAllAsync(x => x.RoomId.Equals(roomId)
                                                               && (x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED));
@@ -218,6 +224,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var userIds = entityContracts.Select(c => c.UserId).ToList();
 
             return userIds;
+        }
+
+        public async Task<List<Guid>> GetAllRoomServicesOfRoomByRoomId(Guid roomId)
+        {
+            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(roomId));
+            if (roomEntity == null)
+            {
+                return [];
+            }
+
+            var roomTypeId = roomEntity.RoomTypeId;
+            var roomTypeServiceEntities = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId.Equals(roomTypeId));
+            var roomServiceIds = roomTypeServiceEntities.Select(rts => rts.RoomServiceId).ToList();
+
+            return roomServiceIds;
         }
     }
 }

@@ -105,7 +105,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpDelete("batch/soft-delete")]
+        [HttpDelete("soft-delete/batch")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteRoomService(List<Guid> ids)
         {
