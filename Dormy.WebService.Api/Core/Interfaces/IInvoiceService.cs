@@ -11,5 +11,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> UpdateInvoiceStatus(InvoiceStatusUpdationRequestModel model);
         Task<ApiResponse> UpdateInvoice(InvoiceUpdationRequestModel model);
         Task<ApiResponse> HardDeleteInvoiceById(Guid id);
+        Task<ApiResponse> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model);
     }
 }

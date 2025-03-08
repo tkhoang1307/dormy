@@ -41,4 +41,28 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string UserName { get; set; } = string.Empty;
     }
+
+    public class GetInitialInvoiceCreationResponseModel
+    {
+        public int Month { get; set; }
+
+        public int Year { get; set; }
+
+        public Guid RoomId { get; set; }
+
+        public List<GetInitialInvoiceItemCreationResponseModel> RoomServices { get; set; } = [];
+    }
+
+    public class GetInitialInvoiceItemCreationResponseModel
+    {
+        public Guid RoomServiceId { get; set; }
+
+        public string RoomServiceName { get; set; } = string.Empty;
+
+        public string RoomServiceType { get; set; } = string.Empty;
+
+        public bool IsServiceIndicatorUsed { get; set; }
+
+        public decimal? CurrentIndicator { get; set; }
+    }
 }

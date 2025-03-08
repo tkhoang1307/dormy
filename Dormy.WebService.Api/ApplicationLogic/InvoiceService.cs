@@ -25,12 +25,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IRoomService _roomService;
         private readonly IInvoiceItemService _invoiceItemService;
         private readonly IInvoiceUserService _invoiceUserService;
+        private readonly IRoomServiceService _roomServiceService;
 
         public InvoiceService(IUnitOfWork unitOfWork, 
                               IUserContextService userContextService, 
                               IRoomService roomService, 
                               IInvoiceItemService invoiceItemService, 
-                              IInvoiceUserService invoiceUserService)
+                              IInvoiceUserService invoiceUserService,
+                              IRoomServiceService roomServiceService)
         {
             _unitOfWork = unitOfWork;
             _invoiceMapper = new InvoiceMapper();
@@ -40,12 +42,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _roomService = roomService;
             _invoiceItemService = invoiceItemService;
             _invoiceUserService = invoiceUserService;
+            _roomServiceService = roomServiceService;
         }
 
         public async Task<ApiResponse> CreateNewInvoice(InvoiceRequestModel model)
         {
             var roomEntity = await _unitOfWork.RoomRepository.GetAsync(r => r.Id == model.RoomId);
-
             if (roomEntity == null)
             {
                 return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
@@ -152,6 +154,46 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetCreated(invoiceEntity.Id);
+        }
+
+        public async Task<ApiResponse> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model)
+        {
+            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(r => r.Id == model.RoomId);
+            if (roomEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
+            }
+
+            var roomServiceIds = await _roomService.GetAllRoomServicesOfRoomByRoomId(roomEntity.Id);
+            var initialRoomServices = new List<GetInitialInvoiceItemCreationResponseModel>();
+            foreach(var roomServiceId in roomServiceIds)
+            {
+                var roomServiceEntity = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id.Equals(roomServiceId));
+                var serviceIndicatorEntity = await _unitOfWork.ServiceIndicatorRepository
+                                                               .GetAsync(si => si.RoomId.Equals(model.RoomId) &&
+                                                                               si.RoomServiceId.Equals(roomServiceId) &&
+                                                                               si.Month.Equals(model.Month) &&
+                                                                               si.Year.Equals(model.Year));
+                
+                initialRoomServices.Add(new GetInitialInvoiceItemCreationResponseModel()
+                {
+                    RoomServiceId = roomServiceId,
+                    RoomServiceName = roomServiceEntity.RoomServiceName,
+                    RoomServiceType = roomServiceEntity.RoomServiceType.ToString(),
+                    IsServiceIndicatorUsed = roomServiceEntity.IsServiceIndicatorUsed,
+                    CurrentIndicator = roomServiceEntity.IsServiceIndicatorUsed ? (serviceIndicatorEntity?.NewIndicator ?? 0) : null,
+                });
+            }
+
+            var initialInvoiceCreation = new GetInitialInvoiceCreationResponseModel()
+            {
+                Month = model.Month,
+                Year = model.Year,
+                RoomId = model.RoomId,
+                RoomServices = initialRoomServices,
+            };
+
+            return new ApiResponse().SetOk(initialInvoiceCreation);
         }
 
         public async Task<ApiResponse> GetInvoiceBatch(GetBatchInvoiceRequestModel model)

@@ -96,6 +96,39 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
+        [HttpPost("create-initial-invoice")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model)
+        {
+            if (model?.RoomId == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomId))));
+            }
+
+            if (model.Month == null)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Month))));
+            }
+
+            if (model.Year == null)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Year))));
+            }
+
+            if (model.Month <= 0 || model.Month >= 13)
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.InvalidMonth, nameof(model.Month))));
+            }
+
+            var response = await _invoiceService.GetInitialInvoiceCreation(model);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
         [HttpPut]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateInvoice(InvoiceUpdationRequestModel model)
