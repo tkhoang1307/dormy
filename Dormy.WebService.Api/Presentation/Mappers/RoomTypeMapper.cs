@@ -38,6 +38,24 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 RoomServices = MapToRoomServiceModels(entity),
             };
         }
+        public RoomTypeRegistrationResponseModel MapToRoomTypeRegistrationResponseModel(RoomTypeResponseModel source)
+        {
+            return new RoomTypeRegistrationResponseModel
+            {
+                Id = source.Id,
+                Capacity = source.Capacity,
+                Description = source.Description,
+                Price = source.Price,
+                RoomTypeName = source.RoomTypeName,
+                RoomServices = source.RoomServices.Select(x => new RoomServiceRegistrationResponseModel
+                {
+                    Id = x.Id,
+                    Cost = x.Cost,
+                    Unit = x.Unit,
+                    RoomServiceName = x.RoomServiceName,
+                }).ToList(),
+            };
+        }
 
         public RoomTypeServiceEntity MapToRoomTypeServiceEntity(Guid roomServiceId)
         {

@@ -36,21 +36,12 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter)
-        {
-            if (filter != null)
-            {
-                return await _dbSet.Where(filter).ToListAsync();
-            }
-
-            return await _dbSet.ToListAsync();
-        }
-
         public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter,
                                                Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
                                                int pageIndex = 1,
                                                int pageSize = 25,
-                                               bool isPaging = true)
+                                               bool isPaging = true,
+                                               bool isNoTracking = true)
         {
             IQueryable<T> query = _dbSet;
 
@@ -72,29 +63,26 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
                     .Take(pageSize); ;
             }
 
-            return await query.AsNoTracking().ToListAsync();
+            if (isNoTracking)
+            {
+                return await query.AsNoTracking().ToListAsync();
+            }
+            return await query.ToListAsync();
         }
 
-        public Task<T?> GetAsync(Expression<Func<T, bool>> filter)
-        {
-            if (filter == null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-            else
-            {
-
-                return _dbSet.FirstOrDefaultAsync(filter);
-            }
-        }
-
-        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, bool isNoTracking = false)
         {
             IQueryable<T> query = _dbSet;
             if (include != null)
             {
                 query = include(query);
             }
+
+            if (isNoTracking)
+            {
+                return await query.AsNoTracking().FirstOrDefaultAsync(filter);
+            }
+
             return await query.FirstOrDefaultAsync(filter);
         }
 

@@ -41,6 +41,22 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             };
         }
 
+        public UserRegisterResponseModel MapToUserRegistrationResponseModel(UserEntity entity)
+        {
+            return new UserRegisterResponseModel
+            {
+                UserId = entity.Id,
+                UserName = entity.UserName,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                Email = entity.Email,
+                PhoneNumber = entity.PhoneNumber,
+                Gender = entity.Gender.ToString(),
+                DateOfBirth = entity.DateOfBirth,
+                NationalIdNumber = entity.NationalIdNumber,
+            };
+        }
+
         public UserEntity MapToUserEntity(UserRequestModel model)
         {
             return new UserEntity()

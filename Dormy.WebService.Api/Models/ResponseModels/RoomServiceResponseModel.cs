@@ -23,4 +23,12 @@
 
         public string EnglishRoomServiceTypeName { get; set; } = string.Empty;
     }
+
+    public class RoomServiceRegistrationResponseModel
+    {
+        public Guid Id { get; set; }
+        public string RoomServiceName { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty;
+        public decimal Cost { get; set; }
+    }
 }

@@ -85,10 +85,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c62a7e77-107e-4056-a3b6-9fed7c5189e3"),
+                            Id = new Guid("6bca7f72-cf5d-4376-8cbf-848c15a51137"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 3, 8, 23, 23, 20, 412, DateTimeKind.Local).AddTicks(7484),
-                            DateOfBirth = new DateTime(2025, 3, 8, 23, 23, 20, 412, DateTimeKind.Local).AddTicks(7490),
+                            CreatedDateUtc = new DateTime(2025, 3, 9, 3, 26, 26, 417, DateTimeKind.Local).AddTicks(2276),
+                            DateOfBirth = new DateTime(2025, 3, 9, 3, 26, 26, 417, DateTimeKind.Local).AddTicks(2280),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",
@@ -691,6 +691,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<Guid?>("ApproverId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
@@ -727,6 +730,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApproverId");
+
+                    b.HasIndex("ContractId")
+                        .IsUnique();
 
                     b.HasIndex("RoomId");
 
@@ -1414,6 +1420,10 @@ namespace Dormy.WebService.Api.Migrations
                         .WithMany("Requests")
                         .HasForeignKey("ApproverId");
 
+                    b.HasOne("Dormy.WebService.Api.Core.Entities.ContractEntity", "Contract")
+                        .WithOne("Request")
+                        .HasForeignKey("Dormy.WebService.Api.Core.Entities.RequestEntity", "ContractId");
+
                     b.HasOne("Dormy.WebService.Api.Core.Entities.RoomEntity", "Room")
                         .WithMany("Requests")
                         .HasForeignKey("RoomId")
@@ -1427,6 +1437,8 @@ namespace Dormy.WebService.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Approver");
+
+                    b.Navigation("Contract");
 
                     b.Navigation("Room");
 
@@ -1582,6 +1594,8 @@ namespace Dormy.WebService.Api.Migrations
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ContractEntity", b =>
                 {
                     b.Navigation("ContractExtensions");
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.HealthInsuranceEntity", b =>

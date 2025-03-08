@@ -5,14 +5,12 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.IRepositories
 {
     public interface IBaseRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter);
-        Task<T?> GetAsync(Expression<Func<T, bool>> filter);
         Task AddAsync(T entity);
         Task AddRangeAsync(List<T> entities);
         Task DeleteByIdAsync(Guid id);
         Task<bool> IsExisted(Guid id);
-        Task<T> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include);
+        Task<T?> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, bool isNoTracking = false);
         Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter,
-                                               Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, int pageIndex = 1, int pageSize = 25, bool isPaging = true);
+                                               Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, int pageIndex = 1, int pageSize = 25, bool isPaging = true, bool isNoTracking = true);
     }
 }
