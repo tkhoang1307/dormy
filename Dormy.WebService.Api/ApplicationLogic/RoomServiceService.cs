@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Core.Utilities;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -124,6 +125,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             entity.RoomServiceName = model.RoomServiceName;
             entity.Unit = model.Unit;
             entity.Cost = model.Cost;
+            entity.RoomServiceType = (RoomServiceTypeEnum)Enum.Parse(typeof(RoomServiceTypeEnum), model.RoomServiceType);
+            entity.IsServiceIndicatorUsed = model.IsServiceIndicatorUsed;
             entity.LastUpdatedBy = _userContextService.UserId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
 

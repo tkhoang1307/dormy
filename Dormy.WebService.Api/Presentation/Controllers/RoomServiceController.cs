@@ -1,6 +1,8 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
@@ -23,18 +25,18 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetRoomServiceById(Guid id)
         {
-            var result = await _roomServiceService.GetRoomSeviceSingle(id);
+            var response = await _roomServiceService.GetRoomSeviceSingle(id);
 
-            return StatusCode((int)result.StatusCode, result);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("batch")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetRoomServiceBatch(GetBatchRequestModel model)
         {
-            var result = await _roomServiceService.GetRoomServiceBatch(model);
+            var response = await _roomServiceService.GetRoomServiceBatch(model);
 
-            return StatusCode((int)result.StatusCode, result);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("batch/create")]
@@ -66,11 +68,29 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                     return StatusCode(412, new ApiResponse().SetPreconditionFailed(message: 
                         string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Cost))));
                 }
+
+                if (string.IsNullOrEmpty(model.RoomServiceType))
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceType))));
+                }
+
+                if (!Enum.TryParse(model.RoomServiceType, out RoomServiceTypeEnum result))
+                {
+                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                        string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.RoomServiceType, nameof(RoomServiceTypeEnum))));
+                }
+
+                if (model?.IsServiceIndicatorUsed == null)
+                {
+                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.IsServiceIndicatorUsed))));
+                }
             }
 
-            var result = await _roomServiceService.AddRoomServiceBatch(models);
+            var response = await _roomServiceService.AddRoomServiceBatch(models);
 
-            return StatusCode((int)result.StatusCode, result);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut]
@@ -100,18 +120,45 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 return StatusCode(412, new ApiResponse().SetPreconditionFailed(message: string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Cost))));
             }
 
-            var result = await _roomServiceService.UpdateRoomService(model);
+            if (string.IsNullOrEmpty(model.RoomServiceType))
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceType))));
+            }
 
-            return StatusCode((int)result.StatusCode, result);
+            if (!Enum.TryParse(model.RoomServiceType, out RoomServiceTypeEnum result))
+            {
+                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.RoomServiceType, nameof(RoomServiceTypeEnum))));
+            }
+
+            if (model?.IsServiceIndicatorUsed == null)
+            {
+                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.IsServiceIndicatorUsed))));
+            }
+
+            var response = await _roomServiceService.UpdateRoomService(model);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpDelete("soft-delete/batch")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteRoomService(List<Guid> ids)
         {
-            var result = await _roomServiceService.SoftDeleteRoomServiceBatch(ids);
+            var response = await _roomServiceService.SoftDeleteRoomServiceBatch(ids);
 
-            return StatusCode((int)result.StatusCode, result);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpGet("room-service-type/all")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetAllRoomServiceTypes()
+        {
+            var roomServiceTypes = RoomServiceTypeEnumHelper.GetAllRoomServiceTypes();
+
+            return Ok(roomServiceTypes);
         }
     }
 }

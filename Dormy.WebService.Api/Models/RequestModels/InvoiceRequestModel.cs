@@ -61,4 +61,13 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public Guid UserId { get; set; }
 
     }
+
+    public class GetInitialInvoiceCreationRequestModel
+    {
+        public int Month { get; set; }
+
+        public int Year { get; set; }
+
+        public Guid RoomId { get; set; }
+    }
 }

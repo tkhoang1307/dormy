@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Models.RequestModels;
+﻿using Dormy.WebService.Api.Models.Enums;
+using Dormy.WebService.Api.Models.RequestModels;
 
 namespace Dormy.WebService.Api.Core.Entities
 {
@@ -11,6 +12,10 @@ namespace Dormy.WebService.Api.Core.Entities
         public string Unit { get; set; } = string.Empty;
 
         public decimal Cost { get; set; }
+
+        public RoomServiceTypeEnum RoomServiceType { get; set; }
+
+        public bool IsServiceIndicatorUsed { get; set; } = false;
 
         public List<RoomTypeServiceEntity>? RoomTypeServices { get; set; }
 
