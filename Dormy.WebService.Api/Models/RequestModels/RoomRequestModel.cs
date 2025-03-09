@@ -37,6 +37,6 @@ namespace Dormy.WebService.Api.Models.RequestModels
     {
         public Guid Id { get; set; }
 
-        public RoomStatusEnum Status { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 }

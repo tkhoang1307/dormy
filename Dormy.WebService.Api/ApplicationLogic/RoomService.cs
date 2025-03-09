@@ -200,7 +200,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
-            entity.Status = model.Status;
+            entity.Status = (RoomStatusEnum)Enum.Parse(typeof(RoomStatusEnum), model.Status);
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 
