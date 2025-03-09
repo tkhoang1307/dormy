@@ -2,7 +2,6 @@
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
-using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +31,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetDetailOvernightAbsence(Guid id)
         {
             var result = await _overnightAbsenceService.GetDetailOvernightAbsence(id);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch")]
@@ -40,7 +39,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetBatchOvernightAbsence(GetBatchRequestModel model)
         {
             var result = await _overnightAbsenceService.GetOvernightAbsenceBatch(model);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/approve")]
@@ -48,7 +47,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ApproveOvernightAbsence(Guid id)
         {
             var result = await _overnightAbsenceService.UpdateStatusOvernightAbsence(id, OvernightAbsenceStatusEnum.APPROVED);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/reject")]
@@ -56,7 +55,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> RejectOvernightAbsence(Guid id)
         {
             var result = await _overnightAbsenceService.UpdateStatusOvernightAbsence(id, OvernightAbsenceStatusEnum.REJECTED);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/cancel")]
@@ -64,7 +63,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> CancelOvernightAbsence(Guid id)
         {
             var result = await _overnightAbsenceService.UpdateStatusOvernightAbsence(id, OvernightAbsenceStatusEnum.CANCELLED);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/update")]
@@ -72,6 +71,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> UpdateOvernightAbsence(Guid id, OvernightAbsentRequestModel model)
         {
             var result = await _overnightAbsenceService.UpdateOvernightAbsence(id, model);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        [HttpDelete("id/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> SoftDeleteOvernightAbsence(Guid id)
+        {
+            var result = await _overnightAbsenceService.SoftDeleteOvernightAbsence(id);
             return StatusCode((int)result.StatusCode, result);
         }
     }

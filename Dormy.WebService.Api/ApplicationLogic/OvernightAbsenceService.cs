@@ -69,7 +69,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 UserName = entity.User.UserName,
                 DateOfBirth = entity.User.DateOfBirth,
                 PhoneNumber = entity.User.PhoneNumber,
-                NationalIdNumber = entity.User.NationalIdNumber
+                NationalIdNumber = entity.User.NationalIdNumber,
+                IsDeleted = entity.IsDeleted
             };
 
             return new ApiResponse().SetOk(result);
@@ -152,10 +153,27 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 UserName = entity.User.UserName,
                 DateOfBirth = entity.User.DateOfBirth,
                 PhoneNumber = entity.User.PhoneNumber,
-                NationalIdNumber = entity.User.NationalIdNumber
+                NationalIdNumber = entity.User.NationalIdNumber,
+                IsDeleted = entity.IsDeleted
             }).ToList();
 
             return new ApiResponse().SetOk(response);
+        }
+
+        public async Task<ApiResponse> SoftDeleteOvernightAbsence(Guid id)
+        {
+            var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == id, isNoTracking: false);
+            if (entity == null)
+            {
+                throw new EntityNotFoundException(message: "Overnight absence not found");
+            }
+
+            entity.IsDeleted = true;
+            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(entity.Id);
         }
 
         public async Task<ApiResponse> UpdateOvernightAbsence(Guid id, OvernightAbsentRequestModel model)
@@ -177,6 +195,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             entity.StartDateTime = model.StartDateTime;
             entity.EndDateTime = model.EndDateTime;
             entity.LastUpdatedBy = _userContextService.UserId;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
 
             await _unitOfWork.SaveChangeAsync();
 
@@ -213,6 +232,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             entity.Status = status;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
+            entity.LastUpdatedBy = _userContextService.UserId;
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetAccepted(entity.Id);

@@ -31,5 +31,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public string NationalIdNumber { get; set; } = string.Empty;
 
         public string Gender { get; set; } = string.Empty;
+
+        public bool IsDeleted { get; set; }
     }
 }

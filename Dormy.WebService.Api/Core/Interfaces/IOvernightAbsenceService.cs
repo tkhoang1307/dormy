@@ -11,5 +11,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetOvernightAbsenceBatch(GetBatchRequestModel model);
         Task<ApiResponse> UpdateOvernightAbsence(Guid id, OvernightAbsentRequestModel model);
         Task<ApiResponse> UpdateStatusOvernightAbsence(Guid id, OvernightAbsenceStatusEnum status);
+        Task<ApiResponse> SoftDeleteOvernightAbsence(Guid id);
     }
 }
