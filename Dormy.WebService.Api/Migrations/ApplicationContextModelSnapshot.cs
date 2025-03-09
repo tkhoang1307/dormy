@@ -85,10 +85,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("34c04f68-a8d0-4bc2-8ed9-ec2b4df8fa53"),
+                            Id = new Guid("aabcc857-55f9-4bec-b8c7-ff348a3b29b0"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 3, 9, 22, 8, 15, 612, DateTimeKind.Local).AddTicks(8289),
-                            DateOfBirth = new DateTime(2025, 3, 9, 22, 8, 15, 612, DateTimeKind.Local).AddTicks(8305),
+                            CreatedDateUtc = new DateTime(2025, 3, 9, 23, 22, 55, 767, DateTimeKind.Local).AddTicks(4833),
+                            DateOfBirth = new DateTime(2025, 3, 9, 23, 22, 55, 767, DateTimeKind.Local).AddTicks(4838),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",

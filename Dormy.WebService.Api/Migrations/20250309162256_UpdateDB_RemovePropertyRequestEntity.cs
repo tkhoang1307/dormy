@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Dormy.WebService.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class fixAbsentEntity : Migration
+    public partial class UpdateDB_RemovePropertyRequestEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,7 +31,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "IsDeleted", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName" },
-                values: new object[] { new Guid("34c04f68-a8d0-4bc2-8ed9-ec2b4df8fa53"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 3, 9, 22, 8, 15, 612, DateTimeKind.Local).AddTicks(8289), new DateTime(2025, 3, 9, 22, 8, 15, 612, DateTimeKind.Local).AddTicks(8305), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
+                values: new object[] { new Guid("aabcc857-55f9-4bec-b8c7-ff348a3b29b0"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 3, 9, 23, 22, 55, 767, DateTimeKind.Local).AddTicks(4833), new DateTime(2025, 3, 9, 23, 22, 55, 767, DateTimeKind.Local).AddTicks(4838), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.AddForeignKey(
                 name: "FK_OvernightAbsences_Admins_AdminId",
@@ -51,7 +51,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.DeleteData(
                 table: "Admins",
                 keyColumn: "Id",
-                keyValue: new Guid("34c04f68-a8d0-4bc2-8ed9-ec2b4df8fa53"));
+                keyValue: new Guid("aabcc857-55f9-4bec-b8c7-ff348a3b29b0"));
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "AdminId",
