@@ -10,6 +10,8 @@
 
         public int TotalAvailableBed { get; set; }
 
+        public int TotalUsedBed { get; set; }
+
         public Guid RoomTypeId { get; set; }
 
         public string RoomTypeName { get; set; } = string.Empty;

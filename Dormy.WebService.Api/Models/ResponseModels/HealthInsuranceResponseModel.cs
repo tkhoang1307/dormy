@@ -9,7 +9,5 @@
         public string RegisteredHospital { get; set; } = string.Empty;
 
         public DateTime ExpirationDate { get; set; }
-
-        public UserResponseModel User { get; set; } = null!;
     }
 }
