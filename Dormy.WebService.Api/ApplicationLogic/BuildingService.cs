@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Core.Utilities;
@@ -24,8 +25,36 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _userContextService = userContextService;
         }
 
+        private async Task VerifyRoomCapacity(BuildingCreationRequestModel model)
+        {
+            // Get all unique RoomTypeIds from the model
+            var roomTypeIds = model.Rooms.Select(room => room.RoomTypeId).Distinct().ToList();
+
+            // Fetch all RoomType entities in a single query
+            var roomTypes = await _unitOfWork.RoomTypeRepository.GetAllAsync(rt => roomTypeIds.Contains(rt.Id));
+
+            // Create a dictionary for quick lookup
+            var roomTypeDict = roomTypes.ToDictionary(rt => rt.Id, rt => rt);
+
+            // Validate each room in the model
+            foreach (var room in model.Rooms)
+            {
+                if (!roomTypeDict.TryGetValue(room.RoomTypeId, out var roomType))
+                {
+                    throw new BadRequestException($"Room Type with ID: {room.RoomTypeId} was not found");
+                }
+
+                if (room.TotalRoomsWantToCreate > roomType.Capacity)
+                {
+                    throw new BadRequestException($"Total Rooms Want To Create must not be greater than room type capacity");
+                }
+            }
+        }
+
         public async Task<ApiResponse> CreateBuilding(BuildingCreationRequestModel model)
         {
+            await VerifyRoomCapacity(model);
+
             var roomTypeIds = model.Rooms
                        .Select(room => room.RoomTypeId)
                        .Distinct()
@@ -84,7 +113,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 {
                     room.CreatedBy = _userContextService.UserId;
                     room.LastUpdatedBy = _userContextService.UserId;
-                    room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed; 
+                    room.TotalAvailableBed = roomTypes.FirstOrDefault(t => t.Id == room.RoomTypeId)?.Capacity ?? room.TotalAvailableBed;
                 }
             }
 

@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
@@ -37,6 +38,12 @@ namespace Dormy.WebService.Api.Presentation.Validations
             {
                 return new ApiResponse().SetPreconditionFailed(message:
                     string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.TotalFloors)));
+            }
+
+            if (model.Rooms.Any(room => room.FloorNumber > model.TotalFloors))
+            {
+                return new ApiResponse().SetPreconditionFailed(message:
+                    string.Format(ErrorMessages.PropertyAMustBeLessThanOrEqualToPropertyB, nameof(RoomRequestModel.FloorNumber), nameof(model.TotalFloors)));
             }
 
             return new ApiResponse().SetOk();
