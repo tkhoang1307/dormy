@@ -33,10 +33,18 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPut("id/{id:guid}/active")]
-        [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
+        [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ActiveContract(Guid id)
         {
             var result = await _contractService.UpdateContractStatus(id, Models.Enums.ContractStatusEnum.ACTIVE);
+            return Ok(result);
+        }
+
+        [HttpPut("id/{id:guid}/accept")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> AcceptRegister(Guid id)
+        {
+            var result = await _contractService.UpdateContractStatus(id, Models.Enums.ContractStatusEnum.WAITING_PAYMENT);
             return Ok(result);
         }
 
@@ -45,6 +53,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> RejectContract(Guid id)
         {
             var result = await _contractService.UpdateContractStatus(id, Models.Enums.ContractStatusEnum.REJECTED);
+            return Ok(result);
+        }
+
+        [HttpPut("id/{id:guid}/terminate")]
+        [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
+        public async Task<IActionResult> TerminateContract(Guid id)
+        {
+            var result = await _contractService.UpdateContractStatus(id, Models.Enums.ContractStatusEnum.TERMINATED);
             return Ok(result);
         }
     }
