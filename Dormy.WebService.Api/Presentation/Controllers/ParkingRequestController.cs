@@ -4,6 +4,7 @@ using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,22 +25,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateNewParkingRequest(ParkingRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.Description))
+            var modelValidator = await ParkingRequestValidator.ParkingRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Description))));
-            }
-
-            if (model?.ParkingSpotId == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ParkingSpotId))));
-            }
-
-            if (model?.VehicleId == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.VehicleId))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _parkingRequestService.CreateParkingRequest(model);
@@ -51,22 +40,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateParkingRequest(UpdateParkingRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await ParkingRequestValidator.UpdateParkingRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            }
-
-            if (string.IsNullOrEmpty(model.Description))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Description))));
-            }
-
-            if (model?.ParkingSpotId == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ParkingSpotId))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _parkingRequestService.UpdateParkingRequest(model);
@@ -78,16 +55,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> AcceptParkingRequest(ApproveOrRejectParkingRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await ParkingRequestValidator.ApproveOrRejectParkingRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            }
-
-            if (model?.IsAccepted == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.IsAccepted))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var payload = new ParkingRequestStatusModel();

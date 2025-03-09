@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,34 +42,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomType([FromBody] RoomTypeRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.RoomTypeName))
+            var modelValidator = await RoomTypeValidator.RoomTypeRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomTypeName))));
-            }
-
-            if (model?.Capacity == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Capacity))));
-            }
-
-            if (model?.Price == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Price))));
-            }
-
-            if (model.Capacity <= 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.Capacity))));
-            }
-
-            if (model.Price < 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Price))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _roomTypeService.CreateRoomType(model);
@@ -80,6 +57,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateRoomType([FromBody] RoomTypeUpdateRequestModel model)
         {
+            var modelValidator = await RoomTypeValidator.RoomTypeUpdateRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var response = await _roomTypeService.UpdateRoomType(model);
 
             return StatusCode((int)response.StatusCode, response);

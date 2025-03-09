@@ -5,6 +5,7 @@ using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,22 +26,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateNewParkingSpot(ParkingSpotRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.ParkingSpotName))
+            var modelValidator = await ParkingSpotValidator.ParkingSpotRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ParkingSpotName))));
-            }
-
-            if (model?.CapacitySpots == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.CapacitySpots))));
-            }
-
-            if (model.CapacitySpots <= 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.CapacitySpots))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _parkingSpotService.AddNewParkingSpot(model);
@@ -52,28 +41,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateParkingSpot(ParkingSpotUpdationRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await ParkingSpotValidator.ParkingSpotUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            } 
-                
-            if (string.IsNullOrEmpty(model.ParkingSpotName))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ParkingSpotName))));
-            }
-
-            if (model?.CapacitySpots == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.CapacitySpots))));
-            }
-
-            if (model.CapacitySpots <= 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.CapacitySpots))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _parkingSpotService.UpdateParkingSpot(model);
@@ -85,22 +56,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateStatusParkingSpot(ParkingSpotUpdateStatusRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await ParkingSpotValidator.ParkingSpotUpdateStatusRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            }
-
-            if (string.IsNullOrEmpty(model.Status))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Status))));
-            }
-
-            if (!Enum.TryParse(model.Status, out ParkingSpotStatusEnum result))
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.Status, nameof(ParkingSpotStatusEnum))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _parkingSpotService.UpdateStatusParkingSpot(model);

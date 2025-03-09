@@ -1,9 +1,7 @@
-﻿using Dormy.WebService.Api.Core.Constants;
-using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
-using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
-using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,34 +40,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateBuilding(BuildingCreationRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
+            var modelValidator = await BuildingValidator.BuildingCreationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
-            }
-
-            if (string.IsNullOrEmpty(model.GenderRestriction))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.GenderRestriction))));
-            }
-
-            if (model?.TotalFloors == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.TotalFloors))));
-            }
-
-            if (!Enum.TryParse(model.GenderRestriction, out GenderEnum result))
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.GenderRestriction, nameof(GenderEnum))));
-            }    
-
-            if (model.TotalFloors <= 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.TotalFloors))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _buildingService.CreateBuilding(model);
@@ -83,34 +57,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             foreach(var model in models)
             {
-                if (string.IsNullOrEmpty(model.Name))
+                var modelValidator = await BuildingValidator.BuildingCreationRequestModelValidator(model);
+                if (!modelValidator.IsSuccess)
                 {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
-                }
-
-                if (string.IsNullOrEmpty(model.GenderRestriction))
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.GenderRestriction))));
-                }
-
-                if (model?.TotalFloors == null)
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.TotalFloors))));
-                }
-
-                if (!Enum.TryParse(model.GenderRestriction, out GenderEnum result))
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.GenderRestriction, nameof(GenderEnum))));
-                }
-
-                if (model.TotalFloors <= 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.TotalFloors))));
+                    return StatusCode((int)modelValidator.StatusCode, modelValidator);
                 }
             }
             var response = await _buildingService.CreateBuildingBatch(models);
@@ -122,34 +72,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateBuilding(BuildingUpdationRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
+            var modelValidator = await BuildingValidator.BuildingUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
-            }
-
-            if (string.IsNullOrEmpty(model.GenderRestriction))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.GenderRestriction))));
-            }
-
-            if (model?.TotalFloors == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.TotalFloors))));
-            }
-
-            if (!Enum.TryParse(model.GenderRestriction, out GenderEnum result))
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.GenderRestriction, nameof(GenderEnum))));
-            }
-
-            if (model.TotalFloors <= 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(model.TotalFloors))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _buildingService.UpdateBuilding(model);

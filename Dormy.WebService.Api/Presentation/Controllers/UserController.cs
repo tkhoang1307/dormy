@@ -4,6 +4,7 @@ using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -36,58 +37,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SignUp(UserRequestModel request)
         {
-            if (string.IsNullOrEmpty(request.FirstName))
+            var modelValidator = await UserValidator.UserRequestModelValidator(request);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.FirstName))));
-            }
-
-            if (string.IsNullOrEmpty(request.LastName))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.LastName))));
-            }
-
-            if (string.IsNullOrEmpty(request.Email))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.Email))));
-            }
-
-            if (string.IsNullOrEmpty(request.UserName))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.UserName))));
-            }
-
-            if (string.IsNullOrEmpty(request.Password))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.Password))));
-            }
-
-            if (request?.DateOfBirth == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.DateOfBirth))));
-            }
-
-            if (string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.PhoneNumber))));
-            }
-
-            if (string.IsNullOrEmpty(request.NationalIdNumber))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.NationalIdNumber))));
-            }
-
-            if (!Enum.TryParse(request.Gender, out GenderEnum result))
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, request.Gender, nameof(GenderEnum))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _userService.SignUp(request);
@@ -99,6 +52,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SignIn([FromBody] LoginRequestModel request)
         {
+            var modelValidator = await UserValidator.LoginRequestModelValidator(request);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var response = await _userService.Login(request);
 
             return StatusCode((int)response.StatusCode, response);
@@ -118,6 +77,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             if (!isValidUserGuidId)
             {
                 return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
+            }
+
+            var modelValidator = await UserValidator.ChangePasswordRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             model.Id = id;
@@ -163,46 +128,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 return BadRequest(new ApiResponse().SetNotFound("User ID is invalid type - Guid required"));
             }
 
-            if (string.IsNullOrEmpty(model.FirstName))
+            var modelValidator = await UserValidator.UserUpdateRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.FirstName))));
-            }
-
-            if (string.IsNullOrEmpty(model.LastName))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.LastName))));
-            }
-
-            if (string.IsNullOrEmpty(model.Email))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Email))));
-            }
-
-            if (model?.DateOfBirth == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.DateOfBirth))));
-            }
-
-            if (string.IsNullOrEmpty(model.PhoneNumber))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.PhoneNumber))));
-            }
-
-            if (string.IsNullOrEmpty(model.NationalIdNumber))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.NationalIdNumber))));
-            }
-
-            if (!Enum.TryParse(model.Gender, out GenderEnum result))
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.Gender, nameof(GenderEnum))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _userService.UpdateProfile(id, model);

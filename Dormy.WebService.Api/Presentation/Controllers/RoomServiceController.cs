@@ -5,6 +5,7 @@ using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,46 +46,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             foreach(var model in models)
             {
-                if (string.IsNullOrEmpty(model.RoomServiceName))
+                var modelValidator = await RoomServiceValidator.RoomServiceRequestModelValidator(model);
+                if (!modelValidator.IsSuccess)
                 {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceName))));
-                }
-
-                if (string.IsNullOrEmpty(model.Unit))
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Unit))));
-                }
-
-                if (model?.Cost == null)
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Cost))));
-                }
-
-                if (model.Cost < 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message: 
-                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Cost))));
-                }
-
-                if (string.IsNullOrEmpty(model.RoomServiceType))
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceType))));
-                }
-
-                if (!Enum.TryParse(model.RoomServiceType, out RoomServiceTypeEnum result))
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.RoomServiceType, nameof(RoomServiceTypeEnum))));
-                }
-
-                if (model?.IsServiceIndicatorUsed == null)
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.IsServiceIndicatorUsed))));
+                    return StatusCode((int)modelValidator.StatusCode, modelValidator);
                 }
             }
 
@@ -97,45 +62,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateRoomService(RoomServiceUpdateRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.RoomServiceName))
+            var modelValidator = await RoomServiceValidator.RoomServiceUpdateRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceName))));
-            }
-
-            if (string.IsNullOrEmpty(model.Unit))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Unit))));
-            }
-
-            if (model?.Cost == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Cost))));
-            }
-
-            if (model.Cost < 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message: string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.Cost))));
-            }
-
-            if (string.IsNullOrEmpty(model.RoomServiceType))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceType))));
-            }
-
-            if (!Enum.TryParse(model.RoomServiceType, out RoomServiceTypeEnum result))
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.RoomServiceType, nameof(RoomServiceTypeEnum))));
-            }
-
-            if (model?.IsServiceIndicatorUsed == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.IsServiceIndicatorUsed))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _roomServiceService.UpdateRoomService(model);

@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,61 +24,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateServiceIndicator(ServiceIndicatorRequestModel model)
         {
-            if (model?.RoomServiceId == null)
+            var modelValidator = await ServiceIndicatorValidator.ServiceIndicatorRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceId))));
-            }
-
-            if (model?.RoomId == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomId))));
-            }
-
-            if (model?.Month == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Month))));
-            }
-
-            if (model?.Year == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Year))));
-            }
-
-            if (model.Month <= 0 || model.Month >= 13)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.InvalidMonth, nameof(model.Month))));
-            }
-
-            if (model?.NewIndicator == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.NewIndicator))));
-            }
-
-            if (model.NewIndicator < 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.NewIndicator))));
-            }
-
-            if (model?.OldIndicator != null)
-            {
-                if (model.OldIndicator < 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.OldIndicator))));
-                }
-
-                if (model.OldIndicator > model.NewIndicator)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyAMustBeLessThanOrEqualToPropertyB, nameof(model.OldIndicator), nameof(model.NewIndicator))));
-                }
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _serviceIndicatorService.AddServiceIndicator(model);
@@ -89,56 +39,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateBatchServiceIndicator(ServiceIndicatorCreationBatchRequestModel model)
         {
-            if (model?.RoomId == null)
+            var modelValidator = await ServiceIndicatorValidator.ServiceIndicatorCreationBatchRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomId))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
-            if (model?.Month == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Month))));
-            }
-
-            if (model?.Year == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Year))));
-            }
-
-            if (model.Month <= 0 || model.Month >= 13)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.InvalidMonth, nameof(model.Month))));
-            }
-
-            foreach (var roomServiceIndicator in model.RoomServiceIndicators)
-            {
-                if (roomServiceIndicator?.RoomServiceId == null)
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(roomServiceIndicator.RoomServiceId))));
-                }
-
-                if (roomServiceIndicator?.NewIndicator == null)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(roomServiceIndicator.NewIndicator))));
-                }
-
-                if (roomServiceIndicator.NewIndicator < 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(roomServiceIndicator.NewIndicator))));
-                }
-
-                if (roomServiceIndicator?.OldIndicator != null && roomServiceIndicator.OldIndicator > roomServiceIndicator.NewIndicator)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyAMustBeLessThanOrEqualToPropertyB, nameof(roomServiceIndicator.OldIndicator), nameof(roomServiceIndicator.NewIndicator))));
-                }
-            }
             var response = await _serviceIndicatorService.AddBatchServiceIndicators(model);
 
             return StatusCode((int)response.StatusCode, response);
@@ -148,67 +54,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateServiceIndicator(ServiceIndicatorUpdationRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await ServiceIndicatorValidator.ServiceIndicatorUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            }
-
-            if (model?.RoomServiceId == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomServiceId))));
-            }
-
-            if (model?.RoomId == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomId))));
-            }
-
-            if (model?.Month == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Month))));
-            }
-
-            if (model?.Year == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Year))));
-            }
-
-            if (model.Month <= 0 || model.Month >= 13)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.InvalidMonth, nameof(model.Month))));
-            }
-
-            if (model?.NewIndicator == null)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.NewIndicator))));
-            }
-
-            if (model.NewIndicator < 0)
-            {
-                return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.NewIndicator))));
-            }
-
-            if (model?.OldIndicator != null)
-            {
-                if (model.OldIndicator < 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(model.OldIndicator))));
-                }
-
-                if (model.OldIndicator > model.NewIndicator)
-                {
-                    return StatusCode(412, new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyAMustBeLessThanOrEqualToPropertyB, nameof(model.OldIndicator), nameof(model.NewIndicator))));
-                }
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _serviceIndicatorService.UpdateServiceIndicator(model);

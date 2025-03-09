@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,22 +24,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateHealthInsurance(HealthInsuranceRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.InsuranceCardNumber))
+            var modelValidator = await HealthInsuranceValidator.HealthInsuranceRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.InsuranceCardNumber))));
-            }
-
-            if (string.IsNullOrEmpty(model.RegisteredHospital))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RegisteredHospital))));
-            }
-
-            if (model?.ExpirationDate == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ExpirationDate))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _healthInsuranceService.AddHealthInsurance(model);
@@ -50,22 +39,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateHealthInsurance(HealthInsuranceUpdationRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.InsuranceCardNumber))
+            var modelValidator = await HealthInsuranceValidator.HealthInsuranceUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.InsuranceCardNumber))));
-            }
-
-            if (string.IsNullOrEmpty(model.RegisteredHospital))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RegisteredHospital))));
-            }
-
-            if (model?.ExpirationDate == null)
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ExpirationDate))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _healthInsuranceService.UpdateHealthInsurance(model);

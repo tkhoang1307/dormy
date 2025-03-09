@@ -4,6 +4,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,28 +25,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateNewGuardian(GuardianRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
+            var modelValidator = await GuardianValidator.GuardianRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
-            }
-
-            if (string.IsNullOrEmpty(model.PhoneNumber))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.PhoneNumber))));
-            }
-
-            if (string.IsNullOrEmpty(model.Address))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Address))));
-            }
-
-            if (string.IsNullOrEmpty(model.RelationshipToUser))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RelationshipToUser))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _guardianService.AddNewGuardian(model);
@@ -57,34 +40,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateGuardian(GuardianUpdationRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await GuardianValidator.GuardianUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            }
-
-            if (string.IsNullOrEmpty(model.Name))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
-            }
-
-            if (string.IsNullOrEmpty(model.PhoneNumber))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.PhoneNumber))));
-            }
-
-            if (string.IsNullOrEmpty(model.Address))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Address))));
-            }
-
-            if (string.IsNullOrEmpty(model.RelationshipToUser))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RelationshipToUser))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _guardianService.UpdateGuardian(model);

@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,23 +52,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateWorkplace([FromBody] WorkplaceRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
+            var modelValidator = await WorkplaceValidator.WorkplaceRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message: 
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
-            if (string.IsNullOrEmpty(model.Address))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Address))));
-            }
-
-            if (string.IsNullOrEmpty(model.Abbrevation))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Abbrevation))));
-            }
             var response = await _workplaceService.CreateWorkplace(model);
 
             return StatusCode((int)response.StatusCode, response);
@@ -77,22 +67,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateWorkplace([FromBody] WorkplaceUpdateRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.Name))
+            var modelValidator = await WorkplaceValidator.WorkplaceUpdateRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Name))));
-            }
-
-            if (string.IsNullOrEmpty(model.Address))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Address))));
-            }
-
-            if (string.IsNullOrEmpty(model.Abbrevation))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Abbrevation))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var response = await _workplaceService.UpdateWorkplace(model);

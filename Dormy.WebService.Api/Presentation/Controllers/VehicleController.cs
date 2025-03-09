@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,16 +24,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateNewVehicle(VehicleRequestModel model)
         {
-            if (string.IsNullOrEmpty(model.LicensePlate))
+            var modelValidator = await VehicleValidator.VehicleRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.LicensePlate))));
-            }
-
-            if (string.IsNullOrEmpty(model.VehicleType))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.VehicleType))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _vehicleService.AddNewVehicle(model);
@@ -44,22 +39,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateVehicle(VehicleUpdationRequestModel model)
         {
-            if (model?.Id == null)
+            var modelValidator = await VehicleValidator.VehicleUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
             {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id))));
-            }
-
-            if (string.IsNullOrEmpty(model.LicensePlate))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.LicensePlate))));
-            }
-
-            if (string.IsNullOrEmpty(model.VehicleType))
-            {
-                return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.VehicleType))));
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
             }
 
             var result = await _vehicleService.UpdateVehicle(model);

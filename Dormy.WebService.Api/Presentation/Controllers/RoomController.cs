@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,34 +26,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             foreach(var room in rooms)
             {
-                if (room?.FloorNumber == null)
+                var modelValidator = await RoomValidator.RoomCreationRequestModelValidator(room);
+                if (!modelValidator.IsSuccess)
                 {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.FloorNumber))));
-                }
-
-                if (room?.RoomTypeId == null)
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.RoomTypeId))));
-                }
-
-                if (room?.TotalRoomsWantToCreate == null)
-                {
-                    return UnprocessableEntity(new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(room.TotalRoomsWantToCreate))));
-                }
-
-                if (room.FloorNumber < 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(room.FloorNumber))));
-                }
-
-                if (room.TotalRoomsWantToCreate <= 0)
-                {
-                    return StatusCode(412, new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(room.TotalRoomsWantToCreate))));
+                    return StatusCode((int)modelValidator.StatusCode, modelValidator);
                 }
             }
             var response = await _roomService.CreateRoomBatch(rooms, buildingId);
@@ -80,7 +57,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateRoom(RoomUpdateRequestModel room)
         {
+            var modelValidator = await RoomValidator.RoomUpdateRequestModelValidator(room);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var response = await _roomService.UpdateRoom(room);
+            
             return StatusCode((int)response.StatusCode, response);
         }
 
@@ -88,6 +72,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateRoomStatus(RoomUpdateStatusRequestModel room)
         {
+            var modelValidator = await RoomValidator.RoomUpdateStatusRequestModelValidator(room);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var response = await _roomService.UpdateRoomStatus(room);
 
             return StatusCode((int)response.StatusCode, response);
