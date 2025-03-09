@@ -59,6 +59,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             // Validate startDate cannot be after enddate
+            if (model.StartDate < DateTime.Now || model.EndDate < DateTime.Now)
+            {
+                return new ApiResponse().SetBadRequest(message: "Start date and end date must be in the future");
+            }
+
             if (model.StartDate > model.EndDate)
             {
                 return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
@@ -280,13 +285,27 @@ namespace Dormy.WebService.Api.ApplicationLogic
             contractEntity.LastUpdatedBy = userId;
             contractEntity.LastUpdatedDateUtc = DateTime.UtcNow;
 
-            if (status == ContractStatusEnum.REJECTED || status == ContractStatusEnum.TERMINATED || status == ContractStatusEnum.EXPIRED)
+            switch (status)
             {
-                // Release bed and update room status
-                contractEntity.Room.TotalUsedBed -= 1;
-                contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                contractEntity.Room.LastUpdatedBy = userId;
-                contractEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
+                case ContractStatusEnum.ACTIVE:
+                    {
+                        if (contractEntity.Status != ContractStatusEnum.WAITING_PAYMENT)
+                        {
+                            return new ApiResponse().SetBadRequest(message: "Contract is not in WAITING_PAYMENT status");
+                        }
+                        break;
+                    }
+                case ContractStatusEnum.REJECTED:
+                case ContractStatusEnum.TERMINATED:
+                case ContractStatusEnum.EXPIRED:
+                    {
+                        // Release bed and update room status
+                        contractEntity.Room.TotalUsedBed = contractEntity.Room.TotalUsedBed > 0 ? contractEntity.Room.TotalUsedBed - 1 : 0;
+                        contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
+                        contractEntity.Room.LastUpdatedBy = userId;
+                        contractEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
+                        break;
+                    }
             }
 
             await _unitOfWork.SaveChangeAsync();

@@ -63,5 +63,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var result = await _contractService.UpdateContractStatus(id, Models.Enums.ContractStatusEnum.TERMINATED);
             return Ok(result);
         }
+
+        [HttpPut("id/{id:guid}/expired")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> ExpiredContract(Guid id)
+        {
+            var result = await _contractService.UpdateContractStatus(id, Models.Enums.ContractStatusEnum.EXPIRED);
+            return Ok(result);
+        }
     }
 }
