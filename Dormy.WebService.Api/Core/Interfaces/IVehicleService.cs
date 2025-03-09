@@ -10,5 +10,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetDetailVehicleById(Guid id);
         Task<ApiResponse> GetVehicleBatch(GetBatchVehicleRequestModel model);
         Task<ApiResponse> GetAllVehiclesOfUser();
+        Task<ApiResponse> SoftDeleteVehicle(Guid id);
     }
 }

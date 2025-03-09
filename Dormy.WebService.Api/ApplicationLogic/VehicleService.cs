@@ -151,5 +151,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetAccepted(entity.Id);
         }
+
+        public async Task<ApiResponse> SoftDeleteVehicle(Guid id)
+        {
+            var entity = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == id);
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle"));
+            }
+
+            entity.IsDeleted = true;
+            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(id);
+        }
     }
 }

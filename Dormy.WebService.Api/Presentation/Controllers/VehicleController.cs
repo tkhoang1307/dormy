@@ -59,6 +59,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [HttpDelete("id/{id:guid}")]
+        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
+        public async Task<IActionResult> SoftDeleteVehicleById(Guid id)
+        {
+            var result = await _vehicleService.SoftDeleteVehicle(id);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+
         [HttpPost("batch")]
         [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         public async Task<IActionResult> GetBatchVechiles(GetBatchVehicleRequestModel model)
