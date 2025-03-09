@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Core.CustomExceptions;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
@@ -18,82 +19,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUserContextService _userContextService;
         private readonly IRoomTypeService _roomTypeService;
         private readonly UserMapper _userMapper;
+        private readonly IUserService _userService;
+        private readonly IHealthInsuranceService _healthInsuranceService;
+        private readonly IGuardianService _guardianService;
         private readonly WorkplaceMapper _workplaceMapper;
         private readonly RoomTypeMapper _roomTypeMapper;
         private readonly ContractMapper _contractMapper;
 
-        public ContractService(IUnitOfWork unitOfWork, IUserContextService userContextService, IRoomTypeService roomTypeService)
+        public ContractService(IUnitOfWork unitOfWork, 
+                               IUserContextService userContextService, 
+                               IRoomTypeService roomTypeService,
+                               IUserService userService,
+                               IHealthInsuranceService healthInsuranceService,
+                               IGuardianService guardianService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
             _roomTypeService = roomTypeService;
+            _userService = userService;
+            _healthInsuranceService =healthInsuranceService;
+            _guardianService =guardianService;
             _userMapper = new UserMapper();
             _workplaceMapper = new WorkplaceMapper();
             _roomTypeMapper = new RoomTypeMapper();
             _contractMapper = new ContractMapper();
         }
 
-        public async Task<ApiResponse> GetRegistrationByRequestId(Guid requestId, Guid? userId)
-        {
-            if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
-            {
-                userId = _userContextService.UserId;
-            }
-
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(
-                x => x.Id == userId,
-                x => x.Include(x => x.HealthInsurance)
-                        .Include(x => x.Guardians)
-                        .Include(x => x.Vehicles));
-            if (userEntity == null)
-            {
-                return new ApiResponse().SetNotFound(message: "User not found");
-            }
-
-            var result = await GetRegistrationByRequestId(requestId, userEntity);
-
-            return new ApiResponse().SetOk(result);
-        }
-        public async Task<ApiResponse> GetRegistrationBatchByRequestIds(List<Guid> requestIds, Guid? userId)
-        {
-            if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
-            {
-                userId = _userContextService.UserId;
-            }
-
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(
-                x => x.Id == userId,
-                x => x.Include(x => x.HealthInsurance)
-                        .Include(x => x.Guardians)
-                        .Include(x => x.Vehicles));
-            if (userEntity == null)
-            {
-                return new ApiResponse().SetNotFound(message: "User not found");
-            }
-
-            var requests = await _unitOfWork.RequestRepository.GetAllAsync(x => requestIds.Contains(x.Id), isNoTracking: true);
-            if (requests.Count != requestIds.Count)
-            {
-                // Find the missing request IDs
-                var foundRequestIds = requests.Select(r => r.Id).ToList();
-                var missingRequestIds = requestIds.Except(foundRequestIds).ToList();
-
-                // Return with error message listing the missing request IDs
-                var errorMessage = $"Request(s) not found: {string.Join(", ", missingRequestIds)}";
-                return new ApiResponse().SetNotFound(message: errorMessage);
-            }
-
-            var result = new List<RegistrationResponseModel>();
-
-            for (int i = 0; i < requestIds.Count; i++)
-            {
-                var requestId = requestIds[i];
-                var registration = await GetRegistrationByRequestId(requestId, userEntity);
-                result.Add(registration);
-            }
-
-            return new ApiResponse().SetOk(result);
-        }
         public async Task<ApiResponse> Register(RegisterRequestModel model)
         {
             if (model == null)
@@ -101,13 +52,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest(null, "Model cannot be null");
             }
 
-            var userId = _userContextService.UserId;
-
-            if (userId == Guid.Empty)
-            {
-                return new ApiResponse().SetForbidden(null, "User not authenticated");
-            }
-
             // Validate User
             if (model.User == null)
             {
@@ -120,63 +64,48 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetUnprocessableEntity(null, "Start date cannot be after end date");
             }
 
-            // Retrieve existing User entity
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(
-                x => x.Id == userId,
-                x => x.Include(x => x.HealthInsurance)
-                        .Include(x => x.Guardians)
-                        .Include(x => x.Vehicles)
-                        .Include(x => x.Contracts)
-                        .Include(x => x.Requests));
-
-            if (userEntity == null)
-            {
-                return new ApiResponse().SetNotFound(message: "User not found");
-            }
-
-            if (IsActiveContractExisted(userEntity))
-            {
-                return new ApiResponse().SetConflict(message: "User is still have an available contract");
-            }
-
             // Get user gender
             Enum.TryParse<GenderEnum>(model.User.Gender, true, out var gender);
             gender = gender == default ? GenderEnum.OTHER : gender;
+            Guid userIdTracking = Guid.Empty;
+            Guid healthInsuranceIdTracking = Guid.Empty;
+            List<Guid> guardianIdsTracking = new List<Guid>();
+            Guid contractIdTracking = Guid.Empty;
+            Guid invoiceIdTracking = Guid.Empty;
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
                 new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
                 TransactionScopeAsyncFlowOption.Enabled))
             {
-                // Check if there is any available room for user gender
-                var roomAvailables = await _unitOfWork.RoomRepository
-                    .GetAllAsync(x =>
-                        x.RoomTypeId == model.RoomTypeId &&
-                        x.Status == RoomStatusEnum.AVAILABLE &&
-                        x.TotalAvailableBed > 0 &&
-                        x.Building.GenderRestriction != gender,
-                        x => x.Include(x => x.RoomType).Include(x => x.Building));
-
-                if (roomAvailables.Count == 0)
+                //Create User
+                var userCreationRequestModel = new UserRequestModel()
                 {
-                    return new ApiResponse().SetUnprocessableEntity(message: "Out of available room");
-                }
+                    FirstName = model.User.FirstName,
+                    LastName = model.User.LastName,
+                    Email = model.User.Email,
+                    UserName = "userTest1",
+                    Password = "userTest1",
+                    DateOfBirth = model.User.DateOfBirth,
+                    PhoneNumber = model.User.PhoneNumber,
+                    NationalIdNumber = model.User.NationalIdNumber,
+                    Gender = model.User.Gender,
+                };
 
-                // Get the first available room
-                var bookedRoom = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == roomAvailables.First().Id);
-
-                if (bookedRoom == null)
+                var responseCreateUser = await _userService.SignUp(userCreationRequestModel);
+                if (!responseCreateUser.IsSuccess)
                 {
-                    return new ApiResponse().SetNotFound(null, "Room not found");
-                }
+                    return responseCreateUser;
+                }    
+                userIdTracking = (Guid)responseCreateUser.Result;
+                var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(userIdTracking));
 
-                // Update room
-                bookedRoom.Status = bookedRoom.TotalAvailableBed == bookedRoom.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                bookedRoom.LastUpdatedBy = userId;
-                bookedRoom.LastUpdatedDateUtc = DateTime.UtcNow;
-                bookedRoom.TotalAvailableBed = bookedRoom.TotalAvailableBed - 1;
-                bookedRoom.TotalUsedBed = bookedRoom.TotalUsedBed + 1;
-                await _unitOfWork.SaveChangeAsync();
+                //Sign in to have userContext
+                var responseLogin = await _userService.Login(new LoginRequestModel()
+                {
+                    Username = userCreationRequestModel.UserName,
+                    Password = userCreationRequestModel.Password,
+                });
 
                 // Check if user have any workplace
                 if (model.WorkplaceId != null)
@@ -186,314 +115,106 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     {
                         return new ApiResponse().SetNotFound(message: "Workplace not found");
                     }
+
+                    userEntity.WorkplaceId = model.WorkplaceId;
                 }
-
-                // Update User entity
-                userEntity.FirstName = model.User.FirstName;
-                userEntity.LastName = model.User.LastName;
-                userEntity.Email = model.User.Email;
-                userEntity.DateOfBirth = model.User.DateOfBirth;
-                userEntity.PhoneNumber = model.User.PhoneNumber;
-                userEntity.NationalIdNumber = model.User.NationalIdNumber;
-                userEntity.WorkplaceId = model.WorkplaceId;
-                userEntity.Gender = gender;
-                userEntity.LastUpdatedBy = userId;
-                userEntity.LastUpdatedDateUtc = DateTime.UtcNow;
-
-                await _unitOfWork.SaveChangeAsync();
 
                 // Add HealthInsurance entity if provided
                 if (model.HealthInsurance != null)
                 {
-                    var healthInsuranceEntity = new HealthInsuranceEntity
+                    var responseCreateHealthInsurance = await _healthInsuranceService.AddHealthInsurance(model.HealthInsurance);
+                    if (!responseCreateHealthInsurance.IsSuccess)
                     {
-                        InsuranceCardNumber = model.HealthInsurance.InsuranceCardNumber,
-                        RegisteredHospital = model.HealthInsurance.RegisteredHospital,
-                        ExpirationDate = model.HealthInsurance.ExpirationDate,
-                        CreatedBy = userId,
-                        CreatedDateUtc = DateTime.UtcNow,
-                    };
-                    await _unitOfWork.HealthInsuranceRepository.AddAsync(healthInsuranceEntity);
-                    await _unitOfWork.SaveChangeAsync();
-
-                    userEntity.HealthInsuranceId = healthInsuranceEntity.Id;
+                        return responseCreateHealthInsurance;
+                    }
+                    healthInsuranceIdTracking = (Guid)responseCreateHealthInsurance.Result;
+                    userEntity.HealthInsuranceId = healthInsuranceIdTracking;
                 }
 
                 // Add Guardians entity if provided
                 if (model.Guardians != null && model.Guardians.Count > 0)
                 {
-                    var guardianEntities = model.Guardians.Select(guardian => new GuardianEntity
+                    foreach (var item in model.Guardians)
                     {
-                        Name = guardian.Name,
-                        Email = guardian.Email,
-                        PhoneNumber = guardian.PhoneNumber,
-                        Address = guardian.Address,
-                        RelationshipToUser = guardian.RelationshipToUser,
-                        UserId = userId,
-                        CreatedBy = userId,
-                        CreatedDateUtc = DateTime.UtcNow,
-                    }).ToList();
-
-                    await _unitOfWork.GuardianRepository.AddRangeAsync(guardianEntities);
-                    await _unitOfWork.SaveChangeAsync();
+                        var guardianCreationRequestModel = item;
+                        guardianCreationRequestModel.UserId = userIdTracking;
+                        var responseCreateGuardian = await _guardianService.AddNewGuardian(guardianCreationRequestModel);
+                        if (!responseCreateGuardian.IsSuccess)
+                        {
+                            return responseCreateGuardian;
+                        }
+                        guardianIdsTracking.Add((Guid)responseCreateGuardian.Result);
+                    }
                 }
 
-                // Create and add Vehicle entities if provided
-                if (model.Vehicles != null && model.Vehicles.Count > 0)
+                // Create contract
+                var contractCreationRequestModel = new ContractRequestModel()
                 {
-                    var vehicleEntities = model.Vehicles.Select(vehicle => new VehicleEntity
-                    {
-                        LicensePlate = vehicle.LicensePlate,
-                        VehicleType = vehicle.VehicleType,
-                        UserId = userId,
-                        CreatedBy = userId,
-                        CreatedDateUtc = DateTime.UtcNow,
-                    }).ToList();
-
-                    await _unitOfWork.VehicleRepository.AddRangeAsync(vehicleEntities);
-                    await _unitOfWork.SaveChangeAsync();
-                }
-
-                // Create Request entity
-                var request = new RequestEntity()
-                {
-                    UserId = userId,
-                    RoomId = bookedRoom.Id,
-                    RequestType = RequestTypeEnum.REGISTRATION.ToString(),
-                    Status = RequestStatusEnum.SUBMITTED,
-                    CreatedBy = userId,
-                    CreatedDateUtc = DateTime.Now,
-                    Description = "User registration request",
-                    Contract = new ContractEntity()
-                    {
-                        UserId = userId,
-                        RoomId = bookedRoom.Id,
-                        StartDate = model.StartDate,
-                        EndDate = model.EndDate,
-                        SubmissionDate = DateTime.Now,
-                        Status = ContractStatusEnum.PENDING,
-                        CreatedBy = userId,
-                        CreatedDateUtc = DateTime.Now,
-                    },
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate,
+                    RoomId = model.RoomId,
+                    UserId = userIdTracking,
                 };
+                var responseCreateContract = await AddNewContract(contractCreationRequestModel);
+                if (!responseCreateContract.IsSuccess)
+                {
+                    return responseCreateContract;
+                }
+                contractIdTracking = (Guid)responseCreateContract.Result;
 
-                await _unitOfWork.RequestRepository.AddAsync(request);
                 await _unitOfWork.SaveChangeAsync();
 
                 // Complete transaction
                 scope.Complete();
             }
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetCreated();
         }
-        public async Task<ApiResponse> UpdateRegistration(Guid requestId, RegisterUpdateRequestModel model)
+
+        public async Task<ApiResponse> AddNewContract(ContractRequestModel model)
         {
-            if (model == null)
-            {
-                return new ApiResponse().SetBadRequest(null, "Model cannot be null");
-            }
+            // Compare StartDate and EndDate
 
-            var userId = _userContextService.UserId;
+            //
 
-            if (userId == Guid.Empty)
-            {
-                return new ApiResponse().SetForbidden(null, "User not authenticated");
-            }
-
-            var requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == requestId && x.UserId == userId, x => x.Include(x => x.Contract), isNoTracking: true);
-            if (requestEntity == null || requestEntity.IsDeleted)
-            {
-                return new ApiResponse().SetNotFound(message: "Request not found");
-            }
-
-            if (requestEntity.Status == RequestStatusEnum.APPROVED)
-            {
-                return new ApiResponse().SetConflict(message: "Request is already approved");
-            }
-
-            if (requestEntity.Contract?.Status != ContractStatusEnum.REJECTED &&
-                requestEntity.Contract?.Status != ContractStatusEnum.TERMINATED &&
-                requestEntity.Contract?.Status != ContractStatusEnum.PENDING)
-            {
-                return new ApiResponse().SetConflict(message: "Contract is already active");
-            }
-
-            // Validate User
-            if (model.User == null)
-            {
-                return new ApiResponse().SetBadRequest(null, "User information is required");
-            }
-
-            // Validate startDate cannot be after enddate
-            if (model.StartDate > model.EndDate)
-            {
-                return new ApiResponse().SetUnprocessableEntity(null, "Start date cannot be after end date");
-            }
-
-            // Retrieve existing User entity
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(
-                x => x.Id == userId,
-                x => x.Include(x => x.HealthInsurance)
-                        .Include(x => x.Guardians)
-                        .Include(x => x.Vehicles)
-                        .Include(x => x.Contracts)
-                        .Include(x => x.Requests));
-
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(model.UserId));
             if (userEntity == null)
             {
-                return new ApiResponse().SetNotFound(message: "User not found");
+                return new ApiResponse().SetNotFound(model.UserId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "User"));
             }
 
-            // Get user gender
-            Enum.TryParse<GenderEnum>(model.User.Gender, true, out var gender);
-            gender = gender == default ? GenderEnum.OTHER : gender;
-
-            using (var scope = new TransactionScope(
-                TransactionScopeOption.Required,
-                new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
-                TransactionScopeAsyncFlowOption.Enabled))
+            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(model.RoomId), x => x.Include(x => x.Building));
+            if (roomEntity == null)
             {
-                // Check if there is any available room for user gender
-                var roomAvailables = await _unitOfWork.RoomRepository
-                    .GetAllAsync(x =>
-                        x.RoomTypeId == model.RoomTypeId &&
-                        x.Status == RoomStatusEnum.AVAILABLE &&
-                        x.TotalAvailableBed > 0 &&
-                        x.Building.GenderRestriction != gender,
-                        x => x.Include(x => x.RoomType).Include(x => x.Building),
-                        isNoTracking: true);
-
-                if (roomAvailables.Count == 0)
-                {
-                    return new ApiResponse().SetUnprocessableEntity(message: "Out of available room");
-                }
-
-                // Get the first available room
-                var bookedRoom = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == roomAvailables.First().Id);
-
-                if (bookedRoom == null)
-                {
-                    return new ApiResponse().SetNotFound(null, "Room not found");
-                }
-
-                // Update room
-                bookedRoom.Status = bookedRoom.TotalAvailableBed == bookedRoom.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                bookedRoom.LastUpdatedBy = userId;
-                bookedRoom.LastUpdatedDateUtc = DateTime.UtcNow;
-                bookedRoom.TotalAvailableBed = bookedRoom.TotalAvailableBed - 1;
-                bookedRoom.TotalUsedBed = bookedRoom.TotalUsedBed + 1;
-                await _unitOfWork.SaveChangeAsync();
-
-                // Reset current booked room available bed
-                var currentBookedRoom = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == requestEntity.RoomId);
-                if (currentBookedRoom == null)
-                {
-                    return new ApiResponse().SetNotFound(null, "Current booked room not found");
-                }
-                currentBookedRoom.TotalAvailableBed = currentBookedRoom.TotalAvailableBed + 1;
-                currentBookedRoom.TotalUsedBed = currentBookedRoom.TotalUsedBed - 1;
-                currentBookedRoom.Status = currentBookedRoom.TotalAvailableBed == currentBookedRoom.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                currentBookedRoom.LastUpdatedBy = userId;
-                currentBookedRoom.LastUpdatedDateUtc = DateTime.UtcNow;
-                await _unitOfWork.SaveChangeAsync();
-
-                // Check if user have any workplace
-                if (model.WorkplaceId != null)
-                {
-                    var workplaceEntity = await _unitOfWork.WorkplaceRepository.GetAsync(x => x.Id == model.WorkplaceId);
-                    if (workplaceEntity == null)
-                    {
-                        return new ApiResponse().SetNotFound(message: "Workplace not found");
-                    }
-                }
-
-                // Update User entity
-                userEntity.FirstName = model.User.FirstName;
-                userEntity.LastName = model.User.LastName;
-                userEntity.Email = model.User.Email;
-                userEntity.DateOfBirth = model.User.DateOfBirth;
-                userEntity.PhoneNumber = model.User.PhoneNumber;
-                userEntity.NationalIdNumber = model.User.NationalIdNumber;
-                userEntity.WorkplaceId = model.WorkplaceId;
-                userEntity.Gender = gender;
-                userEntity.LastUpdatedBy = userId;
-                userEntity.LastUpdatedDateUtc = DateTime.UtcNow;
-
-                // Update HealthInsurance entity if provided
-                if (model.HealthInsurance != null)
-                {
-                    if (userEntity.HealthInsurance == null)
-                    {
-                        userEntity.HealthInsurance = new HealthInsuranceEntity
-                        {
-                            InsuranceCardNumber = model.HealthInsurance.InsuranceCardNumber,
-                            RegisteredHospital = model.HealthInsurance.RegisteredHospital,
-                            ExpirationDate = model.HealthInsurance.ExpirationDate,
-                            CreatedBy = userId,
-                            CreatedDateUtc = DateTime.UtcNow,
-                        };
-                    }
-                    else
-                    {
-                        userEntity.HealthInsurance.InsuranceCardNumber = model.HealthInsurance.InsuranceCardNumber;
-                        userEntity.HealthInsurance.RegisteredHospital = model.HealthInsurance.RegisteredHospital;
-                        userEntity.HealthInsurance.ExpirationDate = model.HealthInsurance.ExpirationDate;
-                        userEntity.HealthInsurance.LastUpdatedBy = userId;
-                        userEntity.HealthInsurance.LastUpdatedDateUtc = DateTime.UtcNow;
-                    }
-                }
-
-                // Add Guardians entity if provided
-                if (model.Guardians != null && model.Guardians.Count > 0)
-                {
-                    userEntity.Guardians = [];
-                    var guardianEntities = model.Guardians.Select(guardian => new GuardianEntity
-                    {
-                        Name = guardian.Name,
-                        Email = guardian.Email,
-                        PhoneNumber = guardian.PhoneNumber,
-                        Address = guardian.Address,
-                        RelationshipToUser = guardian.RelationshipToUser,
-                        UserId = userId,
-                        CreatedBy = userId,
-                        CreatedDateUtc = DateTime.UtcNow,
-                    }).ToList();
-
-                    userEntity.Guardians.AddRange(guardianEntities);
-                }
-
-                // Create and add Vehicle entities if provided
-                if (model.Vehicles != null && model.Vehicles.Count > 0)
-                {
-                    userEntity.Vehicles = [];
-                    var vehicleEntities = model.Vehicles.Select(vehicle => new VehicleEntity
-                    {
-                        LicensePlate = vehicle.LicensePlate,
-                        VehicleType = vehicle.VehicleType,
-                        UserId = userId,
-                        CreatedBy = userId,
-                        CreatedDateUtc = DateTime.UtcNow,
-                    }).ToList();
-
-                    userEntity.Vehicles.AddRange(vehicleEntities);
-                }
-
-                // Update Request and contract entity
-                requestEntity.LastUpdatedBy = userId;
-                requestEntity.LastUpdatedDateUtc = DateTime.Now;
-                requestEntity.Description = "User update registration request";
-                requestEntity.Contract.StartDate = model.StartDate;
-                requestEntity.Contract.EndDate = model.EndDate;
-                requestEntity.Contract.LastUpdatedBy = userId;
-                requestEntity.Contract.LastUpdatedDateUtc = DateTime.Now;
-
-                await _unitOfWork.SaveChangeAsync();
-
-                // Complete transaction
-                scope.Complete();
-
-                return new ApiResponse().SetOk();
+                return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
+
+            if (roomEntity.Building.GenderRestriction != userEntity.Gender)
+            {
+                return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.ConflictGenderWhenChooseRoom, userEntity.Gender.ToString(), roomEntity.Building.GenderRestriction.ToString()));
+            }
+
+            if (roomEntity.TotalUsedBed >= roomEntity.TotalAvailableBed)
+            {
+                return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.RoomIsFull));
+            }
+
+            var contractEntity = _contractMapper.MapToContractEntity(model);
+
+            contractEntity.CreatedBy = _userContextService.UserId;
+            contractEntity.LastUpdatedBy = _userContextService.UserId;
+
+            if (roomEntity.TotalUsedBed + 1 == roomEntity.TotalAvailableBed)
+            {
+                roomEntity.Status = RoomStatusEnum.FULL;
+            }
+            roomEntity.TotalUsedBed = roomEntity.TotalUsedBed + 1;
+
+            await _unitOfWork.ContractRepository.AddAsync(contractEntity);
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetCreated(contractEntity.Id);
         }
+
         public async Task<ApiResponse> UpdateContractStatus(Guid id, ContractStatusEnum status)
         {
             var userId = _userContextService.UserId;
@@ -551,91 +272,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 contract.Status == ContractStatusEnum.WAITING_PAYMENT));
 
             return isUserHaveActiveContract;
-        }
-        private async Task<RegistrationResponseModel> GetRegistrationByRequestId(Guid requestId, UserEntity userEntity)
-        {
-            var result = new RegistrationResponseModel();
-            var requestEntity =
-                await _unitOfWork.RequestRepository.GetAsync(
-                    x => x.Id == requestId,
-                    x => x.Include(x => x.Contract)
-                    .Include(x => x.Room)
-                    .ThenInclude(r => r.RoomType));
-            if (requestEntity == null)
-            {
-                throw new EntityNotFoundException("Request not found");
-            }
-
-            // Map Request
-            result.RequestId = requestEntity.Id;
-            result.RequestType = requestEntity.RequestType;
-            result.Status = requestEntity.Status.ToString();
-            result.ContractId = requestEntity.ContractId;
-
-            if (requestEntity.Contract == null)
-            {
-                throw new EntityNotFoundException("Contract not found");
-            }
-
-            // Map Contract Date
-            result.StartDate = requestEntity.Contract.StartDate;
-            result.EndDate = requestEntity.Contract.EndDate;
-
-            // Map User
-            result.User = _userMapper.MapToUserRegistrationResponseModel(userEntity);
-
-            // Map Workplace
-            if (userEntity.Workplace != null)
-            {
-                result.Workplace = _workplaceMapper.MapToWorkplaceRegistrationResponseModel(userEntity.Workplace);
-            }
-
-            // Map Room
-            var roomTypeData = (await _roomTypeService.GetRoomTypeById(requestEntity.Room.RoomType.Id)).Result as RoomTypeResponseModel;
-            if (roomTypeData == null || roomTypeData.GetType() != typeof(RoomTypeResponseModel))
-            {
-                throw new EntityNotFoundException("RoomType not found");
-            }
-            result.RoomType = _roomTypeMapper.MapToRoomTypeRegistrationResponseModel(roomTypeData);
-
-            // Map HealthInsurance
-            if (userEntity.HealthInsurance != null)
-            {
-                result.HealthInsurance = new HealthInsuranceRegistrationResponseModel
-                {
-                    Id = userEntity.HealthInsurance.Id,
-                    InsuranceCardNumber = userEntity.HealthInsurance.InsuranceCardNumber,
-                    RegisteredHospital = userEntity.HealthInsurance.RegisteredHospital,
-                    ExpirationDate = userEntity.HealthInsurance.ExpirationDate,
-                };
-            }
-
-            // Map Guardians
-            if (userEntity.Guardians != null && userEntity.Guardians.Count > 0)
-            {
-                result.Guardians = userEntity.Guardians.Select(guardian => new GuardianResponseRegistrationModel
-                {
-                    Id = guardian.Id,
-                    Name = guardian.Name,
-                    Email = guardian.Email,
-                    PhoneNumber = guardian.PhoneNumber,
-                    Address = guardian.Address,
-                    RelationshipToUser = guardian.RelationshipToUser,
-                }).ToList();
-            }
-
-            // Map Vehicles
-            if (userEntity.Vehicles != null && userEntity.Vehicles.Count > 0)
-            {
-                result.Vehicles = userEntity.Vehicles.Select(vehicle => new VehicleResponseRegistrationModel
-                {
-                    Id = vehicle.Id,
-                    LicensePlate = vehicle.LicensePlate,
-                    VehicleType = vehicle.VehicleType,
-                }).ToList();
-            }
-
-            return result;
         }
 
         public async Task<ApiResponse> GetSingleContract(Guid id)

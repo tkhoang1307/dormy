@@ -1,4 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Models.Enums;
+using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
@@ -25,6 +27,22 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 ApproverName = contractEntity.Approver == null ? string.Empty : $"{contractEntity.Approver?.FirstName} {contractEntity.Approver?.LastName}",
                 RoomId = contractEntity.RoomId,
                 Room = contractEntity.Room == null ? null : _roomMapper.MapToRoomResponseModel(contractEntity.Room),
+            };
+        }
+
+        public ContractEntity MapToContractEntity(ContractRequestModel model)
+        {
+            return new ContractEntity
+            {
+                SubmissionDate = System.DateTime.Today,
+                StartDate = model.StartDate,
+                EndDate = model.EndDate,
+                Status = ContractStatusEnum.PENDING,
+                NumberExtension = 0,
+                RoomId = model.RoomId,
+                UserId = model.UserId,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
         }
     }
