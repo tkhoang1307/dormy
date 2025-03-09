@@ -6,6 +6,12 @@ namespace Dormy.WebService.Api.Presentation.Mappers
 {
     public class RoomMapper
     {
+        private readonly RoomTypeMapper _roomTypeMapper;
+        public RoomMapper()
+        {
+            _roomTypeMapper = new RoomTypeMapper();
+        }
+
         public RoomEntity MapToRoomEntity(RoomRequestModel model)
         {
             return new RoomEntity
@@ -31,12 +37,15 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 RoomTypeName = entity.RoomType?.RoomTypeName ?? string.Empty,
                 Status = entity.Status.ToString(),
                 TotalAvailableBed = entity.TotalAvailableBed,
+                Price = entity.RoomType?.Price ?? 0,
                 BuildingId = entity.BuildingId,
+                BuildingName = entity.Building?.Name ?? string.Empty,
                 CreatedDateUtc = entity.CreatedDateUtc,
                 CreatedBy = entity.CreatedBy,
                 IsDeleted = entity.IsDeleted,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
+                RoomServices = entity.RoomType != null ? _roomTypeMapper.MapToRoomServiceModels(entity.RoomType) : [],
             };
         }
     }

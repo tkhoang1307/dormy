@@ -1,6 +1,4 @@
-﻿using Dormy.WebService.Api.Models.Enums;
-
-namespace Dormy.WebService.Api.Models.ResponseModels
+﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class RoomResponseModel : BaseResponseModel
     {
@@ -16,9 +14,15 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string RoomTypeName { get; set; } = string.Empty;
 
+        public decimal Price { get; set; }
+
         // RoomStatusEnum
         public string Status { get; set; } = string.Empty;
 
         public Guid BuildingId { get; set; }
+
+        public string BuildingName { get; set; } = string.Empty;
+
+        public List<RoomServiceResponseModel> RoomServices { get; set; } = [];
     }
 }

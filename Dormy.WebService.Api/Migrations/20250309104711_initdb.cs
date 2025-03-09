@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Dormy.WebService.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class initdb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -490,6 +490,45 @@ namespace Dormy.WebService.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Requests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    RequestType = table.Column<string>(type: "text", nullable: false),
+                    ApproverId = table.Column<Guid>(type: "uuid", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Requests_Admins_ApproverId",
+                        column: x => x.ApproverId,
+                        principalTable: "Admins",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Requests_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Requests_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Vehicles",
                 columns: table => new
                 {
@@ -636,51 +675,6 @@ namespace Dormy.WebService.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Requests",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    RequestType = table.Column<string>(type: "text", nullable: false),
-                    ApproverId = table.Column<Guid>(type: "uuid", nullable: true),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ContractId = table.Column<Guid>(type: "uuid", nullable: true),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastUpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Requests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Requests_Admins_ApproverId",
-                        column: x => x.ApproverId,
-                        principalTable: "Admins",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Requests_Contracts_ContractId",
-                        column: x => x.ContractId,
-                        principalTable: "Contracts",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Requests_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Requests_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ParkingRequests",
                 columns: table => new
                 {
@@ -760,7 +754,7 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedBy", "CreatedDateUtc", "DateOfBirth", "Email", "FirstName", "Gender", "IsDeleted", "JobTitle", "LastName", "LastUpdatedBy", "LastUpdatedDateUtc", "Password", "PhoneNumber", "UserName" },
-                values: new object[] { new Guid("a0a4263b-eaa1-4fb1-9bd7-885d10902169"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 3, 9, 10, 2, 10, 915, DateTimeKind.Local).AddTicks(8705), new DateTime(2025, 3, 9, 10, 2, 10, 915, DateTimeKind.Local).AddTicks(8710), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
+                values: new object[] { new Guid("7dc1f8a5-f467-47b1-a6fb-acdf5a99c49a"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 3, 9, 17, 47, 11, 228, DateTimeKind.Local).AddTicks(7509), new DateTime(2025, 3, 9, 17, 47, 11, 228, DateTimeKind.Local).AddTicks(7515), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContractExtensions_ApproverId",
@@ -856,12 +850,6 @@ namespace Dormy.WebService.Api.Migrations
                 name: "IX_Requests_ApproverId",
                 table: "Requests",
                 column: "ApproverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Requests_ContractId",
-                table: "Requests",
-                column: "ContractId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Requests_RoomId",
@@ -983,10 +971,10 @@ namespace Dormy.WebService.Api.Migrations
                 name: "Violations");
 
             migrationBuilder.DropTable(
-                name: "Invoices");
+                name: "Contracts");
 
             migrationBuilder.DropTable(
-                name: "Contracts");
+                name: "Invoices");
 
             migrationBuilder.DropTable(
                 name: "RoomServices");

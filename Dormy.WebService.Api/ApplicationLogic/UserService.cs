@@ -29,7 +29,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         public async Task<ApiResponse> SignUp(UserRequestModel model)
         {
             var userEntity = _userMapper.MapToUserEntity(model);
-            userEntity.Status = Models.Enums.UserStatusEnum.ACTIVE;
+            userEntity.Status = UserStatusEnum.ACTIVE;
 
             var existedAccountByUsername = await _unitOfWork.UserRepository.GetAsync(x => x.UserName.ToLower().Equals(model.UserName.ToLower()));
             if (existedAccountByUsername != null)

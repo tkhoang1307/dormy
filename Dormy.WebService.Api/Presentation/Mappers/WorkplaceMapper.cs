@@ -39,18 +39,6 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 IsDeleted = entity.IsDeleted,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
-                Users = entity.Users.Select(user => _userMapper.MapToUserResponseModel(user)).ToList(),
-            };
-        }
-
-        public WorkplaceRegistrationResponseMode MapToWorkplaceRegistrationResponseModel(WorkplaceEntity entity)
-        {
-            return new WorkplaceRegistrationResponseMode
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Abbrevation = entity.Abbrevation,
-                Address = entity.Address,
             };
         }
     }

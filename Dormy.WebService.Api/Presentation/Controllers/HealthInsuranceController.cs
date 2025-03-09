@@ -1,5 +1,4 @@
-﻿using Dormy.WebService.Api.ApplicationLogic;
-using Dormy.WebService.Api.Core.Constants;
+﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -48,7 +47,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPut]
-        [Authorize(Roles = Role.ADMIN)]
+        [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateHealthInsurance(HealthInsuranceUpdationRequestModel model)
         {
             if (string.IsNullOrEmpty(model.InsuranceCardNumber))
@@ -75,7 +74,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpGet("id/{id:guid}")]
-        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
+        [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> GetHealthInsuranceById(Guid id)
         {
             var result = await _healthInsuranceService.GetDetailHealthInsurance(id);

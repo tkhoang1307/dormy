@@ -1,7 +1,4 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-using Dormy.WebService.Api.Models.Enums;
-
-namespace Dormy.WebService.Api.Models.ResponseModels
+﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class InvoiceBatchResponseModel : BaseResponseModel
     {

@@ -2,22 +2,14 @@
 {
     public class HealthInsuranceResponseModel : BaseResponseModel
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         public string InsuranceCardNumber { get; set; } = string.Empty;
 
         public string RegisteredHospital { get; set; } = string.Empty;
 
-        public DateTime ExpirationDate { get; set; } = DateTime.Now;
+        public DateTime ExpirationDate { get; set; }
 
         public UserResponseModel User { get; set; } = null!;
-    }
-
-    public class HealthInsuranceRegistrationResponseModel
-    {
-        public Guid Id { get; set; }
-        public string InsuranceCardNumber { get; set; } = string.Empty;
-        public string RegisteredHospital { get; set; } = string.Empty;
-        public DateTime ExpirationDate { get; set; } = DateTime.Now;
     }
 }

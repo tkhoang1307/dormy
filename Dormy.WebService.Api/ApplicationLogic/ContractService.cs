@@ -26,8 +26,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly RoomTypeMapper _roomTypeMapper;
         private readonly ContractMapper _contractMapper;
 
-        public ContractService(IUnitOfWork unitOfWork, 
-                               IUserContextService userContextService, 
+        public ContractService(IUnitOfWork unitOfWork,
+                               IUserContextService userContextService,
                                IRoomTypeService roomTypeService,
                                IUserService userService,
                                IHealthInsuranceService healthInsuranceService,
@@ -37,8 +37,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _userContextService = userContextService;
             _roomTypeService = roomTypeService;
             _userService = userService;
-            _healthInsuranceService =healthInsuranceService;
-            _guardianService =guardianService;
+            _healthInsuranceService = healthInsuranceService;
+            _guardianService = guardianService;
             _userMapper = new UserMapper();
             _workplaceMapper = new WorkplaceMapper();
             _roomTypeMapper = new RoomTypeMapper();
@@ -49,19 +49,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             if (model == null)
             {
-                return new ApiResponse().SetBadRequest(null, "Model cannot be null");
+                return new ApiResponse().SetBadRequest(message: "Model cannot be null");
             }
 
             // Validate User
             if (model.User == null)
             {
-                return new ApiResponse().SetBadRequest(null, "User information is required");
+                return new ApiResponse().SetBadRequest(message: "User information is required");
             }
 
             // Validate startDate cannot be after enddate
             if (model.StartDate > model.EndDate)
             {
-                return new ApiResponse().SetUnprocessableEntity(null, "Start date cannot be after end date");
+                return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
             }
 
             // Get user gender
@@ -69,9 +69,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
             gender = gender == default ? GenderEnum.OTHER : gender;
             Guid userIdTracking = Guid.Empty;
             Guid healthInsuranceIdTracking = Guid.Empty;
-            List<Guid> guardianIdsTracking = new List<Guid>();
+            List<Guid> guardianIdsTracking = [];
+            List<Guid> vehicleIdsTracking = [];
             Guid contractIdTracking = Guid.Empty;
             Guid invoiceIdTracking = Guid.Empty;
+            UserLoginResponseModel userData = new();
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
@@ -84,8 +86,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     FirstName = model.User.FirstName,
                     LastName = model.User.LastName,
                     Email = model.User.Email,
-                    UserName = "userTest1",
-                    Password = "userTest1",
+                    UserName = model.User.UserName,
+                    Password = model.User.Password,
                     DateOfBirth = model.User.DateOfBirth,
                     PhoneNumber = model.User.PhoneNumber,
                     NationalIdNumber = model.User.NationalIdNumber,
@@ -96,9 +98,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 if (!responseCreateUser.IsSuccess)
                 {
                     return responseCreateUser;
-                }    
+                }
                 userIdTracking = (Guid)responseCreateUser.Result;
                 var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(userIdTracking));
+
+                // Check if user have any active contract
+                if (userEntity == null)
+                {
+                    return new ApiResponse().SetNotFound(message: "User not found");
+                }
 
                 //Sign in to have userContext
                 var responseLogin = await _userService.Login(new LoginRequestModel()
@@ -106,6 +114,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Username = userCreationRequestModel.UserName,
                     Password = userCreationRequestModel.Password,
                 });
+
+                if (!responseLogin.IsSuccess)
+                {
+                    throw new EntityNotFoundException("User not found");
+                }
+                userData = (UserLoginResponseModel)responseLogin.Result;
 
                 // Check if user have any workplace
                 if (model.WorkplaceId != null)
@@ -147,6 +161,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     }
                 }
 
+                // Add Vehicles
+                if (model.Vehicles?.Count > 0)
+                {
+                    var vehicleEntities = model.Vehicles.Select(x => new VehicleEntity()
+                    {
+                        UserId = userIdTracking,
+                        LicensePlate = x.LicensePlate,
+                        VehicleType = x.VehicleType,
+                        CreatedBy = userIdTracking,
+                        LastUpdatedBy = userIdTracking,
+                    }).ToList();
+
+                    await _unitOfWork.VehicleRepository.AddRangeAsync(vehicleEntities);
+                    await _unitOfWork.SaveChangeAsync();
+                }
+
                 // Create contract
                 var contractCreationRequestModel = new ContractRequestModel()
                 {
@@ -167,16 +197,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 // Complete transaction
                 scope.Complete();
             }
-            return new ApiResponse().SetCreated();
+
+            return new ApiResponse().SetCreated(new RegisterModel
+            {
+                CcontractId = contractIdTracking,
+                User = userData,
+            });
         }
 
         public async Task<ApiResponse> AddNewContract(ContractRequestModel model)
         {
-            // Compare StartDate and EndDate
+            // Validate startDate cannot be after enddate
+            if (model.StartDate > model.EndDate)
+            {
+                return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
+            }
 
-            //
-
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(model.UserId));
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(model.UserId), isNoTracking: true);
             if (userEntity == null)
             {
                 return new ApiResponse().SetNotFound(model.UserId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "User"));
@@ -188,7 +225,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
-            if (roomEntity.Building.GenderRestriction != userEntity.Gender)
+            if (roomEntity.Building.GenderRestriction == userEntity.Gender)
             {
                 return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.ConflictGenderWhenChooseRoom, userEntity.Gender.ToString(), roomEntity.Building.GenderRestriction.ToString()));
             }
@@ -203,11 +240,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
             contractEntity.CreatedBy = _userContextService.UserId;
             contractEntity.LastUpdatedBy = _userContextService.UserId;
 
-            if (roomEntity.TotalUsedBed + 1 == roomEntity.TotalAvailableBed)
+            roomEntity.TotalUsedBed += 1;
+            if (roomEntity.TotalUsedBed == roomEntity.TotalAvailableBed)
             {
                 roomEntity.Status = RoomStatusEnum.FULL;
             }
-            roomEntity.TotalUsedBed = roomEntity.TotalUsedBed + 1;
 
             await _unitOfWork.ContractRepository.AddAsync(contractEntity);
             await _unitOfWork.SaveChangeAsync();
@@ -220,7 +257,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var userId = _userContextService.UserId;
             if (userId == Guid.Empty)
             {
-                return new ApiResponse().SetForbidden(null, "User not authenticated");
+                return new ApiResponse().SetForbidden(message: "User not authenticated");
             }
 
             ContractEntity? contractEntity;
@@ -246,7 +283,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             if (status == ContractStatusEnum.REJECTED || status == ContractStatusEnum.TERMINATED || status == ContractStatusEnum.EXPIRED)
             {
                 // Release bed and update room status
-                contractEntity.Room.TotalAvailableBed += 1;
                 contractEntity.Room.TotalUsedBed -= 1;
                 contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
                 contractEntity.Room.LastUpdatedBy = userId;
@@ -257,41 +293,28 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetOk();
         }
-        private bool IsActiveContractExisted(UserEntity user)
-        {
-            if (user == null || user.Contracts == null || user.Contracts.Count == 0)
-            {
-                return false;
-            }
-            // Check user have available contract
-            var isUserHaveActiveContract = user.Contracts.Any(contract =>
-                contract.EndDate >= DateTime.UtcNow &&
-                (contract.Status == ContractStatusEnum.ACTIVE ||
-                contract.Status == ContractStatusEnum.EXTENDED ||
-                contract.Status == ContractStatusEnum.PENDING ||
-                contract.Status == ContractStatusEnum.WAITING_PAYMENT));
-
-            return isUserHaveActiveContract;
-        }
 
         public async Task<ApiResponse> GetSingleContract(Guid id)
         {
-            var userId = _userContextService.UserId;
-            if (userId == Guid.Empty)
-            {
-                return new ApiResponse().SetNotFound("User not found");
-            }
-
-            ContractEntity? contractEntity;
-
-            if (_userContextService.UserRoles.Contains(Role.ADMIN))
-            {
-                contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
-            }
-            else
-            {
-                contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == id && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
-            }
+            var contractEntity =
+                    await _unitOfWork.ContractRepository
+                    .GetAsync(x => x.Id == id, x => x
+                        .Include(x => x.Approver)
+                        .Include(x => x.User)
+                            .ThenInclude(u => u.Guardians)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Vehicles)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.HealthInsurance)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Workplace)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.Building)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.RoomType)
+                                .ThenInclude(t => t.RoomTypeServices)
+                                    .ThenInclude(s => s.RoomService),
+                    isNoTracking: true);
 
             if (contractEntity == null)
             {
@@ -308,7 +331,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var userId = _userContextService.UserId;
             if (userId == Guid.Empty)
             {
-                return new ApiResponse().SetNotFound("User not found");
+                return new ApiResponse().SetNotFound(message: "User not found");
             }
 
             var contractEntities = new List<ContractEntity>();
@@ -317,22 +340,94 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 if (model.IsGetAll)
                 {
-                    contractEntities = await _unitOfWork.ContractRepository.GetAllAsync(x => true, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
+                    contractEntities =
+                    await _unitOfWork.ContractRepository
+                    .GetAllAsync(x => true, x => x
+                        .Include(x => x.Approver)
+                        .Include(x => x.User)
+                            .ThenInclude(u => u.Guardians)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Vehicles)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.HealthInsurance)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Workplace)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.Building)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.RoomType)
+                                .ThenInclude(t => t.RoomTypeServices)
+                                    .ThenInclude(s => s.RoomService),
+                    isNoTracking: true);
                 }
                 else
                 {
-                    contractEntities = await _unitOfWork.ContractRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
+                    contractEntities =
+                    await _unitOfWork.ContractRepository
+                    .GetAllAsync(x => model.Ids.Contains(x.Id), x => x
+                        .Include(x => x.Approver)
+                        .Include(x => x.User)
+                            .ThenInclude(u => u.Guardians)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Vehicles)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.HealthInsurance)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Workplace)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.Building)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.RoomType)
+                                .ThenInclude(t => t.RoomTypeServices)
+                                    .ThenInclude(s => s.RoomService),
+                    isNoTracking: true);
                 }
             }
             else
             {
                 if (model.IsGetAll)
                 {
-                    contractEntities = await _unitOfWork.ContractRepository.GetAllAsync(x => x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
+                    contractEntities =
+                    await _unitOfWork.ContractRepository
+                    .GetAllAsync(x => x.UserId == userId, x => x
+                        .Include(x => x.Approver)
+                        .Include(x => x.User)
+                            .ThenInclude(u => u.Guardians)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Vehicles)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.HealthInsurance)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Workplace)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.Building)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.RoomType)
+                                .ThenInclude(t => t.RoomTypeServices)
+                                    .ThenInclude(s => s.RoomService),
+                    isNoTracking: true);
                 }
                 else
                 {
-                    contractEntities = await _unitOfWork.ContractRepository.GetAllAsync(x => model.Ids.Contains(x.Id) && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
+                    contractEntities =
+                    await _unitOfWork.ContractRepository
+                    .GetAllAsync(x => x.UserId == userId && model.Ids.Contains(x.Id), x => x
+                        .Include(x => x.Approver)
+                        .Include(x => x.User)
+                            .ThenInclude(u => u.Guardians)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Vehicles)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.HealthInsurance)
+                        .Include(u => u.User)
+                            .ThenInclude(u => u.Workplace)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.Building)
+                        .Include(x => x.Room)
+                            .ThenInclude(r => r.RoomType)
+                                .ThenInclude(t => t.RoomTypeServices)
+                                    .ThenInclude(s => s.RoomService),
+                    isNoTracking: true);
                 }
             }
 
@@ -345,7 +440,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
 
                     // Return with error message listing the missing request IDs
-                    var errorMessage = $"Request(s) not found: {string.Join(", ", missingRequestIds)}";
+                    var errorMessage = $"Contract(s) not found: {string.Join(", ", missingRequestIds)}";
                     return new ApiResponse().SetNotFound(message: errorMessage);
                 }
             }

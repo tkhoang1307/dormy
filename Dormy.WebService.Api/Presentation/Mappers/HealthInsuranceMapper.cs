@@ -26,7 +26,6 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 InsuranceCardNumber = model.InsuranceCardNumber,
                 RegisteredHospital = model.RegisteredHospital,
                 ExpirationDate = model.ExpirationDate,
-                //User = _userMapper.MapToUserResponseModel(model.User),
                 CreatedDateUtc = model.CreatedDateUtc,
                 CreatedBy = model.CreatedBy,
                 LastUpdatedBy = model.LastUpdatedBy,

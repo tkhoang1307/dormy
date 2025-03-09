@@ -1,7 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
-using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers

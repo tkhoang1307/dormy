@@ -26,34 +26,9 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Email = entity.Email,
                 PhoneNumber = entity.PhoneNumber,
                 Gender = entity.Gender.ToString(),
-                Guardians = entity.Guardians != null ? entity.Guardians.Select(x => new GuardiansResponseModel()
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                }).ToList() : [],
                 DateOfBirth = entity.DateOfBirth,
-                HealthInsuranceId = entity.HealthInsuranceId,
                 NationalIdNumber = entity.NationalIdNumber,
                 Status = entity.Status.ToString(),
-                WorkplaceId = entity.WorkplaceId,
-                WorkplaceName = entity.Workplace?.Name ?? string.Empty,
-                HealthInsurance = entity.HealthInsurance != null ? _healthInsuranceMapper.MapToHealthInsuranceResponseModel(entity.HealthInsurance) : null,
-            };
-        }
-
-        public UserRegisterResponseModel MapToUserRegistrationResponseModel(UserEntity entity)
-        {
-            return new UserRegisterResponseModel
-            {
-                UserId = entity.Id,
-                UserName = entity.UserName,
-                FirstName = entity.FirstName,
-                LastName = entity.LastName,
-                Email = entity.Email,
-                PhoneNumber = entity.PhoneNumber,
-                Gender = entity.Gender.ToString(),
-                DateOfBirth = entity.DateOfBirth,
-                NationalIdNumber = entity.NationalIdNumber,
             };
         }
 

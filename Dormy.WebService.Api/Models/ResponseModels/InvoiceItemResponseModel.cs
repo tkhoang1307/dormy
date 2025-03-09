@@ -1,6 +1,4 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-
-namespace Dormy.WebService.Api.Models.ResponseModels
+﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class InvoiceItemResponseModel
     {

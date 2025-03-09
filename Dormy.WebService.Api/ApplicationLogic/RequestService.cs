@@ -38,22 +38,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 if (model.IsGetAll)
                 {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => true, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(r => r.RoomType).Include(x => x.Contract));
+                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => true, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
                 }
                 else
                 {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(r => r.RoomType).Include(x => x.Contract));
+                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
                 }
             }
             else
             {
                 if (model.IsGetAll)
                 {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(r => r.RoomType).Include(x => x.Contract));
+                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
                 }
                 else
                 {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => model.Ids.Contains(x.Id) && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(r => r.RoomType).Include(x => x.Contract));
+                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => model.Ids.Contains(x.Id) && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
                 }
             }
 
@@ -87,11 +87,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(r => r.RoomType).Include(x => x.Contract));
+                requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
             }
             else
             {
-                requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(r => r.RoomType).Include(x => x.Contract));
+                requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room));
             }
 
             if (requestEntity == null)
@@ -130,33 +130,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 if (requestEntity == null)
                 {
                     return new ApiResponse().SetNotFound("Request not found");
-                }
-
-                switch (status)
-                {
-                    case RequestStatusEnum.CANCELLED:
-                    case RequestStatusEnum.REJECTED:
-                        {
-                            if (requestEntity.RequestType == RequestTypeEnum.REGISTRATION.ToString())
-                            {
-                                // Update room status and bed count
-                                requestEntity.Room.TotalUsedBed -= 1;
-                                requestEntity.Room.TotalAvailableBed += 1;
-                                requestEntity.Room.Status = requestEntity.Room.TotalUsedBed == requestEntity.Room.TotalAvailableBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                                requestEntity.Room.LastUpdatedBy = userId;
-                                requestEntity.Room.LastUpdatedDateUtc = DateTime.Now;
-
-                                if (requestEntity.Contract != null)
-                                {
-                                    requestEntity.Contract.Status = ContractStatusEnum.REJECTED;
-                                    requestEntity.Contract.LastUpdatedBy = userId;
-                                    requestEntity.Contract.LastUpdatedDateUtc = DateTime.Now;
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break;
                 }
 
                 requestEntity.Status = status;

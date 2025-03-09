@@ -28,7 +28,6 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 ApproverName = $"{requestEntity.Approver?.FirstName} {requestEntity.Approver?.LastName}",
                 UserName = $"{requestEntity.User?.FirstName} {requestEntity.User?.LastName}",
                 Room = _roomMapper.MapToRoomResponseModel(requestEntity.Room),
-                Contract = requestEntity.Contract != null ? _contractMapper.MapToContractModel(requestEntity.Contract) : null
             };
         }
     }

@@ -30,7 +30,6 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 PhoneNumber = model.PhoneNumber,
                 Address = model.Address,
                 RelationshipToUser = model.RelationshipToUser,
-                //User = _userMapper.MapToUserResponseModel(model.User),
                 CreatedDateUtc = model.CreatedDateUtc,
                 CreatedBy = model.CreatedBy,
                 LastUpdatedBy = model.LastUpdatedBy,

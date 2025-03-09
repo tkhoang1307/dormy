@@ -179,7 +179,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entity = await _unitOfWork.BuildingRepository
                 .GetAsync(
                     building => building.Id.Equals(id),
-                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType)
+                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType).ThenInclude(roomType => roomType.RoomTypeServices).ThenInclude(roomTypeService => roomTypeService.RoomService)
                 );
 
             if (entity == null)
@@ -216,7 +216,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entities = await _unitOfWork.BuildingRepository
                 .GetAllAsync(
                     building => isGetAll || ids.Contains(building.Id),
-                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType)
+                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType).ThenInclude(roomType => roomType.RoomTypeServices).ThenInclude(roomTypeService => roomTypeService.RoomService)
                 );
 
             if (entities == null)

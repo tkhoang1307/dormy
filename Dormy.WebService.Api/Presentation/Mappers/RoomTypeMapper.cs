@@ -82,6 +82,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Cost = x.Cost,
                 Unit = x.Unit,
                 RoomServiceName = x.RoomServiceName,
+                RoomServiceType = x.RoomServiceType.ToString(),
                 CreatedBy = x.CreatedBy,
                 IsDeleted = x.IsDeleted,
                 CreatedDateUtc = x.CreatedDateUtc,

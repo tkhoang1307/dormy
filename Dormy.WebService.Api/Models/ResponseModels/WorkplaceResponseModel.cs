@@ -9,15 +9,5 @@
         public string Address { get; set; } = string.Empty;
 
         public string Abbrevation { get; set; } = string.Empty;
-
-        public List<UserResponseModel> Users { get; set; } = [];
-    }
-
-    public class WorkplaceRegistrationResponseMode
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string Abbrevation { get; set; } = string.Empty;
     }
 }

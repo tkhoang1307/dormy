@@ -46,11 +46,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Health insurance"));
             }
 
-            if (_userContextService.UserRoles.FirstOrDefault() == Role.USER && entity.CreatedBy != _userContextService.UserId)
-            {
-                return new ApiResponse().SetForbidden(message: ErrorMessages.AccountDoesNotHavePermission);
-            }
-
             var healthInsuranceModel = _healthInsuranceMapper.MapToHealthInsuranceResponseModel(entity);
 
             var (createdAdmin, lastUpdatedAdmin) = await _unitOfWork.AdminRepository.GetAuthors(healthInsuranceModel.CreatedBy, healthInsuranceModel.LastUpdatedBy);

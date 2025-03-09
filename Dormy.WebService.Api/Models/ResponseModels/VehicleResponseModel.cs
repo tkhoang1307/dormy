@@ -1,6 +1,4 @@
-﻿using Dormy.WebService.Api.Core.Entities;
-
-namespace Dormy.WebService.Api.Models.ResponseModels
+﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class VehicleResponseModel: BaseUserResponseModel
     {
@@ -17,11 +15,5 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public Guid UserId { get; set; }
 
         public string UserFullname { get; set; } = string.Empty;
-    }
-    public class VehicleResponseRegistrationModel
-    {
-        public Guid Id { get; set; }
-        public string LicensePlate { get; set; } = string.Empty;
-        public string VehicleType { get; set; } = string.Empty;
     }
 }

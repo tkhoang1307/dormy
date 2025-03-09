@@ -2,7 +2,6 @@
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
-using System;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
 {
