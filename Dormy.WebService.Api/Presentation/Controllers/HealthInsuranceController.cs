@@ -83,7 +83,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPost("batch")]
-        [Authorize(Roles = Role.ADMIN)]
+        [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> GetBatchHealthInsurances(GetBatchRequestModel model)
         {
             var result = await _healthInsuranceService.GetHealthInsuranceBatch(model);

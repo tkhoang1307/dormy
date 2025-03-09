@@ -38,7 +38,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetDetailHealthInsurance(Guid id)
         {
-            var entity = await _unitOfWork.HealthInsuranceRepository.GetAsync(x => x.Id == id, 
+            var entity = await _unitOfWork.HealthInsuranceRepository.GetAsync(x => x.Id == id,
                                 include: x => x.Include(healthInsurance => healthInsurance.User));
 
             if (entity == null)
@@ -80,15 +80,49 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetHealthInsuranceBatch(GetBatchRequestModel model)
         {
+            var userId = _userContextService.UserId;
+            if (userId == Guid.Empty)
+            {
+                return new ApiResponse().SetNotFound(message: "User not found");
+            }
+
             var entities = new List<HealthInsuranceEntity>();
 
-            if (model.IsGetAll)
+            if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => true);
+                if (model.IsGetAll)
+                {
+                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => true);
+                }
+                else
+                {
+                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+                }
             }
             else
             {
-                entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+                if (model.IsGetAll)
+                {
+                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => x.User.Id == userId, x => x.Include(x => x.User));
+                }
+                else
+                {
+                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => x.User.Id == userId && model.Ids.Contains(x.Id), x => x.Include(x => x.User));
+                }
+            }
+
+            if (!model.IsGetAll)
+            {
+                if (entities.Count != model.Ids.Count)
+                {
+                    // Find the missing request IDs
+                    var foundRequestIds = entities.Select(r => r.Id).ToList();
+                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
+
+                    // Return with error message listing the missing request IDs
+                    var errorMessage = $"Entity(s) not found: {string.Join(", ", missingRequestIds)}";
+                    return new ApiResponse().SetNotFound(message: errorMessage);
+                }
             }
 
             var healthInsuranceModels = entities.Select(x => _healthInsuranceMapper.MapToHealthInsuranceResponseModel(x)).ToList();
