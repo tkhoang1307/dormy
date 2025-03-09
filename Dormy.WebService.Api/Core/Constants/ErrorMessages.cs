@@ -46,5 +46,7 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string ChangeContractStatusRejectedConflict = "{0} was REJECTED. You can not change to other statuses.";
         public const string ChangeContractExtensionStatusActiveConflict = "{0} is being ACTIVE. You only can change to EXPIRED or TERMINATED.";
         public const string CreateServiceIndicatorConflict = "{0} indicator for month {1}/{2} existed.";
+        public const string ConflictGenderWhenChooseRoom = "You are {0} gender, so you can not register room for {1} gender";
+        public const string RoomIsFull = "Room is full, you can not register this room";
     }
 }

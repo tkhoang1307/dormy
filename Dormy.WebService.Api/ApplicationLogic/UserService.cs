@@ -40,7 +40,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.UserRepository.AddAsync(userEntity);
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(true);
+            return new ApiResponse().SetOk(userEntity.Id);
         }
 
         public async Task<ApiResponse> Login(LoginRequestModel model)

@@ -11,6 +11,8 @@
         public string Address { get; set; } = string.Empty;
 
         public string RelationshipToUser { get; set; } = string.Empty;
+
+        public Guid? UserId { get; set; }
     }
 
     public class GuardianUpdationRequestModel : GuardianRequestModel
