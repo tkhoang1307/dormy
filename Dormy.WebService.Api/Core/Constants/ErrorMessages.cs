@@ -48,5 +48,7 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string CreateServiceIndicatorConflict = "{0} indicator for month {1}/{2} existed.";
         public const string ConflictGenderWhenChooseRoom = "You are {0} gender, so you can not register room for {1} gender";
         public const string RoomIsFull = "Room is full, you can not register this room";
+        public const string ParkingSpotIsUnderMaintenance = "Parking spot is under maintenance";
+        public const string ParkingSpotIsFull = "Parking spot is full";
     }
 }

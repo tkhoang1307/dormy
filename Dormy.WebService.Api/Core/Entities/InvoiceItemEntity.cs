@@ -6,7 +6,7 @@
 
         public string RoomServiceName { get; set; } = string.Empty;
 
-        public Guid RoomServiceId { get; set; }
+        public Guid? RoomServiceId { get; set; }
 
         public decimal Cost { get; set; }
 

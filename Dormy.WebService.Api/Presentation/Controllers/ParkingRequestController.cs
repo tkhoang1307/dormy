@@ -53,7 +53,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPut("admin/approve-or-reject/id/{id:guid}")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> AcceptParkingRequest(ApproveOrRejectParkingRequestModel model)
+        public async Task<IActionResult> AcceptParkingRequest(Guid id, ApproveOrRejectParkingRequestModel model)
         {
             var modelValidator = await ParkingRequestValidator.ApproveOrRejectParkingRequestModelValidator(model);
             if (!modelValidator.IsSuccess)
@@ -65,12 +65,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             if (model.IsAccepted)
             {
-                payload.Id = model.Id;
+                payload.Id = id;
                 payload.Status = RequestStatusEnum.APPROVED;
             }
             else
             {
-                payload.Id = model.Id;
+                payload.Id = id;
                 payload.Status = RequestStatusEnum.REJECTED;
             }
 

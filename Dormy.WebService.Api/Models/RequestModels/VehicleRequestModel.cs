@@ -18,7 +18,6 @@ namespace Dormy.WebService.Api.Models.RequestModels
     public class VehicleHistoryRequestModel
     {
         public bool IsIn { get; set; }
-
         public Guid VehicleId { get; set; }
         public Guid ParkingSpotId { get; set; }
     }

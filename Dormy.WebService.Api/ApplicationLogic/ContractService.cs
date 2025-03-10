@@ -7,6 +7,7 @@ using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
+using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
@@ -25,13 +26,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly WorkplaceMapper _workplaceMapper;
         private readonly RoomTypeMapper _roomTypeMapper;
         private readonly ContractMapper _contractMapper;
+        private readonly IInvoiceService _invoiceService;
 
         public ContractService(IUnitOfWork unitOfWork,
                                IUserContextService userContextService,
                                IRoomTypeService roomTypeService,
                                IUserService userService,
                                IHealthInsuranceService healthInsuranceService,
-                               IGuardianService guardianService)
+                               IGuardianService guardianService,
+                               IInvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
@@ -39,6 +42,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _userService = userService;
             _healthInsuranceService = healthInsuranceService;
             _guardianService = guardianService;
+            _invoiceService = invoiceService;
             _userMapper = new UserMapper();
             _workplaceMapper = new WorkplaceMapper();
             _roomTypeMapper = new RoomTypeMapper();
@@ -132,7 +136,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     var workplaceEntity = await _unitOfWork.WorkplaceRepository.GetAsync(x => x.Id == model.WorkplaceId);
                     if (workplaceEntity == null)
                     {
-                        return new ApiResponse().SetNotFound(message: "Workplace not found");
+                        return new ApiResponse().SetNotFound(model.WorkplaceId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Workplace"));
                     }
 
                     userEntity.WorkplaceId = model.WorkplaceId;
@@ -278,35 +282,36 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (contractEntity == null)
             {
-                return new ApiResponse().SetNotFound(message: "Contract not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
+            }
+
+            var (isError, errorMessage) = ContractStatusChangeValidator.VerifyContractStatusChangeValidator(contractEntity.Status, status);
+            if (isError)
+            {
+                return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Contract"));
             }
 
             contractEntity.Status = status;
             contractEntity.LastUpdatedBy = userId;
             contractEntity.LastUpdatedDateUtc = DateTime.UtcNow;
 
-            switch (status)
+            if (status == ContractStatusEnum.WAITING_PAYMENT)
             {
-                case ContractStatusEnum.ACTIVE:
-                    {
-                        if (contractEntity.Status != ContractStatusEnum.WAITING_PAYMENT)
-                        {
-                            return new ApiResponse().SetBadRequest(message: "Contract is not in WAITING_PAYMENT status");
-                        }
-                        break;
-                    }
-                case ContractStatusEnum.REJECTED:
-                case ContractStatusEnum.TERMINATED:
-                case ContractStatusEnum.EXPIRED:
-                    {
-                        // Release bed and update room status
-                        contractEntity.Room.TotalUsedBed = contractEntity.Room.TotalUsedBed > 0 ? contractEntity.Room.TotalUsedBed - 1 : 0;
-                        contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                        contractEntity.Room.LastUpdatedBy = userId;
-                        contractEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
-                        break;
-                    }
+                var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
+                {
+                    DueDate = DateTime.Now.AddDays(15),
+                    Type = InvoiceTypeEnum.PAYMENT_CONTRACT.ToString(),
+                    RoomId = contractEntity.RoomId
+                });
             }
+
+            if (status == ContractStatusEnum.REJECTED || status == ContractStatusEnum.TERMINATED || status == ContractStatusEnum.EXPIRED)
+            {
+                contractEntity.Room.TotalUsedBed = contractEntity.Room.TotalUsedBed > 0 ? contractEntity.Room.TotalUsedBed - 1 : 0;
+                contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
+                contractEntity.Room.LastUpdatedBy = userId;
+                contractEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
+            }    
 
             await _unitOfWork.SaveChangeAsync();
 
@@ -337,7 +342,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (contractEntity == null)
             {
-                return new ApiResponse().SetNotFound(message: "Contract not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
             }
 
             var response = _contractMapper.MapToContractModel(contractEntity);
@@ -350,7 +355,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var userId = _userContextService.UserId;
             if (userId == Guid.Empty)
             {
-                return new ApiResponse().SetNotFound(message: "User not found");
+                return new ApiResponse().SetNotFound(userId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "User"));
             }
 
             var contractEntities = new List<ContractEntity>();

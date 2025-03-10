@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
@@ -24,18 +25,18 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var vehicleEntity = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == model.VehicleId, isNoTracking: true);
             if (vehicleEntity == null)
             {
-                return new ApiResponse().SetNotFound("Vehicle not found");
+                return new ApiResponse().SetNotFound(model.VehicleId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle"));
             }
 
             var parkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == model.ParkingSpotId, isNoTracking: false);
             if (parkingSpotEntity == null)
             {
-                return new ApiResponse().SetNotFound("Parking spot not found");
+                return new ApiResponse().SetNotFound(model.ParkingSpotId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
             }
 
             if (parkingSpotEntity.Status == Models.Enums.ParkingSpotStatusEnum.UNDER_MAINTENANCE)
             {
-                return new ApiResponse().SetBadRequest("Parking spot is under maintenance");
+                return new ApiResponse().SetBadRequest(message: ErrorMessages.ParkingSpotIsUnderMaintenance);
             }
 
             using (var scope = new TransactionScope(
@@ -43,20 +44,20 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
                 TransactionScopeAsyncFlowOption.Enabled))
             {
-                if (model.IsIn)
-                {
-                    if (parkingSpotEntity.CurrentQuantity >= parkingSpotEntity.CapacitySpots)
-                    {
-                        return new ApiResponse().SetBadRequest("Parking spot is full");
-                    }
-                    parkingSpotEntity.CurrentQuantity++;
-                    await _unitOfWork.SaveChangeAsync();
-                }
-                else
-                {
-                    parkingSpotEntity.CurrentQuantity = parkingSpotEntity.CurrentQuantity == 0 ? 0 : parkingSpotEntity.CurrentQuantity - 1;
-                    await _unitOfWork.SaveChangeAsync();
-                }
+                //if (model.IsIn)
+                //{
+                //    if (parkingSpotEntity.CurrentQuantity >= parkingSpotEntity.CapacitySpots)
+                //    {
+                //        return new ApiResponse().SetBadRequest(message: ErrorMessages.ParkingSpotIsFull);
+                //    }
+                //    parkingSpotEntity.CurrentQuantity++;
+                //    await _unitOfWork.SaveChangeAsync();
+                //}
+                //else
+                //{
+                //    parkingSpotEntity.CurrentQuantity = parkingSpotEntity.CurrentQuantity == 0 ? 0 : parkingSpotEntity.CurrentQuantity - 1;
+                //    await _unitOfWork.SaveChangeAsync();
+                //}
 
                 var vehicleHistoryEntity = new VehicleHistoryEntity
                 {

@@ -23,7 +23,6 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
     public class ApproveOrRejectParkingRequestModel
     {
-        public Guid Id { get; set; }
         public bool IsAccepted { get; set; }
     }
 

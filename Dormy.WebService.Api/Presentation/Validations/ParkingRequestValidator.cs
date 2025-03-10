@@ -54,12 +54,6 @@ namespace Dormy.WebService.Api.Presentation.Validations
 
         public static async Task<ApiResponse> ApproveOrRejectParkingRequestModelValidator(ApproveOrRejectParkingRequestModel model)
         {
-            if (model?.Id == null)
-            {
-                return new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id)));
-            }
-
             if (model?.IsAccepted == null)
             {
                 return new ApiResponse().SetUnprocessableEntity(message:
