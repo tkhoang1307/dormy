@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250309162256_UpdateDB_RemovePropertyRequestEntity")]
-    partial class UpdateDB_RemovePropertyRequestEntity
+    [Migration("20250311163428_EditInvoiceEntity")]
+    partial class EditInvoiceEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,10 +88,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("aabcc857-55f9-4bec-b8c7-ff348a3b29b0"),
+                            Id = new Guid("69ddb490-cfb9-4416-9b89-570da765f9fe"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 3, 9, 23, 22, 55, 767, DateTimeKind.Local).AddTicks(4833),
-                            DateOfBirth = new DateTime(2025, 3, 9, 23, 22, 55, 767, DateTimeKind.Local).AddTicks(4838),
+                            CreatedDateUtc = new DateTime(2025, 3, 11, 23, 34, 28, 417, DateTimeKind.Local).AddTicks(8593),
+                            DateOfBirth = new DateTime(2025, 3, 11, 23, 34, 28, 417, DateTimeKind.Local).AddTicks(8598),
                             Email = "hungdv190516@gmail.com",
                             FirstName = "Admin",
                             Gender = "MALE",
@@ -375,6 +375,10 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("Metadata")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int?>("Month")
                         .HasColumnType("integer");
 
@@ -433,7 +437,7 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid>("RoomServiceId")
+                    b.Property<Guid?>("RoomServiceId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("RoomServiceName")
