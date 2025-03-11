@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Newtonsoft.Json.Linq;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
 {
@@ -16,7 +17,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Cost = model.Cost,
                 Quantity = model.Quantity,
                 Unit = model.Unit,
-                Metadata = model.Metadata,
+                Metadata = model.Metadata != null ? model.Metadata.ToString() : string.Empty,
                 CreatedDateUtc = DateTime.UtcNow,
                 LastUpdatedDateUtc = DateTime.UtcNow,
             };
@@ -29,12 +30,12 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             var invoiceItemResponseModel = new InvoiceItemResponseModel
             {
                 Id = model.Id,
-                RoomServiceId = model.RoomServiceId,
+                RoomServiceId = model?.RoomServiceId,
                 RoomServiceName = model.RoomServiceName,
                 Cost = model.Cost,
                 Quantity = model.Quantity,
                 Unit = model.Unit,
-                Metadata = model.Metadata,
+                Metadata = JObject.Parse(model.Metadata),
             };
 
             return invoiceItemResponseModel;

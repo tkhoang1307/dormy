@@ -12,6 +12,7 @@ using Dormy.WebService.Api.Startup;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json.Linq;
 using System.Transactions;
 
 namespace Dormy.WebService.Api.ApplicationLogic
@@ -99,7 +100,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         Cost = roomService.Cost,
                         Quantity = invoiceItem.Quantity,
                         Unit = roomService.Unit,
-                        Metadata = invoiceItem.Metadata,
+                        Metadata = JObject.FromObject(new { oldIndicator = invoiceItem.OldIndicator, newIndicator = invoiceItem.NewIndicator }),
                     });
                     amountBeforePromotion = amountBeforePromotion + roomService.Cost * invoiceItem.Quantity;
                 }
@@ -125,6 +126,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Type = model.Type,
                     Status = InvoiceStatusEnum.DRAFT.ToString(),
                     RoomId = model.RoomId,
+                    Metadata = JObject.FromObject(new { contractId = model.ContractId }),
                     InvoiceItems = invoiceItemsMapperRequestModel,
                     InvoiceUsers = invoiceUsersModel,
                 };
@@ -370,7 +372,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Cost = roomService.Cost,
                     Quantity = invoiceItem.Quantity,
                     Unit = roomService.Unit,
-                    Metadata = invoiceItem.Metadata,
+                    Metadata = JObject.FromObject(new { oldIndicator = invoiceItem.OldIndicator, newIndicator = invoiceItem.NewIndicator }),
                 };
                 var invoiceItemEntity = _invoiceItemMapper.MapToInvoiceItemEntity(invoiceItemMapperRequestModel);
                 invoiceItemEntity.InvoiceId = invoiceEntity.Id;

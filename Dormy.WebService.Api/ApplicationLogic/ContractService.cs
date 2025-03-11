@@ -301,7 +301,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 {
                     DueDate = DateTime.Now.AddDays(15),
                     Type = InvoiceTypeEnum.PAYMENT_CONTRACT.ToString(),
-                    RoomId = contractEntity.RoomId
+                    RoomId = contractEntity.RoomId,
+                    ContractId = contractEntity.Id,
                 });
             }
 

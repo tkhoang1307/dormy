@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Models.ResponseModels
+﻿using Newtonsoft.Json.Linq;
+
+namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class InvoiceItemResponseModel
     {
@@ -6,7 +8,7 @@
 
         public string RoomServiceName { get; set; } = string.Empty;
 
-        public Guid RoomServiceId { get; set; }
+        public Guid? RoomServiceId { get; set; }
 
         public decimal Cost { get; set; }
 
@@ -14,6 +16,6 @@
 
         public string Unit { get; set; } = string.Empty;
 
-        public object? Metadata { get; set; }
+        public JObject? Metadata { get; set; } = null!;
     }
 }

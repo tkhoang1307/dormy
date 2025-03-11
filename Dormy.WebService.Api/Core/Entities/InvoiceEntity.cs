@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Models.Enums;
+using Newtonsoft.Json.Linq;
 
 namespace Dormy.WebService.Api.Core.Entities
 {
@@ -20,6 +21,8 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public InvoiceTypeEnum Type { get; set; }
         public InvoiceStatusEnum Status { get; set; } = InvoiceStatusEnum.DRAFT;
+
+        public string Metadata { get; set; } = string.Empty;
 
         public Guid RoomId { get; set; }
 

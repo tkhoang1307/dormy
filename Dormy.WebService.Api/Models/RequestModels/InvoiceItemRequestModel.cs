@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Models.RequestModels
+﻿using Newtonsoft.Json.Linq;
+
+namespace Dormy.WebService.Api.Models.RequestModels
 {
     public class InvoiceItemRequestModel
     {
@@ -6,7 +8,9 @@
 
         public decimal Quantity { get; set; }
 
-        public string Metadata { get; set; } = string.Empty;
+        public decimal? OldIndicator { get; set; }
+
+        public decimal? NewIndicator { get; set; }
     }
 
     public class InvoiceItemMapperRequestModel
@@ -21,6 +25,6 @@
 
         public string Unit { get; set; } = string.Empty;
 
-        public string Metadata { get; set; } = string.Empty;
+        public JObject? Metadata { get; set; } = null!;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Newtonsoft.Json.Linq;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
     public class InvoiceItemEntity : BaseEntity
     {

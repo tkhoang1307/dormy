@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Models.ResponseModels
+﻿using Newtonsoft.Json.Linq;
+
+namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class InvoiceBatchResponseModel : BaseResponseModel
     {
@@ -19,6 +21,8 @@
         public string Type { get; set; } = string.Empty;
 
         public string Status { get; set; } = string.Empty;
+
+        public JObject? Metadata { get; set; } = null!;
 
         public Guid RoomId { get; set; }
 

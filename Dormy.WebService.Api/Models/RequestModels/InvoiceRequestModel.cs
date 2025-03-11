@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Models.Enums;
+using Newtonsoft.Json.Linq;
 
 namespace Dormy.WebService.Api.Models.RequestModels
 {
@@ -14,6 +15,8 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public string Type { get; set; } = string.Empty;
 
         public Guid RoomId { get; set; }
+
+        public Guid? ContractId { get; set; }
 
         public List<InvoiceItemRequestModel> InvoiceItems { get; set; } = null!;
     }
@@ -48,6 +51,8 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public string Status { get; set; } = string.Empty;
 
         public Guid RoomId { get; set; }
+
+        public JObject? Metadata { get; set; } = null!;
 
         public List<InvoiceItemMapperRequestModel> InvoiceItems { get; set; } = null!;
 
