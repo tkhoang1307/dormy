@@ -43,11 +43,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 {
                     throw new BadRequestException($"Room Type with ID: {room.RoomTypeId} was not found");
                 }
-
-                if (room.TotalRoomsWantToCreate > roomType.Capacity)
-                {
-                    throw new BadRequestException($"Total Rooms Want To Create must not be greater than room type capacity");
-                }
             }
         }
 
