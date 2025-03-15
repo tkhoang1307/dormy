@@ -1,10 +1,12 @@
-﻿using Dormy.WebService.Api.Core.CustomExceptions;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,8 +31,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 throw new EntityNotFoundException(message: "User not found");
             }
 
-            VerifyDates(model.StartDateTime, model.EndDateTime);
-
             var entity = new OvernightAbsenceEntity
             {
                 UserId = userId,
@@ -39,6 +39,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 EndDateTime = model.EndDateTime,
                 Status = OvernightAbsenceStatusEnum.SUBMITTED,
                 CreatedBy = userId,
+                LastUpdatedBy = userId,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
 
             await _unitOfWork.OvernightAbsenceRepository.AddAsync(entity);
@@ -52,7 +55,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.User), isNoTracking: true);
             if (entity == null)
             {
-                throw new EntityNotFoundException(message: "Overnight absence not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Overnight absence"));
             }
 
             var result = new OvernightAbsentModel
@@ -165,7 +168,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == id, isNoTracking: false);
             if (entity == null)
             {
-                throw new EntityNotFoundException(message: "Overnight absence not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Overnight absence"));
             }
 
             entity.IsDeleted = true;
@@ -176,19 +179,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetAccepted(entity.Id);
         }
 
-        public async Task<ApiResponse> UpdateOvernightAbsence(Guid id, OvernightAbsentRequestModel model)
+        public async Task<ApiResponse> UpdateOvernightAbsence(OvernightAbsentUpdationRequestModel model)
         {
-            var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == id, isNoTracking: false);
+            var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == model.Id, isNoTracking: false);
             if (entity == null)
             {
-                throw new EntityNotFoundException(message: "Overnight absence not found");
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Overnight absence"));
             }
 
-            VerifyDates(model.StartDateTime, model.EndDateTime);
+            if (_userContextService.UserId != entity.UserId)
+            {
+                return new ApiResponse().SetForbidden(message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "overnight absence"));
+            }
 
             if (entity.Status != OvernightAbsenceStatusEnum.SUBMITTED)
             {
-                throw new BadRequestException(message: "Overnight absence cannot be updated because it is not in submitted status");
+                return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.UpdateEntityConflict, "overnight absence"));
             }
 
             entity.Reason = model.Reason;
@@ -207,28 +213,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == id, isNoTracking: false);
             if (entity == null)
             {
-                throw new EntityNotFoundException(message: "Overnight absence not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Overnight absence"));
             }
 
-            switch (status)
+            if (_userContextService.UserRoles.Contains(Role.USER) && _userContextService.UserId !=  entity.UserId)
             {
-                case OvernightAbsenceStatusEnum.APPROVED:
-                case OvernightAbsenceStatusEnum.REJECTED:
-                    {
-                        if (entity.Status != OvernightAbsenceStatusEnum.SUBMITTED)
-                        {
-                            throw new BadRequestException(message: "Overnight absence is not available for approve/ reject");
-                        }
-                    }
-                    break;
-                case OvernightAbsenceStatusEnum.CANCELLED:
-                    {
-                        if (entity.Status == OvernightAbsenceStatusEnum.APPROVED || entity.Status == OvernightAbsenceStatusEnum.REJECTED)
-                        {
-                            throw new BadRequestException(message: "Overnight absence is already approved or rejected");
-                        }
-                    }
-                    break;
+                return new ApiResponse().SetForbidden(message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "overnight absence"));
+            }    
+
+            var (isError, errorMessage) = OvernightAbsenceStatusChangeValidator.VerifyOvernightAbsenceStatusChangeValidator(entity.Status, status);
+            if (isError)
+            {
+                return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Overnight absence"));
+            }
+
+            if (status == OvernightAbsenceStatusEnum.APPROVED || status == OvernightAbsenceStatusEnum.REJECTED)
+            {
+                entity.ApproverId = _userContextService.UserId;
             }
 
             entity.Status = status;
@@ -237,24 +238,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetAccepted(entity.Id);
-        }
-
-        private void VerifyDates(DateTime startDateTime, DateTime endDateTime)
-        {
-            if (startDateTime < DateTime.Now)
-            {
-                throw new BadRequestException(message: "Start date time must be in the future");
-            }
-
-            if (endDateTime < DateTime.Now)
-            {
-                throw new BadRequestException(message: "End date time must be in the future");
-            }
-
-            if (startDateTime > endDateTime)
-            {
-                throw new BadRequestException(message: "Start date time must be before end date time");
-            }
         }
     }
 }

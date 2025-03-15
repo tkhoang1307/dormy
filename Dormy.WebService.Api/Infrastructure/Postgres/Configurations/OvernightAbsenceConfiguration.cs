@@ -22,9 +22,9 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .HasForeignKey(overnightAbsence => overnightAbsence.UserId);
 
             builder
-                .HasOne(overnightAbsence => overnightAbsence.Admin)
+                .HasOne(overnightAbsence => overnightAbsence.Approver)
                 .WithMany(admin => admin.OvernightAbsences)
-                .HasForeignKey(overnightAbsence => overnightAbsence.AdminId);
+                .HasForeignKey(overnightAbsence => overnightAbsence.ApproverId);
         }
     }
 }

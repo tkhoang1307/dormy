@@ -18,8 +18,8 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public UserEntity User { get; set; } = null!;
 
-        public Guid? AdminId { get; set; }
+        public Guid? ApproverId { get; set; }
 
-        public AdminEntity? Admin { get; set; } = null!;
+        public AdminEntity? Approver { get; set; } = null!;
     }
 }
