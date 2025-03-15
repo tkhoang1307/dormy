@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
+using System.Globalization;
 
 namespace Dormy.WebService.Api.Core.Utilities
 {
@@ -24,6 +25,17 @@ namespace Dormy.WebService.Api.Core.Utilities
             }
 
             return userFullname;
+        }
+
+        public static string BuildPasswordForUser(DateTime date)
+        {
+            string day = date.Day.ToString("D2");
+
+            string month = date.ToString("MMM", CultureInfo.InvariantCulture);
+
+            string year = date.Year.ToString("D4");
+
+            return day + month + year;
         }
     }
 }

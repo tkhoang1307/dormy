@@ -23,6 +23,13 @@
         public string Gender { get; set; } = string.Empty;
     }
 
+    public class UserCreationResponseModel
+    {
+        public Guid UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
     public class UserProfileResponseModel : UserResponseModel
     {
         public List<GuardiansResponseModel> Guardians { get; set; } = [];

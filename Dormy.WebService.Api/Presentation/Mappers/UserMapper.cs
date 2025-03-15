@@ -32,7 +32,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             };
         }
 
-        public UserEntity MapToUserEntity(UserRequestModel model)
+        public UserEntity MapToUserEntity(UserMapperRequestModel model)
         {
             return new UserEntity()
             {

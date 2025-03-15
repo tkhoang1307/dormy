@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
@@ -28,13 +29,25 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> SignUp(UserRequestModel model)
         {
-            var userEntity = _userMapper.MapToUserEntity(model);
+            var userMapperModel = new UserMapperRequestModel()
+            {
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                UserName = model.PhoneNumber,
+                Password = UserHelper.BuildPasswordForUser(model.DateOfBirth),
+                Email = model.Email,
+                DateOfBirth = model.DateOfBirth,
+                PhoneNumber = model.PhoneNumber,
+                NationalIdNumber = model.NationalIdNumber,
+                Gender = model.Gender,
+            };
+            var userEntity = _userMapper.MapToUserEntity(userMapperModel);
             userEntity.Status = UserStatusEnum.ACTIVE;
 
-            var existedAccountByUsername = await _unitOfWork.UserRepository.GetAsync(x => x.UserName.ToLower().Equals(model.UserName.ToLower()));
+            var existedAccountByUsername = await _unitOfWork.UserRepository.GetAsync(x => x.UserName.ToLower().Equals(model.PhoneNumber.ToLower()));
             if (existedAccountByUsername != null)
             {
-                throw new UsernameIsExistedException(ErrorMessages.UsernameIsExisted);
+                throw new UsernameIsExistedException(ErrorMessages.PhoneNumberIsExisted);
             }
 
             await _unitOfWork.UserRepository.AddAsync(userEntity);
