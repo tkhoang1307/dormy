@@ -29,8 +29,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entity = _guardianMapper.MapToGuardianEntity(model);
 
             entity.UserId = model?.UserId ?? _userContextService.UserId;
-            entity.CreatedBy = _userContextService.UserId;
-            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.CreatedBy = model?.UserId ?? _userContextService.UserId;
+            entity.LastUpdatedBy = model?.UserId ?? _userContextService.UserId;
 
             await _unitOfWork.GuardianRepository.AddAsync(entity);
             await _unitOfWork.SaveChangeAsync();
