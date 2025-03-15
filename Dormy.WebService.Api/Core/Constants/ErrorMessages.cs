@@ -52,5 +52,9 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string ParkingSpotIsUnderMaintenance = "Parking spot is under maintenance";
         public const string ParkingSpotIsFull = "Parking spot is full";
         public const string StartDateMustBeLessThanEndDate = "Start date must be less than end date.";
+        public const string StartDateMustBeLessThanOrEqualToEndDate = "Start date must be less than end date.";
+        public const string DateMustNotBeInThePast = "{0} must not be in the past.";
+        public const string DateMustNotBeInTheFuture = "{0} must not be in the future.";
+        public const string ParkingRequestIsFull = "Parking request is full. Please choose other parking spots";
     }
 }
