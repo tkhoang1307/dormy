@@ -2,11 +2,13 @@
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
+using System.Transactions;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -15,12 +17,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private readonly RoomTypeMapper _roomTypeMapper;
+        private readonly IRoomServiceService _roomServiceService;
 
-        public RoomTypeService(IUnitOfWork unitOfWork, IUserContextService userContextService)
+        public RoomTypeService(IUnitOfWork unitOfWork, IUserContextService userContextService, IRoomServiceService roomServiceService)
         {
             _unitOfWork = unitOfWork;
             _roomTypeMapper = new RoomTypeMapper();
             _userContextService = userContextService;
+            _roomServiceService = roomServiceService;
         }
 
         public async Task<ApiResponse> CreateRoomType(RoomTypeRequestModel model)
@@ -31,20 +35,43 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 return new ApiResponse().SetBadRequest(message: ErrorMessages.SomeServicesAreNotExisted);
             }
-
-            var entity = _roomTypeMapper.MapToRoomTypeEnity(model);
-            entity.CreatedBy = _userContextService.UserId;
-            entity.LastUpdatedBy = _userContextService.UserId;
-            for (var i = 0; i < entity.RoomTypeServices.Count; i++)
+            Guid roomTypeIdTracking = Guid.Empty;
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required,
+                new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
+                TransactionScopeAsyncFlowOption.Enabled))
             {
-                entity.RoomTypeServices[i].CreatedBy = _userContextService.UserId;
-                entity.RoomTypeServices[i].LastUpdatedBy = _userContextService.UserId;
-            }    
+                var responseCreateRoomService = await _roomServiceService.AddRoomService(new RoomServiceRequestModel()
+                {
+                    RoomServiceName = "Tiền phòng " + model.RoomTypeName,
+                    Unit = "tháng",
+                    Cost = model.Price,
+                    RoomServiceType = RoomServiceTypeEnum.RENTAL_PAYMENT.ToString(),
+                    IsServiceIndicatorUsed = false,
+                });
+                if (!responseCreateRoomService.IsSuccess)
+                {
+                    return responseCreateRoomService;
+                }
+                model.RoomServiceIds.Add((Guid)responseCreateRoomService.Result);
+                var entity = _roomTypeMapper.MapToRoomTypeEnity(model);
+                entity.CreatedBy = _userContextService.UserId;
+                entity.LastUpdatedBy = _userContextService.UserId;
+                for (var i = 0; i < entity.RoomTypeServices.Count; i++)
+                {
+                    entity.RoomTypeServices[i].CreatedBy = _userContextService.UserId;
+                    entity.RoomTypeServices[i].LastUpdatedBy = _userContextService.UserId;
+                }
 
-            await _unitOfWork.RoomTypeRepository.AddAsync(entity);
-            await _unitOfWork.SaveChangeAsync();
+                roomTypeIdTracking = entity.Id;
+                await _unitOfWork.RoomTypeRepository.AddAsync(entity);
+                await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetCreated(entity.Id);
+                // Complete transaction
+                scope.Complete();
+            }
+
+            return new ApiResponse().SetCreated(roomTypeIdTracking);
         }
 
         public async Task<ApiResponse> GetRoomTypes()
@@ -133,10 +160,18 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room type"));
             }
 
-            //if (model.Capacity < entity.Rooms?.Count)
-            //{
-            //    return new ApiResponse().SetBadRequest(model.Id, ErrorMessages.RoomCapacityIsSmallerThanCurrentErrorMessage);
-            //}
+            // update roomTypeServices
+            var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == model.Id, x => x.Include(x => x.RoomService));
+            var roomTypeServiceIds = roomTypeServices.Where(x => x.RoomService.RoomServiceType != RoomServiceTypeEnum.RENTAL_PAYMENT)
+                                                     .Select(x => x.Id).ToList();
+
+            if (entity.Price != model.Price)
+            {
+                var roomServiceIdRentalPayment = roomTypeServices.Where(x => x.RoomService.RoomServiceType == RoomServiceTypeEnum.RENTAL_PAYMENT)
+                                                                 .Select(x => x.RoomServiceId).FirstOrDefault();
+                var roomServiceEntity = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id == roomServiceIdRentalPayment);
+                roomServiceEntity.Cost = model.Price;
+            }
 
             entity.RoomTypeName = model.RoomTypeName;
             entity.Price = model.Price;
@@ -145,9 +180,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             entity.LastUpdatedBy = _userContextService.UserId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
 
-            // update roomTypeServices
-            var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == model.Id);
-            var roomTypeServiceIds = roomTypeServices.Select(x => x.Id).ToList();
             foreach (var roomTypeServiceId in roomTypeServiceIds)
             {
                 await _unitOfWork.RoomTypeServiceRepository.DeleteByIdAsync(roomTypeServiceId);

@@ -31,6 +31,9 @@ namespace Dormy.WebService.Api.Models.Enums
         [Description("Washing machine /*-*/ Máy giặt")]
         WASHING_MACHINE,
 
+        [Description("Rental payment /*-*/ Tiền thuê phòng")]
+        RENTAL_PAYMENT,
+
         [Description("Other services /*-*/ Dịch vụ khác")]
         OTHER_SERVICES
     }
