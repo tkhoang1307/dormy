@@ -24,6 +24,18 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _userContextService = userContextService;
         }
 
+        public async Task<ApiResponse> AddRoomService(RoomServiceRequestModel model)
+        {
+            var entity = _roomServiceMapper.MapToRoomServiceEntity(model);
+
+            entity.CreatedBy = _userContextService.UserId;
+            entity.LastUpdatedBy = _userContextService.UserId;
+
+            await _unitOfWork.RoomServiceRepository.AddAsync(entity);
+            await _unitOfWork.SaveChangeAsync();
+            return new ApiResponse().SetCreated(entity.Id);
+        }
+
         public async Task<ApiResponse> AddRoomServiceBatch(List<RoomServiceRequestModel> models)
         {
             var entities = models.Select(x => _roomServiceMapper.MapToRoomServiceEntity(x)).ToList();
