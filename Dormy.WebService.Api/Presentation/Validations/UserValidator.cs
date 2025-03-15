@@ -28,18 +28,6 @@ namespace Dormy.WebService.Api.Presentation.Validations
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.Email)));
             }
 
-            //if (string.IsNullOrEmpty(request.UserName))
-            //{
-            //    return new ApiResponse().SetUnprocessableEntity(message:
-            //        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.UserName)));
-            //}
-
-            //if (string.IsNullOrEmpty(request.Password))
-            //{
-            //    return new ApiResponse().SetUnprocessableEntity(message:
-            //        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(request.Password)));
-            //}
-
             if (request?.DateOfBirth == null)
             {
                 return new ApiResponse().SetUnprocessableEntity(message:

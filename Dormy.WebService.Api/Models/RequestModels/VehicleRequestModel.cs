@@ -8,11 +8,17 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public string LicensePlate { get; set; } = string.Empty;
 
         public string VehicleType { get; set; } = string.Empty;
+
+        public Guid? UserId { get; set; }
     }
 
-    public class VehicleUpdationRequestModel: VehicleRequestModel
+    public class VehicleUpdationRequestModel
     {
         public Guid Id { get; set; }
+
+        public string LicensePlate { get; set; } = string.Empty;
+
+        public string VehicleType { get; set; } = string.Empty;
     }
 
     public class VehicleHistoryRequestModel
