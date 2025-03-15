@@ -10,4 +10,10 @@
 
         public Guid UserId { get; set; }
     }
+
+    public class ViolationUpdationRequestModel : ViolationRequestModel
+    {
+        public Guid Id { get; set; }
+
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,11 +33,17 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpPut("id/{id:guid}")]
+        [HttpPut()]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> UpdateViolation(Guid id, ViolationRequestModel model)
+        public async Task<IActionResult> UpdateViolation(ViolationUpdationRequestModel model)
         {
-            var result = await _violationService.UpdateViolation(id, model);
+            var modelValidator = await ViolationValidator.ViolationUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
+            var result = await _violationService.UpdateViolation(model);
             return Ok(result);
         }
 
@@ -44,6 +51,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateViolation(ViolationRequestModel model)
         {
+            var modelValidator = await ViolationValidator.ViolationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var result = await _violationService.CreateViolation(model);
             return Ok(result);
         }

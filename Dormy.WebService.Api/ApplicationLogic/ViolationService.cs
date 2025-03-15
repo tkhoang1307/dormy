@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -36,6 +37,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 ViolationDate = model.ViolationDate,
                 CreatedBy = _userContextService.UserId,
                 CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedBy = _userContextService.UserId,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
 
             await _unitOfWork.ViolationRepository.AddAsync(violationEntity);
@@ -49,7 +52,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var violationEntity = await _unitOfWork.ViolationRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.User), isNoTracking: true);
             if (violationEntity == null)
             {
-                return new ApiResponse().SetNotFound("Violation not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Violation"));
             }
 
             var result = new ViolationResponseModel
@@ -139,7 +142,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var violationEntity = await _unitOfWork.ViolationRepository.GetAsync(x => x.Id == id);
             if (violationEntity == null)
             {
-                return new ApiResponse().SetNotFound("Violation not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Violation"));
             }
 
             violationEntity.IsDeleted = true;
@@ -148,15 +151,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetOk(violationEntity.Id);
         }
 
-        public async Task<ApiResponse> UpdateViolation(Guid id, ViolationRequestModel model)
+        public async Task<ApiResponse> UpdateViolation(ViolationUpdationRequestModel model)
         {
-            var violationEntity = await _unitOfWork.ViolationRepository.GetAsync(x => x.Id == id);
+            var violationEntity = await _unitOfWork.ViolationRepository.GetAsync(x => x.Id == model.Id);
             if (violationEntity == null)
             {
-                return new ApiResponse().SetNotFound("Violation not found");
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Violation"));
             }
 
             var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == model.UserId);
@@ -169,10 +172,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
             violationEntity.Penalty = model.Penalty;
             violationEntity.ViolationDate = model.ViolationDate;
             violationEntity.UserId = model.UserId;
+            violationEntity.LastUpdatedBy = _userContextService.UserId;
+            violationEntity.LastUpdatedDateUtc = DateTime.UtcNow;
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetOk(violationEntity.Id);
         }
     }
 }

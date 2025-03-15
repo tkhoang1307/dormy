@@ -8,4 +8,16 @@
 
         public string Reason { get; set; } = string.Empty;
     }
+
+    public class OvernightAbsentUpdationRequestModel : OvernightAbsentRequestModel
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class OvernightAbsentApproveOrRejectRequestModel
+    {
+        public Guid Id { get; set; }
+
+        public bool IsApproved { get; set; }
+    }
 }

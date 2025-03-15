@@ -8,7 +8,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> CreateViolation(ViolationRequestModel model);
         Task<ApiResponse> GetSingleViolation(Guid id);
         Task<ApiResponse> GetViolationBatch(GetBatchRequestModel model);
-        Task<ApiResponse> UpdateViolation(Guid id, ViolationRequestModel model);
+        Task<ApiResponse> UpdateViolation(ViolationUpdationRequestModel model);
         Task<ApiResponse> SoftDeleteViolation(Guid id);
     }
 }
