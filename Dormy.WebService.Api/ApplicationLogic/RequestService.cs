@@ -1,4 +1,4 @@
-﻿using Dormy.WebService.Api.Core.CustomExceptions;
+﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
@@ -6,9 +6,9 @@ using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
+using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
-using System.Transactions;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -41,7 +41,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == model.RoomId.Value, isNoTracking: true);
                 if (roomEntity == null)
                 {
-                    return new ApiResponse().SetNotFound("Room not found");
+                    return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
                 }
                 requestEntity.RoomId = model.RoomId.Value;
             }
@@ -108,7 +108,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var userId = _userContextService.UserId;
             if (userId == Guid.Empty)
             {
-                return new ApiResponse().SetNotFound("User not found");
+                return new ApiResponse().SetNotFound(userId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "User"));
             }
 
             var requestEntity = new RequestEntity();
@@ -124,29 +124,34 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (requestEntity == null)
             {
-                return new ApiResponse().SetNotFound("Request not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Request"));
+            }
+
+            if (_userContextService.UserRoles.Contains(Role.USER) && userId != requestEntity.UserId)
+            {
+                return new ApiResponse().SetForbidden(message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "request"));
             }
 
             var response = _requestMapper.MapToRequestModel(requestEntity);
             return new ApiResponse().SetOk(response);
         }
 
-        public async Task<ApiResponse> UpdateRequest(Guid id, RequestRequestModel model)
+        public async Task<ApiResponse> UpdateRequest(RequestUpdationRequestModel model)
         {
-            var requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id);
+            var requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == model.Id);
             if (requestEntity == null)
             {
-                return new ApiResponse().SetNotFound("Request not found");
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Request"));
             }
 
             if (requestEntity.UserId != _userContextService.UserId)
             {
-                return new ApiResponse().SetForbidden("You are not allowed to update this request");
+                return new ApiResponse().SetForbidden(message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "request"));
             }
 
             if (requestEntity.Status != RequestStatusEnum.SUBMITTED)
             {
-                return new ApiResponse().SetBadRequest("Request is not in SUBMITTED status");
+                return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.UpdateEntityConflict, "request"));
             }
 
             requestEntity.Description = model.Description;
@@ -157,7 +162,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == model.RoomId.Value, isNoTracking: true);
                 if (roomEntity == null)
                 {
-                    return new ApiResponse().SetNotFound("Room not found");
+                    return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
                 }
                 requestEntity.RoomId = model.RoomId.Value;
             }
@@ -172,35 +177,30 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var userId = _userContextService.UserId;
             if (userId == Guid.Empty)
             {
-                return new ApiResponse().SetNotFound("User not found");
+                return new ApiResponse().SetNotFound(userId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "User"));
             }
 
             var requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id, isNoTracking: false);
 
             if (requestEntity == null)
             {
-                return new ApiResponse().SetNotFound("Request not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Request"));
             }
 
-            switch (status)
+            if (_userContextService.UserRoles.Contains(Role.USER) && _userContextService.UserId != requestEntity.UserId)
             {
-                case RequestStatusEnum.APPROVED:
-                case RequestStatusEnum.REJECTED:
-                    {
-                        if (requestEntity.Status != RequestStatusEnum.SUBMITTED)
-                        {
-                            throw new BadRequestException(message: "Overnight absence is not available for approve/ reject");
-                        }
-                    }
-                    break;
-                case RequestStatusEnum.CANCELLED:
-                    {
-                        if (requestEntity.Status == RequestStatusEnum.APPROVED || requestEntity.Status == RequestStatusEnum.REJECTED)
-                        {
-                            throw new BadRequestException(message: "Overnight absence is already approved or rejected");
-                        }
-                    }
-                    break;
+                return new ApiResponse().SetForbidden(message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "overnight absence"));
+            }
+
+            var (isError, errorMessage) = RequestStatusChangeValidator.VerifyRequestStatusChangeValidator(requestEntity.Status, status);
+            if (isError)
+            {
+                return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Request"));
+            }
+
+            if (status == RequestStatusEnum.APPROVED || status == RequestStatusEnum.REJECTED)
+            {
+                requestEntity.ApproverId = userId;
             }
 
             requestEntity.Status = status;
@@ -209,7 +209,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetOk(requestEntity.Id);
         }
     }
 }

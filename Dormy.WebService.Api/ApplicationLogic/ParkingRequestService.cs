@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Validations;
@@ -24,21 +25,45 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateParkingRequest(ParkingRequestModel model)
         {
-            await VerirfyParkingRequest(model.ParkingSpotId, model.VehicleId);
+            var parkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == model.ParkingSpotId);
+            if (parkingSpotEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.ParkingSpotId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
+            }
+            if (parkingSpotEntity.CurrentQuantity == parkingSpotEntity.CapacitySpots)
+            {
+                return new ApiResponse().SetPreconditionFailed(model.ParkingSpotId, message: string.Format(ErrorMessages.ParkingRequestIsFull));
+            }
+
+            var vehicleEntity = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == model.VehicleId);
+            if (vehicleEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.VehicleId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle"));
+            }
 
             var parkingRequest = new ParkingRequestEntity
             {
                 Id = Guid.NewGuid(),
-                CreatedBy = _userContextService.UserId,
                 ParkingSpotId = model.ParkingSpotId,
-                Status = Models.Enums.RequestStatusEnum.SUBMITTED,
+                Status = RequestStatusEnum.SUBMITTED,
                 UserId = _userContextService.UserId,
                 VehicleId = model.VehicleId,
                 Description = model.Description,
+                CreatedBy = _userContextService.UserId,
+                LastUpdatedBy = _userContextService.UserId,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
             };
+
+            parkingSpotEntity.CurrentQuantity += 1;
+            if (parkingSpotEntity.CurrentQuantity == parkingSpotEntity.CapacitySpots)
+            {
+                parkingSpotEntity.Status = ParkingSpotStatusEnum.FULL;
+            }
 
             await _unitOfWork.ParkingRequestRepository.AddAsync(parkingRequest);
             await _unitOfWork.SaveChangeAsync();
+            
             return new ApiResponse().SetCreated(parkingRequest.Id);
         }
 
@@ -123,18 +148,28 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                                      message: string.Format(errorMessage, "parking request"));
             }
 
+            if (model.Status == RequestStatusEnum.REJECTED || model.Status == RequestStatusEnum.CANCELLED)
+            {
+                var parkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == parkingRequest.ParkingSpotId);
+                if (parkingSpotEntity.CurrentQuantity == parkingSpotEntity.CapacitySpots)
+                {
+                    parkingSpotEntity.Status = ParkingSpotStatusEnum.AVAILABLE;
+                }
+                parkingSpotEntity.CurrentQuantity = parkingSpotEntity.CurrentQuantity - 1;
+            }
+
             parkingRequest.Status = model.Status;
             parkingRequest.LastUpdatedBy = _userContextService.UserId;
             parkingRequest.LastUpdatedDateUtc = DateTime.Now;
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.Status == Models.Enums.RequestStatusEnum.APPROVED || model.Status == Models.Enums.RequestStatusEnum.REJECTED)
+                if (model.Status == RequestStatusEnum.APPROVED || model.Status == RequestStatusEnum.REJECTED)
                 {
                     parkingRequest.ApproverId = _userContextService.UserId;
                 }
 
-                if (model.Status == Models.Enums.RequestStatusEnum.APPROVED)
+                if (model.Status == RequestStatusEnum.APPROVED)
                 {
                     var vehicle = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == parkingRequest.VehicleId);
                     vehicle.ParkingSpotId = parkingRequest.ParkingSpotId;
@@ -155,13 +190,36 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking request"));
             }
 
-            if (parkingRequest.Status != Models.Enums.RequestStatusEnum.SUBMITTED)
+            if (parkingRequest.Status != RequestStatusEnum.SUBMITTED)
             {
                 return new ApiResponse().SetConflict(parkingRequest.Id,
                                                      message: string.Format(ErrorMessages.UpdateEntityConflict, "parking request"));
-            }    
+            }
 
-            await VerirfyParkingRequest(model.ParkingSpotId, parkingRequest.VehicleId);
+            var newParkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == model.ParkingSpotId);
+            if (newParkingSpotEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.ParkingSpotId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
+            }
+            if (newParkingSpotEntity.CurrentQuantity == newParkingSpotEntity.CapacitySpots)
+            {
+                return new ApiResponse().SetPreconditionFailed(model.ParkingSpotId, message: string.Format(ErrorMessages.ParkingRequestIsFull));
+            }
+
+            // Update slot for new parking spot
+            newParkingSpotEntity.CurrentQuantity = newParkingSpotEntity.CurrentQuantity + 1;
+            if (newParkingSpotEntity.CurrentQuantity == newParkingSpotEntity.CapacitySpots)
+            {
+                newParkingSpotEntity.Status = ParkingSpotStatusEnum.FULL;
+            }
+
+            //Update slot for current parking spot
+            var currentParkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == parkingRequest.ParkingSpotId);
+            if (currentParkingSpotEntity.CurrentQuantity == currentParkingSpotEntity.CapacitySpots)
+            {
+                currentParkingSpotEntity.Status = ParkingSpotStatusEnum.AVAILABLE;
+            }
+            currentParkingSpotEntity.CurrentQuantity = currentParkingSpotEntity.CurrentQuantity - 1;
 
             parkingRequest.Description = model.Description;
             parkingRequest.ParkingSpotId = model.ParkingSpotId;
@@ -189,19 +247,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(parkingRequest.Id);
-        }
-
-        private async Task VerirfyParkingRequest(Guid parkingSpotId, Guid vehicleId)
-        {
-            var parkingSpot = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == parkingSpotId);
-            var vehicle = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == vehicleId);
-
-            if (parkingSpot is null || vehicle is null)
-            {
-                var entityName = parkingSpot is null ? "Parking Spot" : "Vehicle";
-                var entityId = parkingSpot is null ? parkingSpotId : vehicleId;
-                throw new EntityNotFoundException($"{entityName} with Id: {entityId} Not Found.");
-            }
         }
     }
 }

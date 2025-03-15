@@ -28,7 +28,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string VehicleType { get; set; } = string.Empty;
 
-        public Guid ApproverId { get; set; }
+        public Guid? ApproverId { get; set; }
 
         public string ApproverUserName { get; set; } = string.Empty;
 
