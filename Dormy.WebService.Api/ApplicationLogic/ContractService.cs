@@ -66,15 +66,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest(message: "User information is required");
             }
 
-            // Validate startDate cannot be after enddate
-            if (model.StartDate < DateTime.Now || model.EndDate < DateTime.Now)
+            // Validate startDate and endDate
+            if (model.StartDate.Date < DateTime.Now.Date)
             {
-                return new ApiResponse().SetBadRequest(message: "Start date and end date must be in the future");
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.DateMustNotBeInThePast, nameof(model.StartDate)));
             }
-
-            if (model.StartDate > model.EndDate)
+            if (model.EndDate.Date < DateTime.Now.Date)
             {
-                return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.DateMustNotBeInThePast, nameof(model.EndDate)));
+            }
+            if (!DateTimeHelper.AreValidStartDateEndDateWithoutTime(model.StartDate, model.EndDate, false))
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.StartDateMustBeLessThanEndDate));
             }
 
             // Get user gender
@@ -205,10 +211,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> AddNewContract(ContractRequestModel model)
         {
-            // Validate startDate cannot be after enddate
-            if (model.StartDate > model.EndDate)
+            // Validate startDate and endDate
+            if (model.StartDate.Date < DateTime.Now.Date)
             {
-                return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.DateMustNotBeInThePast, nameof(model.StartDate)));
+            }
+            if (model.EndDate.Date < DateTime.Now.Date)
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.DateMustNotBeInThePast, nameof(model.EndDate)));
+            }
+            if (!DateTimeHelper.AreValidStartDateEndDateWithoutTime(model.StartDate, model.EndDate, false))
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.StartDateMustBeLessThanEndDate));
             }
 
             var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id.Equals(model.UserId), isNoTracking: true);

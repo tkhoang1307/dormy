@@ -6,6 +6,7 @@ using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
+using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 
