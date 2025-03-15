@@ -1,6 +1,8 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +24,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateRequest(RequestRequestModel model)
         {
+            var modelValidator = await RequestValidator.RequestRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var result = await _requestService.CreateRequest(model);
             return StatusCode((int)result.StatusCode, result);
         }
@@ -46,13 +54,24 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpPut("id/{id:guid}/approve")]
+        [HttpPut("id/{id:guid}/approve-or-reject")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> ApproveRequest(Guid id)
+        public async Task<IActionResult> ApproveOrRejectRequest(RequestApproveOrRejectRequestModel model)
         {
-            var result = await _requestService.UpdateRequestStatus(id, Models.Enums.RequestStatusEnum.APPROVED);
+            var modelValidator = await RequestValidator.RequestApproveOrRejectRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
+            RequestStatusEnum status = RequestStatusEnum.REJECTED;
+            if (model.IsApproved)
+            {
+                status = RequestStatusEnum.APPROVED;
+            }    
+            var result = await _requestService.UpdateRequestStatus(model.Id, status);
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -60,19 +79,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = Role.USER)]
-        public async Task<IActionResult> UpdateRequest(Guid id, RequestRequestModel model)
+        public async Task<IActionResult> UpdateRequest(RequestUpdationRequestModel model)
         {
-            var result = await _requestService.UpdateRequest(id, model);
-            return StatusCode((int)result.StatusCode, result);
-        }
+            var modelValidator = await RequestValidator.RequestUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
 
-        [HttpPut("id/{id:guid}/reject")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> RejectRequest(Guid id)
-        {
-            var result = await _requestService.UpdateRequestStatus(id, Models.Enums.RequestStatusEnum.REJECTED);
+            var result = await _requestService.UpdateRequest(model);
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -82,7 +97,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CancelRequest(Guid id)
         {
-            var result = await _requestService.UpdateRequestStatus(id, Models.Enums.RequestStatusEnum.CANCELLED);
+            var result = await _requestService.UpdateRequestStatus(id, RequestStatusEnum.CANCELLED);
             return StatusCode((int)result.StatusCode, result);
         }
     }

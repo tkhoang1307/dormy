@@ -9,7 +9,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> CreateRequest(RequestRequestModel model);
         Task<ApiResponse> GetRequests(GetBatchRequestModel model);
         Task<ApiResponse> GetSingleRequest(Guid id);
-        Task<ApiResponse> UpdateRequest(Guid id, RequestRequestModel model);
+        Task<ApiResponse> UpdateRequest(RequestUpdationRequestModel model);
         Task<ApiResponse> UpdateRequestStatus(Guid id, RequestStatusEnum status);
     }
 }
