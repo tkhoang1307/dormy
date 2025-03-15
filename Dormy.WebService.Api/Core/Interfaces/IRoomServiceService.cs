@@ -6,6 +6,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     public interface IRoomServiceService
     {
         Task<ApiResponse> AddRoomServiceBatch(List<RoomServiceRequestModel> models);
+        Task<ApiResponse> AddRoomService(RoomServiceRequestModel model);
         Task<ApiResponse> UpdateRoomService(RoomServiceUpdateRequestModel model);
         Task<ApiResponse> GetRoomServiceBatch(GetBatchRequestModel model);
         Task<ApiResponse> GetRoomSeviceSingle(Guid id);

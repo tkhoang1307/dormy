@@ -16,6 +16,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string Unit { get; set; } = string.Empty;
 
-        public JObject? Metadata { get; set; } = null!;
+        public decimal? OldIndicator { get; set; }
+
+        public decimal? NewIndicator { get; set; }
     }
 }

@@ -52,7 +52,7 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public Guid RoomId { get; set; }
 
-        public JObject? Metadata { get; set; } = null!;
+        public Guid? ContractId { get; set; }
 
         public List<InvoiceItemMapperRequestModel> InvoiceItems { get; set; } = null!;
 

@@ -17,7 +17,7 @@ namespace Dormy.WebService.Api.Models.RequestModels
     {
         public string RoomServiceName { get; set; } = string.Empty;
 
-        public Guid RoomServiceId { get; set; }
+        public Guid? RoomServiceId { get; set; }
 
         public decimal Cost { get; set; }
 
@@ -25,6 +25,8 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public string Unit { get; set; } = string.Empty;
 
-        public JObject? Metadata { get; set; } = null!;
+        public decimal? OldIndicator { get; set; }
+
+        public decimal? NewIndicator { get; set; }
     }
 }

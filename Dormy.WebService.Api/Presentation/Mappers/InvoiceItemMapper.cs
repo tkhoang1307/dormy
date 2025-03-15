@@ -17,7 +17,8 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Cost = model.Cost,
                 Quantity = model.Quantity,
                 Unit = model.Unit,
-                Metadata = model.Metadata != null ? model.Metadata.ToString() : string.Empty,
+                OldIndicator = model.OldIndicator,
+                NewIndicator = model.NewIndicator,
                 CreatedDateUtc = DateTime.UtcNow,
                 LastUpdatedDateUtc = DateTime.UtcNow,
             };
@@ -35,7 +36,8 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Cost = model.Cost,
                 Quantity = model.Quantity,
                 Unit = model.Unit,
-                Metadata = JObject.Parse(model.Metadata),
+                OldIndicator = model?.OldIndicator, 
+                NewIndicator = model?.NewIndicator,
             };
 
             return invoiceItemResponseModel;

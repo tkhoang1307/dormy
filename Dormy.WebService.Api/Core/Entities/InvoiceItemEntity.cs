@@ -16,7 +16,9 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public string Unit { get; set; } = string.Empty;
 
-        public string Metadata { get; set; } = string.Empty;
+        public decimal? OldIndicator { get; set; }
+
+        public decimal? NewIndicator { get; set; }
 
         public Guid InvoiceId { get; set; }
 

@@ -22,7 +22,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string Status { get; set; } = string.Empty;
 
-        public JObject? Metadata { get; set; } = null!;
+        public Guid? ContractId { get; set; }
 
         public Guid RoomId { get; set; }
 

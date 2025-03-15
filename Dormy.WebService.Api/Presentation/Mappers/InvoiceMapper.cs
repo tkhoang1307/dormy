@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
@@ -31,7 +32,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Type = (InvoiceTypeEnum)Enum.Parse(typeof(InvoiceTypeEnum), model.Type),
                 Status = (InvoiceStatusEnum)Enum.Parse(typeof(InvoiceStatusEnum), model.Status),
                 RoomId = model.RoomId,
-                Metadata = model.Metadata != null ? model.Metadata.ToString() : string.Empty,
+                ContractId = model.ContractId,
                 InvoiceItems = model.InvoiceItems.Select(it => _invoiceItemMapper.MapToInvoiceItemEntity(it)).ToList(),
                 InvoiceUsers = model.InvoiceUsers.Select(iu => _invoiceUserMapper.MapToInvoiceUserEntity(iu)).ToList(),
                 CreatedDateUtc = DateTime.UtcNow,
@@ -54,6 +55,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Year = entity.Year,
                 Type = entity.Type.ToString(),
                 Status = entity.Status.ToString(),
+                ContractId = entity.ContractId,
                 RoomId = entity.RoomId,
                 CreatedBy = entity.CreatedBy,
                 CreatedDateUtc = entity.CreatedDateUtc,
@@ -79,7 +81,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Type = entity.Type.ToString(),
                 Status = entity.Status.ToString(),
                 RoomId = entity.RoomId,
-                Metadata = JObject.Parse(entity.Metadata),
+                ContractId = entity.ContractId,
                 CreatedBy = entity.CreatedBy,
                 CreatedDateUtc = entity.CreatedDateUtc,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,

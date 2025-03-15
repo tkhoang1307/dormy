@@ -100,18 +100,31 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         Cost = roomService.Cost,
                         Quantity = invoiceItem.Quantity,
                         Unit = roomService.Unit,
-                        Metadata = JObject.FromObject(new { oldIndicator = invoiceItem.OldIndicator, newIndicator = invoiceItem.NewIndicator }),
+                        OldIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.OldIndicator : null,
+                        NewIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.NewIndicator : null,
                     });
                     amountBeforePromotion = amountBeforePromotion + roomService.Cost * invoiceItem.Quantity;
                 }
 
-                var userIds = _roomService.GetAllUsersOfRoomByRoomId(model.RoomId).Result;
                 var invoiceUsersModel = new List<InvoiceUserMapperModel>();
-                foreach (var userId in userIds)
+                if (model.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY.ToString())
                 {
+                    var userIds = _roomService.GetAllUsersOfRoomByRoomId(model.RoomId).Result;
+                    foreach (var userId in userIds)
+                    {
+                        invoiceUsersModel.Add(new InvoiceUserMapperModel()
+                        {
+                            UserId = userId,
+                        });
+                    }
+                }
+
+                if (model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString())
+                {
+                    var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == model.ContractId);
                     invoiceUsersModel.Add(new InvoiceUserMapperModel()
                     {
-                        UserId = userId,
+                        UserId = contractEntity.UserId,
                     });
                 }
 
@@ -126,7 +139,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Type = model.Type,
                     Status = InvoiceStatusEnum.DRAFT.ToString(),
                     RoomId = model.RoomId,
-                    Metadata = JObject.FromObject(new { contractId = model.ContractId }),
+                    ContractId = model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString() ? model.ContractId : null,
                     InvoiceItems = invoiceItemsMapperRequestModel,
                     InvoiceUsers = invoiceUsersModel,
                 };
@@ -162,7 +175,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 await _unitOfWork.InvoiceRepository.AddAsync(invoiceEntity);
 
                 await _unitOfWork.SaveChangeAsync();
-            }            
+
+                // Complete transaction
+                scope.Complete();
+            }
 
             return new ApiResponse().SetCreated(invoiceIdTracking);
         }
@@ -270,7 +286,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 if (invoiceEntity.Status == InvoiceStatusEnum.DRAFT)
                 {
-                    return new ApiResponse().SetBadRequest(id, message: ErrorMessages.AccountDoesNotHavePermissionInvoice);
+                    return new ApiResponse().SetBadRequest(id, message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "invoice"));
                 }
 
                 var invoiceUserEntity = await _unitOfWork.InvoiceUserRepository.GetAsync(iu => iu.UserId == _userContextService.UserId && iu.InvoiceId == invoiceEntity.Id);
@@ -372,7 +388,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Cost = roomService.Cost,
                     Quantity = invoiceItem.Quantity,
                     Unit = roomService.Unit,
-                    Metadata = JObject.FromObject(new { oldIndicator = invoiceItem.OldIndicator, newIndicator = invoiceItem.NewIndicator }),
+                    OldIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.OldIndicator : null,
+                    NewIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.NewIndicator : null,
                 };
                 var invoiceItemEntity = _invoiceItemMapper.MapToInvoiceItemEntity(invoiceItemMapperRequestModel);
                 invoiceItemEntity.InvoiceId = invoiceEntity.Id;
