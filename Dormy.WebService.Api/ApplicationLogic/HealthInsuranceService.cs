@@ -28,8 +28,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entity = _healthInsuranceMapper.MapToHealthInsuranceEntity(model);
 
-            entity.CreatedBy = _userContextService.UserId;
-            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.CreatedBy = model?.UserId ?? _userContextService.UserId;
+            entity.LastUpdatedBy = model?.UserId ?? _userContextService.UserId;
 
             await _unitOfWork.HealthInsuranceRepository.AddAsync(entity);
             await _unitOfWork.SaveChangeAsync();
