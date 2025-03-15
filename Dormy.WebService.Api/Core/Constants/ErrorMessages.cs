@@ -7,6 +7,7 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string DuplicatedErrorMessage = "New password must be different with current password.";
         public const string PasswordDoesNotMatchErrorMessage = "Password is incorrect.";
         public const string UsernameIsExisted = "Username is existed.";
+        public const string PhoneNumberIsExisted = "Phone number is existed.";
         public const string CanNotDeleteNotEmptyEntity = "Can not delete data, related data existed.";
         public const string RoomIsOccupiedErrorMessage = "Can not delete data, room is current in used.";
         public const string RoomCapacityIsSmallerThanCurrentErrorMessage = "Can not set room capicity smnaller than actual value.";
@@ -27,7 +28,7 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string CreateInvoiceConflict = "Invoice for month {0}/{1} was created.";
         public const string UpdateInvoiceConflict = "Invoice was only updated when status is DRAFT.";
         public const string DeleteInvoiceConflict = "Invoice was only deleted when status is DRAFT.";
-        public const string AccountDoesNotHavePermissionInvoice = "Your account doesn’t have permission to access this invoice.";
+        public const string AccountDoesNotHavePermissionEntity = "Your account doesn’t have permission to access this {0}.";
         public const string ChangeRequestStatusSubmittedConflict = "{0} was SUBMITTED. You can change to other statuses except SUBMITTED.";
         public const string ChangeRequestStatusApproveConflict = "{0} was APPROVED. You can not change to other statuses except CANCELLED.";
         public const string ChangeRequestStatusCancelledConflict = "{0} was CANCELLED. You can not change to other statuses.";
@@ -50,5 +51,6 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string RoomIsFull = "Room is full, you can not register this room";
         public const string ParkingSpotIsUnderMaintenance = "Parking spot is under maintenance";
         public const string ParkingSpotIsFull = "Parking spot is full";
+        public const string StartDateMustBeLessThanEndDate = "Start date must be less than end date.";
     }
 }

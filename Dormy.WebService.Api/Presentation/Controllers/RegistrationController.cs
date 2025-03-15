@@ -1,5 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
@@ -19,6 +20,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(RegisterRequestModel model)
         {
+            var modelValidator = await RegistrationValidator.RegisterRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var result = await _contractService.Register(model);
             return StatusCode((int)result.StatusCode, result);
         }

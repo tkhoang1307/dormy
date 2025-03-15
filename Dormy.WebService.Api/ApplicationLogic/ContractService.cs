@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -27,6 +28,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly RoomTypeMapper _roomTypeMapper;
         private readonly ContractMapper _contractMapper;
         private readonly IInvoiceService _invoiceService;
+        private readonly IVehicleService _vehicleService;
 
         public ContractService(IUnitOfWork unitOfWork,
                                IUserContextService userContextService,
@@ -34,7 +36,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                IUserService userService,
                                IHealthInsuranceService healthInsuranceService,
                                IGuardianService guardianService,
-                               IInvoiceService invoiceService)
+                               IInvoiceService invoiceService,
+                               IVehicleService vehicleService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
@@ -43,6 +46,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _healthInsuranceService = healthInsuranceService;
             _guardianService = guardianService;
             _invoiceService = invoiceService;
+            _vehicleService = vehicleService;
             _userMapper = new UserMapper();
             _workplaceMapper = new WorkplaceMapper();
             _roomTypeMapper = new RoomTypeMapper();
@@ -95,8 +99,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     FirstName = model.User.FirstName,
                     LastName = model.User.LastName,
                     Email = model.User.Email,
-                    UserName = model.User.UserName,
-                    Password = model.User.Password,
                     DateOfBirth = model.User.DateOfBirth,
                     PhoneNumber = model.User.PhoneNumber,
                     NationalIdNumber = model.User.NationalIdNumber,
@@ -116,19 +118,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 {
                     return new ApiResponse().SetNotFound(message: "User not found");
                 }
-
-                //Sign in to have userContext
-                var responseLogin = await _userService.Login(new LoginRequestModel()
-                {
-                    Username = userCreationRequestModel.UserName,
-                    Password = userCreationRequestModel.Password,
-                });
-
-                if (!responseLogin.IsSuccess)
-                {
-                    throw new EntityNotFoundException("User not found");
-                }
-                userData = (UserLoginResponseModel)responseLogin.Result;
 
                 // Check if user have any workplace
                 if (model.WorkplaceId != null)
@@ -170,20 +159,20 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     }
                 }
 
-                // Add Vehicles
-                if (model.Vehicles?.Count > 0)
+                // Add Vehicles entity if provided
+                if (model.Vehicles != null && model.Vehicles.Count > 0)
                 {
-                    var vehicleEntities = model.Vehicles.Select(x => new VehicleEntity()
+                    foreach (var item in model.Vehicles)
                     {
-                        UserId = userIdTracking,
-                        LicensePlate = x.LicensePlate,
-                        VehicleType = x.VehicleType,
-                        CreatedBy = userIdTracking,
-                        LastUpdatedBy = userIdTracking,
-                    }).ToList();
-
-                    await _unitOfWork.VehicleRepository.AddRangeAsync(vehicleEntities);
-                    await _unitOfWork.SaveChangeAsync();
+                        var vehicleCreationRequestModel = item;
+                        vehicleCreationRequestModel.UserId = userIdTracking;
+                        var responseCreateVehicle = await _vehicleService.AddNewVehicle(vehicleCreationRequestModel);
+                        if (!responseCreateVehicle.IsSuccess)
+                        {
+                            return responseCreateVehicle;
+                        }
+                        guardianIdsTracking.Add((Guid)responseCreateVehicle.Result);
+                    }
                 }
 
                 // Create contract
@@ -209,7 +198,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetCreated(new RegisterModel
             {
-                CcontractId = contractIdTracking,
+                ContractId = contractIdTracking,
                 User = userData,
             });
         }
@@ -234,7 +223,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
-            if (roomEntity.Building.GenderRestriction == userEntity.Gender)
+            if (roomEntity.Building.GenderRestriction != userEntity.Gender)
             {
                 return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.ConflictGenderWhenChooseRoom, userEntity.Gender.ToString(), roomEntity.Building.GenderRestriction.ToString()));
             }
@@ -246,8 +235,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var contractEntity = _contractMapper.MapToContractEntity(model);
 
-            contractEntity.CreatedBy = _userContextService.UserId;
-            contractEntity.LastUpdatedBy = _userContextService.UserId;
+            contractEntity.CreatedBy = model?.UserId ?? _userContextService.UserId;
+            contractEntity.LastUpdatedBy = model?.UserId ?? _userContextService.UserId;
 
             roomEntity.TotalUsedBed += 1;
             if (roomEntity.TotalUsedBed == roomEntity.TotalAvailableBed)
@@ -291,32 +280,69 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Contract"));
             }
 
-            contractEntity.Status = status;
-            contractEntity.LastUpdatedBy = userId;
-            contractEntity.LastUpdatedDateUtc = DateTime.UtcNow;
-
-            if (status == ContractStatusEnum.WAITING_PAYMENT)
+            Guid invoiceIdTracking = Guid.Empty;
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required,
+                new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
+                TransactionScopeAsyncFlowOption.Enabled))
             {
-                var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
+                switch (status)
                 {
-                    DueDate = DateTime.Now.AddDays(15),
-                    Type = InvoiceTypeEnum.PAYMENT_CONTRACT.ToString(),
-                    RoomId = contractEntity.RoomId,
-                    ContractId = contractEntity.Id,
-                });
+                    case ContractStatusEnum.WAITING_PAYMENT:
+                        var roomTypeId = (await _unitOfWork.RoomRepository.GetAsync(x => x.Id == contractEntity.RoomId)).RoomTypeId;
+                        var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == roomTypeId, x => x.Include(x => x.RoomService));
+                        var roomServiceIdRentalPayment = roomTypeServices.Where(x => x.RoomService.RoomServiceType == RoomServiceTypeEnum.RENTAL_PAYMENT)
+                                                                         .Select(x => x.RoomServiceId).FirstOrDefault();
+                        var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
+                        {
+                            DueDate = DateTime.Now.AddDays(15),
+                            Type = InvoiceTypeEnum.PAYMENT_CONTRACT.ToString(),
+                            RoomId = contractEntity.RoomId,
+                            ContractId = contractEntity.Id,
+                            InvoiceItems = new List<InvoiceItemRequestModel>()
+                        {
+                            new InvoiceItemRequestModel()
+                            {
+                                RoomServiceId = roomServiceIdRentalPayment,
+                                Quantity = 1
+                            }
+                        }
+                        });
+
+                        if (!responseCreateInvoice.IsSuccess)
+                        {
+                            return responseCreateInvoice;
+                        }
+
+                        invoiceIdTracking = (Guid)responseCreateInvoice.Result;
+                        contractEntity.InvoiceId = invoiceIdTracking;
+                        contractEntity.ApproverId = userId;
+                        break;
+                    case ContractStatusEnum.ACTIVE:
+                        break;
+                    case ContractStatusEnum.EXTENDED:
+                        break;
+                    case ContractStatusEnum.EXPIRED:
+                    case ContractStatusEnum.TERMINATED:
+                    case ContractStatusEnum.REJECTED:
+                        contractEntity.Room.TotalUsedBed = contractEntity.Room.TotalUsedBed > 0 ? contractEntity.Room.TotalUsedBed - 1 : 0;
+                        contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
+                        contractEntity.Room.LastUpdatedBy = userId;
+                        contractEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
+                        break;
+                }
+
+                contractEntity.Status = status;
+                contractEntity.LastUpdatedBy = userId;
+                contractEntity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+                await _unitOfWork.SaveChangeAsync();
+
+                // Complete transaction
+                scope.Complete();
             }
 
-            if (status == ContractStatusEnum.REJECTED || status == ContractStatusEnum.TERMINATED || status == ContractStatusEnum.EXPIRED)
-            {
-                contractEntity.Room.TotalUsedBed = contractEntity.Room.TotalUsedBed > 0 ? contractEntity.Room.TotalUsedBed - 1 : 0;
-                contractEntity.Room.Status = contractEntity.Room.TotalAvailableBed == contractEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                contractEntity.Room.LastUpdatedBy = userId;
-                contractEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
-            }    
-
-            await _unitOfWork.SaveChangeAsync();
-
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetOk(id);
         }
 
         public async Task<ApiResponse> GetSingleContract(Guid id)
@@ -344,6 +370,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
             if (contractEntity == null)
             {
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
+            }
+
+            if (contractEntity.UserId != _userContextService.UserId)
+            {
+                return new ApiResponse().SetForbidden(contractEntity.Id, message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "contract"));
             }
 
             var response = _contractMapper.MapToContractModel(contractEntity);

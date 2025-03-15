@@ -2,7 +2,7 @@
 {
     public class RegisterModel
     {
-        public Guid CcontractId { get; set; }
+        public Guid ContractId { get; set; }
         public UserLoginResponseModel User { get; set; } = null!;
     }
 }
