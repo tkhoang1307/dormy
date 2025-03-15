@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/parking-spot")]
     [ApiController]
     public class ParkingSpotController: ControllerBase
     {
@@ -52,7 +52,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpPut("status")]
+        [HttpPut("update/status")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateStatusParkingSpot(ParkingSpotUpdateStatusRequestModel model)
         {
@@ -85,7 +85,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpDelete("soft-delete/id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteParkingSpot(Guid id)
         {

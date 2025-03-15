@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/admin")]
     public class AdminController : ControllerBase
     {
         private readonly IConfiguration _configuration;

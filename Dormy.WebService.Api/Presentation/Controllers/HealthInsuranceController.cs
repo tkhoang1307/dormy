@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/health-insurance")]
     [ApiController]
     public class HealthInsuranceController : ControllerBase
     {

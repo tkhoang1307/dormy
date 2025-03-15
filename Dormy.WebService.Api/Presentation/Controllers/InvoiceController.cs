@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/invoice")]
     [ApiController]
     public class InvoiceController : ControllerBase
     {
@@ -37,7 +37,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPost("create-initial-invoice")]
+        [HttpPost("create-initial-data")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model)
         {
@@ -100,7 +100,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("hard-delete/id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/hard-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> HardDeleteInvoiceById(Guid id)
         {

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/vehicle")]
     [ApiController]
     public class VehicleController : ControllerBase
     {
@@ -59,7 +59,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         public async Task<IActionResult> SoftDeleteVehicleById(Guid id)
         {

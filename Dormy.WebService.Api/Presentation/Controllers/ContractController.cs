@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/contract")]
     [ApiController]
     public class ContractController : ControllerBase
     {
@@ -35,7 +35,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpPut("active/id/{id:guid}")]
+        [HttpPut("id/{id:guid}/active")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ActiveContract(Guid id)
         {
@@ -43,7 +43,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpPut("admin/approve-or-reject/id/{id:guid}")]
+        [HttpPut("id/{id:guid}/approve-or-reject")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ApproveOrRejectRegisterContract(Guid id, [FromBody] ApproveOrRejectContractRequestModel model)
         {
@@ -71,7 +71,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("terminate/id/{id:guid}")]
+        [HttpPut("id/{id:guid}/terminate")]
         [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> TerminateContract(Guid id)
         {
@@ -79,7 +79,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpPut("expired/id/{id:guid}")]
+        [HttpPut("id/{id:guid}/expire")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ExpiredContract(Guid id)
         {

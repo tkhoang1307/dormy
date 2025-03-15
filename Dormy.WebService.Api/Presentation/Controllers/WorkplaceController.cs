@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/workplace")]
     [ApiController]
     public class WorkplaceController : ControllerBase
     {
@@ -78,7 +78,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> DeleteWorkplace(Guid id)
         {
@@ -87,7 +87,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("id/hard-delete/{id:guid}")]
+        [HttpDelete("id/{id:guid}/hard-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> HardDeleteWorkplace(Guid id)
         {

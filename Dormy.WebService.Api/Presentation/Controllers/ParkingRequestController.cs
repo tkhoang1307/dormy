@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/parking-request")]
     [ApiController]
     public class ParkingRequestController : ControllerBase
     {
@@ -51,7 +51,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpPut("admin/approve-or-reject/id/{id:guid}")]
+        [HttpPut("id/{id:guid}/approve-or-reject")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> AcceptParkingRequest(Guid id, ApproveOrRejectParkingRequestModel model)
         {
@@ -79,7 +79,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("user/cancel/id/{id:guid}")]
+        [HttpPut("id/{id:guid}/cancel")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CancelParkingRequest(Guid id)
         {
@@ -111,7 +111,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpDelete("soft-delete/id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteParkingSpot(Guid id)
         {

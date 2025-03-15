@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/service-indicator")]
     [ApiController]
     public class ServiceIndicatorController : ControllerBase
     {
@@ -35,7 +35,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPost("create/batch")]
+        [HttpPost("batch/create")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateBatchServiceIndicator(ServiceIndicatorCreationBatchRequestModel model)
         {
@@ -83,7 +83,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpDelete("hard-delete/batch")]
+        [HttpDelete("batch/hard-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteRoomService(List<Guid> ids)
         {

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/overnight-absence")]
     [ApiController]
     public class OvernightAbsentController : ControllerBase
     {

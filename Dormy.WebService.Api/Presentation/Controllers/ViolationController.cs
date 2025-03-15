@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/violation")]
     [ApiController]
     public class ViolationController : ControllerBase
     {
@@ -48,7 +48,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> DeleteViolation(Guid id)
         {

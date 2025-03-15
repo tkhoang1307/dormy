@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -33,7 +33,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _emailService = emailService;
         }
 
-        [HttpPost("user/sign-up")]
+        [HttpPost("sign-up")]
         [AllowAnonymous]
         public async Task<IActionResult> SignUp(UserRequestModel request)
         {
@@ -48,7 +48,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response); 
         }
 
-        [HttpPost("user/sign-in")]
+        [HttpPost("sign-in")]
         [AllowAnonymous]
         public async Task<IActionResult> SignIn([FromBody] LoginRequestModel request)
         {
@@ -63,7 +63,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("user/change-password")]
+        [HttpPut("change-password")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> ChangePassword(ChangePasswordRequestModel model)
         {
@@ -92,7 +92,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("user/reset-password")]
+        [HttpPut("reset-password")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> ResetPassword()
         {
@@ -112,7 +112,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("user/update-profile")]
+        [HttpPut("update-profile")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateProfile(UserUpdateRequestModel model)
         {
@@ -139,7 +139,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpGet("user/id/{id:guid}")]
+        [HttpGet("id/{id:guid}")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> GetProfile(Guid id)
         {
@@ -148,7 +148,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPost("user/batch")]
+        [HttpPost("batch")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetUserBatch([FromBody] GetBatchRequestModel request)
         {
@@ -157,7 +157,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("user/update-workplace/workplaceId/{workplaceId:guid}")]
+        [HttpPut("update-workplace/workplaceId/{workplaceId:guid}")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateUserWorkplace([FromRoute] Guid workplaceId)
         {
@@ -178,7 +178,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("user/update-health-insurance")]
+        [HttpPut("update-health-insurance")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> UpdateUserHealthInsurance([FromBody] HealthInsuranceRequestModel? model)
         {

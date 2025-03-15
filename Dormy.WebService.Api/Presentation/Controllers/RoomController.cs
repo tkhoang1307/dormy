@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/room")]
     [ApiController]
     public class RoomController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _roomService = roomService;
         }
 
-        [HttpPost("batch/create/buildingId/{buildingId:guid}")]
+        [HttpPost("buildingId/{buildingId:guid}/batch/create")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateRoomBatch(Guid buildingId, [FromBody] List<RoomCreationRequestModel> rooms)
         {
@@ -37,7 +37,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpGet("batch/buildingId/{buildingId:guid}")]
+        [HttpGet("buildingId/{buildingId:guid}/batch")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetRoomsByBuildingId(Guid buildingId)
         {
@@ -68,7 +68,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPut("status")]
+        [HttpPut("update/status")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateRoomStatus(RoomUpdateStatusRequestModel room)
         {
@@ -83,7 +83,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDelete(Guid id)
         {
@@ -92,7 +92,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("delete/batch")]
+        [HttpDelete("batch/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteBatch([FromBody] List<Guid> ids)
         {

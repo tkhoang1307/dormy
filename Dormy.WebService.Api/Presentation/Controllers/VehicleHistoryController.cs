@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/vehicle-history")]
     [ApiController]
     public class VehicleHistoryController : ControllerBase
     {
@@ -42,7 +42,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/hard-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> DeleteVehicleHistory(Guid id)
         {

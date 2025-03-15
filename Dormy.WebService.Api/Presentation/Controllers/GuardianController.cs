@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/guardian")]
     [ApiController]
     public class GuardianController : ControllerBase
     {
@@ -78,7 +78,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpDelete("hard-delete/id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/hard-delete")]
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> HardDeleteGuardian(Guid id)
         {

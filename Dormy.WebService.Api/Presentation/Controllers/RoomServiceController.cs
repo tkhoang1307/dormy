@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/room-service")]
     [ApiController]
     public class RoomServiceController : ControllerBase
     {
@@ -73,7 +73,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("soft-delete/batch")]
+        [HttpDelete("batch/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteRoomService(List<Guid> ids)
         {

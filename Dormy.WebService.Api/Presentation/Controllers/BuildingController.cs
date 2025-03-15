@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/building")]
     [ApiController]
     public class BuildingController : ControllerBase
     {
@@ -51,7 +51,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPost("create/batch")]
+        [HttpPost("batch/create")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateBuildingBatch(List<BuildingCreationRequestModel> models)
         {
@@ -83,7 +83,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpDelete("id/{id:guid}/soft-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> SoftDeleteBuilding(Guid id)
         {
