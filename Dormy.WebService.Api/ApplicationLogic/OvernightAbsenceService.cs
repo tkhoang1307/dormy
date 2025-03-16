@@ -6,6 +6,7 @@ using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
+        private readonly OvernightAbsenceMapper _overnightAbsenceMapper;
 
         public OvernightAbsenceService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
+            _overnightAbsenceMapper = new OvernightAbsenceMapper();
         }
 
         public async Task<ApiResponse> AddOvernightAbsence(OvernightAbsentRequestModel model)
@@ -31,23 +34,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 throw new EntityNotFoundException(message: "User not found");
             }
 
-            var entity = new OvernightAbsenceEntity
-            {
-                UserId = userId,
-                Reason = model.Reason,
-                StartDateTime = model.StartDateTime,
-                EndDateTime = model.EndDateTime,
-                Status = OvernightAbsenceStatusEnum.SUBMITTED,
-                CreatedBy = userId,
-                LastUpdatedBy = userId,
-                CreatedDateUtc = DateTime.UtcNow,
-                LastUpdatedDateUtc = DateTime.UtcNow,
-            };
+            var overnightAbsenceEntity = _overnightAbsenceMapper.MapToOvernightAbsenceEntity(model);
+            overnightAbsenceEntity.UserId = userId;
+            overnightAbsenceEntity.CreatedBy = userId;
+            overnightAbsenceEntity.LastUpdatedBy = userId;
 
-            await _unitOfWork.OvernightAbsenceRepository.AddAsync(entity);
+            await _unitOfWork.OvernightAbsenceRepository.AddAsync(overnightAbsenceEntity);
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetCreated(entity.Id);
+            return new ApiResponse().SetCreated(overnightAbsenceEntity.Id);
         }
 
         public async Task<ApiResponse> GetDetailOvernightAbsence(Guid id)
@@ -58,25 +53,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Overnight absence"));
             }
 
-            var result = new OvernightAbsentModel
-            {
-                Id = entity.Id,
-                UserId = entity.UserId,
-                Reason = entity.Reason,
-                StartDateTime = entity.StartDateTime,
-                EndDateTime = entity.EndDateTime,
-                Status = entity.Status.ToString(),
-                FirstName = entity.User.FirstName,
-                LastName = entity.User.LastName,
-                Email = entity.User.Email,
-                UserName = entity.User.UserName,
-                DateOfBirth = entity.User.DateOfBirth,
-                PhoneNumber = entity.User.PhoneNumber,
-                NationalIdNumber = entity.User.NationalIdNumber,
-                IsDeleted = entity.IsDeleted
-            };
+            var overnightAbsenceModel = _overnightAbsenceMapper.MapToOvernightAbsentModel(entity);
 
-            return new ApiResponse().SetOk(result);
+            return new ApiResponse().SetOk(overnightAbsenceModel);
         }
 
         public async Task<ApiResponse> GetOvernightAbsenceBatch(GetBatchRequestModel model)
@@ -142,23 +121,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 }
             }
 
-            var response = entities.Select(entity => new OvernightAbsentModel
-            {
-                Id = entity.Id,
-                UserId = entity.UserId,
-                Reason = entity.Reason,
-                StartDateTime = entity.StartDateTime,
-                EndDateTime = entity.EndDateTime,
-                Status = entity.Status.ToString(),
-                FirstName = entity.User.FirstName,
-                LastName = entity.User.LastName,
-                Email = entity.User.Email,
-                UserName = entity.User.UserName,
-                DateOfBirth = entity.User.DateOfBirth,
-                PhoneNumber = entity.User.PhoneNumber,
-                NationalIdNumber = entity.User.NationalIdNumber,
-                IsDeleted = entity.IsDeleted
-            }).ToList();
+            var response = entities.Select(entity => _overnightAbsenceMapper.MapToOvernightAbsentModel(entity)).ToList();
 
             return new ApiResponse().SetOk(response);
         }
