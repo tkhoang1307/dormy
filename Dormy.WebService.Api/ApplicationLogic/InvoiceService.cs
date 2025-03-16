@@ -282,7 +282,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var invoiceEntity = await _unitOfWork.InvoiceRepository
                                                 .GetAsync(i => i.Id == id,
                                                     include: q => q.Include(i => i.InvoiceItems)
-                                                                    .Include(i => i.InvoiceUsers));
+                                                                    .Include(i => i.InvoiceUsers)
+                                                                    .Include(i => i.Room));
             if (invoiceEntity == null)
             {
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
@@ -303,6 +304,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var invoiceModel = _invoiceMapper.MapToInvoiceResponseModel(invoiceEntity);
+
+            var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(invoiceModel.CreatedBy, invoiceModel.LastUpdatedBy);
+
+            invoiceModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+            invoiceModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
             return new ApiResponse().SetOk(invoiceModel);
         }

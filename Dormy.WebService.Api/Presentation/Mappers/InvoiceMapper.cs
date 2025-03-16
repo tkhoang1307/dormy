@@ -81,12 +81,12 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Type = entity.Type.ToString(),
                 Status = entity.Status.ToString(),
                 RoomId = entity.RoomId,
+                RoomName = entity.Room.RoomNumber.ToString(),
                 ContractId = entity.ContractId,
                 CreatedBy = entity.CreatedBy,
                 CreatedDateUtc = entity.CreatedDateUtc,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
                 LastUpdatedBy = entity.LastUpdatedBy,
-                //Rooms = (entity != null && entity.Rooms != null) ? entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.FloorNumber).ToList() : [],
                 InvoiceItems = (entity != null && entity.InvoiceItems != null) ? entity.InvoiceItems.Select(r => _invoiceItemMapper.MapToInvoiceItemResponseModel(r)).ToList() : [],
                 IsDeleted = entity != null && entity.IsDeleted,
             };
