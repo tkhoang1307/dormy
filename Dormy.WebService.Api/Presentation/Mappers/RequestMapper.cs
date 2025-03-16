@@ -1,17 +1,22 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Models.Enums;
+using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 
 namespace Dormy.WebService.Api.Presentation.Mappers
 {
     public class RequestMapper
     {
-        private readonly RoomMapper _roomMapper;
-        private readonly ContractMapper _contractMapper;
-
-        public RequestMapper()
+        public RequestEntity MapToRequestEntity(RequestRequestModel model)
         {
-            _roomMapper = new();
-            _contractMapper = new();
+            return new RequestEntity
+            {
+                Description = model.Description,
+                RequestType = model.RequestType,
+                Status = RequestStatusEnum.SUBMITTED,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
+            };
         }
 
         public RequestResponseModel MapToRequestModel(RequestEntity requestEntity)
@@ -28,10 +33,9 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 ApproverName = $"{requestEntity.Approver?.FirstName} {requestEntity.Approver?.LastName}",
                 UserName = $"{requestEntity.User?.FirstName} {requestEntity.User?.LastName}",
                 RoomNumber = requestEntity.Room?.RoomNumber,
-                FloorNumber = requestEntity.Room?.FloorNumber,
-                RoomStatus = requestEntity.Room?.Status.ToString(),
                 BuildingId = requestEntity.Room?.BuildingId,
-                BuildingName = requestEntity.Room?.Building?.Name
+                BuildingName = requestEntity.Room?.Building?.Name,
+                IsDeleted = requestEntity.IsDeleted,
             };
         }
     }

@@ -27,14 +27,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateRequest(RequestRequestModel model)
         {
-            var requestEntity = new RequestEntity
-            {
-                Description = model.Description,
-                RequestType = model.RequestType,
-                UserId = _userContextService.UserId,
-                Status = RequestStatusEnum.SUBMITTED,
-                CreatedBy = _userContextService.UserId,
-            };
+            var requestEntity = _requestMapper.MapToRequestEntity(model);
+
+            requestEntity.UserId = _userContextService.UserId;
+            requestEntity.CreatedBy = _userContextService.UserId;
+            requestEntity.LastUpdatedBy = _userContextService.UserId;
 
             if (model.RoomId != null)
             {
