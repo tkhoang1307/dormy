@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250311163428_EditInvoiceEntity")]
-    partial class EditInvoiceEntity
+    [Migration("20250315154013_EditDB")]
+    partial class EditDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,24 +84,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("69ddb490-cfb9-4416-9b89-570da765f9fe"),
-                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 3, 11, 23, 34, 28, 417, DateTimeKind.Local).AddTicks(8593),
-                            DateOfBirth = new DateTime(2025, 3, 11, 23, 34, 28, 417, DateTimeKind.Local).AddTicks(8598),
-                            Email = "hungdv190516@gmail.com",
-                            FirstName = "Admin",
-                            Gender = "MALE",
-                            IsDeleted = false,
-                            JobTitle = "Admin",
-                            LastName = "",
-                            Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
-                            PhoneNumber = "",
-                            UserName = "admin"
-                        });
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BuildingEntity", b =>
@@ -207,7 +189,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ApproverId")
+                    b.Property<Guid?>("ApproverId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ContractId")
@@ -353,6 +335,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<decimal>("AmountBeforePromotion")
                         .HasColumnType("numeric");
 
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
@@ -374,10 +359,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Metadata")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int?>("Month")
                         .HasColumnType("integer");
@@ -430,9 +411,11 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("Metadata")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<decimal?>("NewIndicator")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("OldIndicator")
+                        .HasColumnType("numeric");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("numeric");
@@ -551,7 +534,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("AdminId")
+                    b.Property<Guid?>("ApproverId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CreatedBy")
@@ -588,7 +571,7 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdminId");
+                    b.HasIndex("ApproverId");
 
                     b.HasIndex("UserId");
 
@@ -601,7 +584,7 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ApproverId")
+                    b.Property<Guid?>("ApproverId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CreatedBy")
@@ -1275,9 +1258,7 @@ namespace Dormy.WebService.Api.Migrations
                 {
                     b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Approver")
                         .WithMany("ContractExtensions")
-                        .HasForeignKey("ApproverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ApproverId");
 
                     b.HasOne("Dormy.WebService.Api.Core.Entities.ContractEntity", "Contract")
                         .WithMany("ContractExtensions")
@@ -1363,9 +1344,9 @@ namespace Dormy.WebService.Api.Migrations
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.OvernightAbsenceEntity", b =>
                 {
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Admin")
+                    b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Approver")
                         .WithMany("OvernightAbsences")
-                        .HasForeignKey("AdminId");
+                        .HasForeignKey("ApproverId");
 
                     b.HasOne("Dormy.WebService.Api.Core.Entities.UserEntity", "User")
                         .WithMany("OvernightAbsences")
@@ -1373,7 +1354,7 @@ namespace Dormy.WebService.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Admin");
+                    b.Navigation("Approver");
 
                     b.Navigation("User");
                 });
@@ -1382,9 +1363,7 @@ namespace Dormy.WebService.Api.Migrations
                 {
                     b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Approver")
                         .WithMany("ParkingRequests")
-                        .HasForeignKey("ApproverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ApproverId");
 
                     b.HasOne("Dormy.WebService.Api.Core.Entities.ParkingSpotEntity", "ParkingSpot")
                         .WithMany("ParkingRequests")
