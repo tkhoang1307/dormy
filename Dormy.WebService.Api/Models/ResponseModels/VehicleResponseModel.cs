@@ -3,7 +3,7 @@ using Dormy.WebService.Api.Models.Enums;
 
 namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class VehicleResponseModel : BaseUserResponseModel
+    public class VehicleResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
