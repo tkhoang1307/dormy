@@ -2,7 +2,7 @@ using Dormy.WebService.Api.Models.Enums;
 
 namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class ParkingRequestResponseModel
+    public class ParkingRequestResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; }
 
@@ -11,8 +11,6 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public RequestStatusEnum Status { get; set; }
 
         public Guid UserId { get; set; }
-
-        public string UserName { get; set; } = string.Empty;
 
         public string UserFullName { get; set; } = string.Empty;
 
@@ -29,8 +27,6 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public string VehicleType { get; set; } = string.Empty;
 
         public Guid? ApproverId { get; set; }
-
-        public string ApproverUserName { get; set; } = string.Empty;
 
         public string ApproverUserFullName { get; set; } = string.Empty;
     }

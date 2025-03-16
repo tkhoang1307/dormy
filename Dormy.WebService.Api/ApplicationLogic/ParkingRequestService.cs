@@ -6,8 +6,10 @@ using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dormy.WebService.Api.ApplicationLogic
@@ -16,11 +18,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
+        private readonly ParkingRequestMapper _parkingRequestMapper;
 
         public ParkingRequestService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
+            _parkingRequestMapper = new ParkingRequestMapper();
         }
 
         public async Task<ApiResponse> CreateParkingRequest(ParkingRequestModel model)
@@ -41,19 +45,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.VehicleId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle"));
             }
 
-            var parkingRequest = new ParkingRequestEntity
-            {
-                Id = Guid.NewGuid(),
-                ParkingSpotId = model.ParkingSpotId,
-                Status = RequestStatusEnum.SUBMITTED,
-                UserId = _userContextService.UserId,
-                VehicleId = model.VehicleId,
-                Description = model.Description,
-                CreatedBy = _userContextService.UserId,
-                LastUpdatedBy = _userContextService.UserId,
-                CreatedDateUtc = DateTime.UtcNow,
-                LastUpdatedDateUtc = DateTime.UtcNow,
-            };
+            var parkingRequestEntity = _parkingRequestMapper.MapToParkingRequestEntity(model);
+            parkingRequestEntity.UserId = _userContextService.UserId;
+            parkingRequestEntity.CreatedBy = _userContextService.UserId;
+            parkingRequestEntity.LastUpdatedBy = _userContextService.UserId;
 
             parkingSpotEntity.CurrentQuantity += 1;
             if (parkingSpotEntity.CurrentQuantity == parkingSpotEntity.CapacitySpots)
@@ -61,10 +56,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 parkingSpotEntity.Status = ParkingSpotStatusEnum.FULL;
             }
 
-            await _unitOfWork.ParkingRequestRepository.AddAsync(parkingRequest);
+            await _unitOfWork.ParkingRequestRepository.AddAsync(parkingRequestEntity);
             await _unitOfWork.SaveChangeAsync();
             
-            return new ApiResponse().SetCreated(parkingRequest.Id);
+            return new ApiResponse().SetCreated(parkingRequestEntity.Id);
         }
 
         public async Task<ApiResponse> GetParkingRequestBatch(List<Guid> ids, bool isGetAll = false)
@@ -73,26 +68,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 x => x
                 .Include(x => x.Vehicle)
                 .Include(x => x.Approver)
-                .Include(x => x.ParkingSpot));
+                .Include(x => x.ParkingSpot)
+                .Include(x => x.User));
 
-            var result = parkingRequests.Select(x => new ParkingRequestResponseModel
-            {
-                Id = x.Id,
-                Description = x.Description,
-                Status = x.Status,
-                UserId = x.UserId,
-                VehicleId = x.VehicleId,
-                ParkingSpotId = x.ParkingSpotId,
-                ApproverId = x.ApproverId,
-                ApproverUserFullName = x.Approver.LastName + " " + x.Approver.FirstName,
-                ApproverUserName = x.Approver.UserName,
-                LicensePlate = x.Vehicle.LicensePlate,
-                VehicleType = x.Vehicle.VehicleType,
-                UserName = x.User.UserName,
-                ParkingSpotName = x.ParkingSpot.ParkingSpotName,
-                ParkingSpotStatus = x.ParkingSpot.Status,
-                UserFullName = x.User.LastName + " " + x.User.FirstName
-            }).ToList();
+            var result = parkingRequests.Select(x => _parkingRequestMapper.MapToParkingRequestResponseModel(x)).ToList();
 
             return new ApiResponse().SetOk(result);
         }
@@ -111,23 +90,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking request"));
             }
 
-            var result = new ParkingRequestResponseModel
-            {
-                Id = parkingRequest.Id,
-                Description = parkingRequest.Description,
-                Status = parkingRequest.Status,
-                UserId = parkingRequest.UserId,
-                VehicleId = parkingRequest.VehicleId,
-                ParkingSpotId = parkingRequest.ParkingSpotId,
-                ApproverId = parkingRequest.ApproverId,
-                ApproverUserFullName = parkingRequest?.Approver?.LastName + " " + parkingRequest?.Approver?.FirstName,
-                LicensePlate = parkingRequest.Vehicle.LicensePlate,
-                VehicleType = parkingRequest.Vehicle.VehicleType,
-                UserName = parkingRequest.User.UserName,
-                ParkingSpotName = parkingRequest.ParkingSpot.ParkingSpotName,
-                ParkingSpotStatus = parkingRequest.ParkingSpot.Status,
-                UserFullName = parkingRequest.User.LastName + " " + parkingRequest.User.FirstName
-            };
+            var result = _parkingRequestMapper.MapToParkingRequestResponseModel(parkingRequest);
 
             return new ApiResponse().SetOk(result);
         }
