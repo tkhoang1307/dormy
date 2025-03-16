@@ -1,6 +1,6 @@
 ﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class BuildingResponseModel : BaseResponseModel
+    public class BuildingBatchResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; }
 
@@ -12,7 +12,10 @@
 
         // GenderEnum
         public string GenderRestriction { get; set; } = string.Empty;
+    }
 
-        public List<RoomResponseModel> Rooms { get; set; } = [];
+    public class BuildingResponseModel : BuildingBatchResponseModel
+    {
+        public List<RoomBatchResponseModel> Rooms { get; set; } = [];
     }
 }

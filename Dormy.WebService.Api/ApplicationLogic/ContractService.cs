@@ -389,7 +389,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
             }
 
-            if (contractEntity.UserId != _userContextService.UserId)
+            if (_userContextService.UserRoles.Contains(Role.USER) && contractEntity.UserId != _userContextService.UserId)
             {
                 return new ApiResponse().SetForbidden(contractEntity.Id, message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "contract"));
             }

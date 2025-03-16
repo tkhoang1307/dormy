@@ -84,7 +84,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetRoomById(Guid id)
         {
-            var entity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(id), x => x.Include(x => x.RoomType));
+            var entity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(id), x => x.Include(x => x.RoomType).ThenInclude(roomType => roomType.RoomTypeServices).ThenInclude(roomTypeService => roomTypeService.RoomService));
 
             if (entity == null)
             {
@@ -92,6 +92,20 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var response = _roomMapper.MapToRoomResponseModel(entity);
+
+            var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(response.CreatedBy, response.LastUpdatedBy);
+
+            response.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+            response.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+
+            foreach(var roomServiceModel in response.RoomServices)
+            {
+                var (createdUserRoomService, lastUpdatedUserRoomService) = await _unitOfWork.AdminRepository.GetAuthors(roomServiceModel.CreatedBy, roomServiceModel.LastUpdatedBy);
+
+                roomServiceModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUserRoomService);
+                roomServiceModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUserRoomService);
+            }    
+
             return new ApiResponse().SetOk(response);
         }
 
@@ -106,7 +120,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             entity.Rooms ??= [];
 
-            var response = entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.RoomNumber).ToList();
+            var response = entity.Rooms.Select(r => _roomMapper.MapToRoomBatchResponseModel(r)).OrderBy(r => r.RoomNumber).ToList();
+            foreach(var roomModel in response)
+            {
+                var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(roomModel.CreatedBy, roomModel.LastUpdatedBy);
+
+                roomModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+                roomModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+            }
+
             return new ApiResponse().SetOk(response);
         }
 

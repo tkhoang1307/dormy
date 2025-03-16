@@ -42,7 +42,26 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 TotalRooms = entity?.Rooms?.Count ?? 0,
-                Rooms = (entity != null && entity.Rooms != null) ? entity.Rooms.Select(r => _roomMapper.MapToRoomResponseModel(r)).OrderBy(r => r.FloorNumber).ToList() : [],
+                Rooms = (entity != null && entity.Rooms != null) ? entity.Rooms.Select(r => _roomMapper.MapToRoomBatchResponseModel(r)).OrderBy(r => r.FloorNumber).ToList() : [],
+                IsDeleted = entity != null && entity.IsDeleted,
+            };
+
+            return buildingResponse;
+        }
+
+        public BuildingBatchResponseModel MapToBuildingBatchResponseModel(BuildingEntity entity)
+        {
+            var buildingResponse = new BuildingBatchResponseModel
+            {
+                Id = entity.Id,
+                GenderRestriction = entity.GenderRestriction.ToString(),
+                Name = entity.Name,
+                TotalFloors = entity.TotalFloors,
+                CreatedBy = entity.CreatedBy,
+                CreatedDateUtc = entity.CreatedDateUtc,
+                LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
+                LastUpdatedBy = entity.LastUpdatedBy,
+                TotalRooms = entity?.Rooms?.Count ?? 0,
                 IsDeleted = entity != null && entity.IsDeleted,
             };
 

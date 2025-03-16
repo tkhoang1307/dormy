@@ -1,6 +1,6 @@
 ﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class RoomResponseModel : BaseResponseModel
+    public class RoomBatchResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; }
 
@@ -18,13 +18,15 @@
 
         public decimal Price { get; set; }
 
-        // RoomStatusEnum
         public string Status { get; set; } = string.Empty;
 
         public Guid BuildingId { get; set; }
 
         public string BuildingName { get; set; } = string.Empty;
+    }
 
+    public class RoomResponseModel : RoomBatchResponseModel
+    {
         public List<RoomServiceResponseModel> RoomServices { get; set; } = [];
     }
 }

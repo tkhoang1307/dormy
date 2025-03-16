@@ -72,8 +72,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(roomService.CreatedBy, roomService.LastUpdatedBy);
 
-                roomService.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-                roomService.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+                roomService.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+                roomService.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
             }
 
             return new ApiResponse().SetOk(roomServiceModels);
@@ -92,8 +92,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(roomServiceModel.CreatedBy, roomServiceModel.LastUpdatedBy);
 
-            roomServiceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-            roomServiceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+            roomServiceModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+            roomServiceModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
             return new ApiResponse().SetOk(roomServiceModel);
         }

@@ -49,5 +49,28 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 RoomServices = entity.RoomType != null ? _roomTypeMapper.MapToRoomServiceModels(entity.RoomType) : [],
             };
         }
+
+        public RoomBatchResponseModel MapToRoomBatchResponseModel(RoomEntity entity)
+        {
+            return new RoomBatchResponseModel
+            {
+                Id = entity.Id,
+                FloorNumber = entity.FloorNumber,
+                RoomNumber = entity.RoomNumber,
+                RoomTypeId = entity.RoomTypeId,
+                RoomTypeName = entity.RoomType?.RoomTypeName ?? string.Empty,
+                Status = entity.Status.ToString(),
+                TotalAvailableBed = entity.TotalAvailableBed,
+                TotalUsedBed = entity.TotalUsedBed,
+                Price = entity.RoomType?.Price ?? 0,
+                BuildingId = entity.BuildingId,
+                BuildingName = entity.Building?.Name ?? string.Empty,
+                CreatedDateUtc = entity.CreatedDateUtc,
+                CreatedBy = entity.CreatedBy,
+                IsDeleted = entity.IsDeleted,
+                LastUpdatedBy = entity.LastUpdatedBy,
+                LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
+            };
+        }
     }
 }
