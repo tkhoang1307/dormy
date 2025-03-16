@@ -20,7 +20,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public string UserFullname { get; set; } = string.Empty;
     }
 
-    public class VehicleHisotryResponseModel
+    public class VehicleHistoryResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; }
 
@@ -35,17 +35,5 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public Guid ParkingSpotId { get; set; }
 
         public string ParkingSpotName { get; set; } = string.Empty;
-
-        public int CapacitySpots { get; set; }
-
-        public int CurrentQuantity { get; set; } = 0;
-
-        public string Status { get; set; } = string.Empty;
-
-        public bool IsDeleted { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime LastUpdatedAt { get; set; }
     }
 }

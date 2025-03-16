@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
@@ -13,11 +14,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
+        private readonly VehicleHistoryMapper _vehicleHistoryMapper;
 
         public VehicleHistoryService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
+            _vehicleHistoryMapper = new VehicleHistoryMapper();
         }
 
         public async Task<ApiResponse> CreateVehicleHistory(VehicleHistoryRequestModel model)
@@ -59,14 +62,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 //    await _unitOfWork.SaveChangeAsync();
                 //}
 
-                var vehicleHistoryEntity = new VehicleHistoryEntity
-                {
-                    VehicleId = model.VehicleId,
-                    ParkingSpotId = model.ParkingSpotId,
-                    Action = model.IsIn ? Models.Enums.VehicleActionEnum.IN : Models.Enums.VehicleActionEnum.OUT,
-                    CreatedDateUtc = DateTime.UtcNow,
-                    CreatedBy = _userContextService.UserId
-                };
+                var vehicleHistoryEntity = _vehicleHistoryMapper.MapToVehicleHistoryEntity(model);
+
+                vehicleHistoryEntity.CreatedBy = _userContextService.UserId;
+                vehicleHistoryEntity.LastUpdatedBy = _userContextService.UserId;
 
                 await _unitOfWork.VehicleHistoryRepository.AddAsync(vehicleHistoryEntity);
                 await _unitOfWork.SaveChangeAsync();
@@ -84,22 +83,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle history"));
             }
 
-            var result = new VehicleHisotryResponseModel
-            {
-                Id = vehicleHistoryEntity.Id,
-                VehicleId = vehicleHistoryEntity.VehicleId,
-                ParkingSpotId = vehicleHistoryEntity.ParkingSpotId,
-                Action = vehicleHistoryEntity.Action.ToString(),
-                CurrentQuantity = vehicleHistoryEntity.ParkingSpot.CurrentQuantity,
-                CapacitySpots = vehicleHistoryEntity.ParkingSpot.CapacitySpots,
-                LicensePlate = vehicleHistoryEntity.Vehicle.LicensePlate,
-                VehicleType = vehicleHistoryEntity.Vehicle.VehicleType,
-                ParkingSpotName = vehicleHistoryEntity.ParkingSpot.ParkingSpotName,
-                Status = vehicleHistoryEntity.ParkingSpot.Status.ToString(),
-                IsDeleted = vehicleHistoryEntity.IsDeleted,
-                CreatedAt = vehicleHistoryEntity.CreatedDateUtc,
-                LastUpdatedAt = vehicleHistoryEntity.LastUpdatedDateUtc.HasValue ? vehicleHistoryEntity.LastUpdatedDateUtc.Value : vehicleHistoryEntity.CreatedDateUtc,
-            };
+            var result = _vehicleHistoryMapper.MapToVehicleHistoryResponseModel(vehicleHistoryEntity);
 
             return new ApiResponse().SetOk(result);
         }
@@ -116,22 +100,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 vehicleHistoryEntities = await _unitOfWork.VehicleHistoryRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.Vehicle).Include(x => x.ParkingSpot), isNoTracking: true);
             }
 
-            var result = vehicleHistoryEntities.Select(x => new VehicleHisotryResponseModel
-            {
-                Id = x.Id,
-                VehicleId = x.VehicleId,
-                ParkingSpotId = x.ParkingSpotId,
-                Action = x.Action.ToString(),
-                CurrentQuantity = x.ParkingSpot.CurrentQuantity,
-                CapacitySpots = x.ParkingSpot.CapacitySpots,
-                LicensePlate = x.Vehicle.LicensePlate,
-                VehicleType = x.Vehicle.VehicleType,
-                ParkingSpotName = x.ParkingSpot.ParkingSpotName,
-                Status = x.ParkingSpot.Status.ToString(),
-                IsDeleted = x.IsDeleted,
-                CreatedAt = x.CreatedDateUtc,
-                LastUpdatedAt = x.LastUpdatedDateUtc.HasValue ? x.LastUpdatedDateUtc.Value : x.CreatedDateUtc,
-            }).ToList();
+            var result = vehicleHistoryEntities.Select(x => _vehicleHistoryMapper.MapToVehicleHistoryResponseModel(x)).ToList();
 
             return new ApiResponse().SetOk(result);
         }
