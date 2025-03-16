@@ -177,8 +177,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(serviceIndicatorModel.CreatedBy, serviceIndicatorModel.LastUpdatedBy);
 
-            serviceIndicatorModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-            serviceIndicatorModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+            serviceIndicatorModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+            serviceIndicatorModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
             return new ApiResponse().SetOk(serviceIndicatorModel);
         }

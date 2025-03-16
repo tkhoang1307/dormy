@@ -84,12 +84,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var workplace = response[i];
                 var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(workplace.CreatedBy));
 
-                workplace.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(author);
+                workplace.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(author);
 
                 if (workplace.LastUpdatedBy != null)
                 {
                     var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(workplace.LastUpdatedBy));
-                    workplace.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
+                    workplace.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
                 }
             }
 
@@ -112,12 +112,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(response.CreatedBy));
 
-            response.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(author);
+            response.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(author);
 
             if (entity.LastUpdatedBy != null)
             {
                 var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(response.LastUpdatedBy));
-                response.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
+                response.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
             }
 
             return new ApiResponse().SetOk(response);
@@ -143,12 +143,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var workplace = response[i];
                 var author = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(workplace.CreatedBy));
 
-                workplace.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(author);
+                workplace.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(author);
 
                 if (workplace.LastUpdatedBy != null)
                 {
                     var updatedAdmin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id.Equals(workplace.LastUpdatedBy));
-                    workplace.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
+                    workplace.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(updatedAdmin);
                 }
             }
 
@@ -191,13 +191,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Workplace"));
             }
 
-            if (entity.Users.Any())
-            {
-                return new ApiResponse().SetConflict(id, ErrorMessages.CanNotDeleteNotEmptyEntity);
-            }
-
             entity.IsDeleted = true;
-
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 

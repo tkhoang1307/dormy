@@ -53,25 +53,25 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (createdAdmin != null)
             {
-                healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdAdmin);
+                healthInsuranceModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdAdmin);
             }
             else
             {
                 if (createdUser != null)
                 {
-                    healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                    healthInsuranceModel.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
                 }
             }
 
             if (lastUpdatedAdmin != null)
             {
-                healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedAdmin);
+                healthInsuranceModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedAdmin);
             }
             else
             {
                 if (lastUpdatedUser != null)
                 {
-                    healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                    healthInsuranceModel.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
                 }
             }
 
@@ -136,25 +136,25 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 if (createdAdmin != null)
                 {
-                    healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdAdmin);
+                    healthInsuranceModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdAdmin);
                 }
                 else
                 {
                     if (createdUser != null)
                     {
-                        healthInsuranceModel.CreatedByAdminName = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                        healthInsuranceModel.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
                     }
                 }
 
                 if (lastUpdatedAdmin != null)
                 {
-                    healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedAdmin);
+                    healthInsuranceModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedAdmin);
                 }
                 else
                 {
                     if (lastUpdatedUser != null)
                     {
-                        healthInsuranceModel.LastUpdatedByAdminName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                        healthInsuranceModel.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
                     }
                 }
             }

@@ -127,17 +127,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         UserId = contractEntity.UserId,
                     });
                 }
-
+                var invoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")";
+                var invoiceStatus = InvoiceStatusEnum.DRAFT.ToString();
+                if (model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString())
+                {
+                    invoiceName = "Hóa đơn hợp đồng lưu trú (Accommodation contract invoice)";
+                    invoiceStatus = InvoiceStatusEnum.UNPAID.ToString();
+                }
                 var invoiceMapperRequestModel = new InvoiceMapperRequestModel()
                 {
-                    InvoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")",
+                    InvoiceName = invoiceName,
                     DueDate = model.DueDate,
                     AmountBeforePromotion = amountBeforePromotion,
                     AmountAfterPromotion = amountBeforePromotion,
                     Month = model.Month,
                     Year = model.Year,
                     Type = model.Type,
-                    Status = InvoiceStatusEnum.DRAFT.ToString(),
+                    Status = invoiceStatus,
                     RoomId = model.RoomId,
                     ContractId = model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString() ? model.ContractId : null,
                     InvoiceItems = invoiceItemsMapperRequestModel,
@@ -263,8 +269,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(invoice.CreatedBy, invoice.LastUpdatedBy);
                 var roomNumber = await _unitOfWork.RoomRepository.GetRoomName(invoice.RoomId);
 
-                invoice.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-                invoice.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+                invoice.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+                invoice.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
                 invoice.RoomName = roomNumber != null ? ("P" + roomNumber) : "";
             }
 
@@ -282,7 +288,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
             }
 
-            if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
+            if (_userContextService.UserRoles.Contains(Role.USER))
             {
                 if (invoiceEntity.Status == InvoiceStatusEnum.DRAFT)
                 {

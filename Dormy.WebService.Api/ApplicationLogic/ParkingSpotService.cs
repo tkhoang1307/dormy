@@ -50,8 +50,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(parkingSpotModel.CreatedBy, parkingSpotModel.LastUpdatedBy);
 
-            parkingSpotModel.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-            parkingSpotModel.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+            parkingSpotModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+            parkingSpotModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
             return new ApiResponse().SetOk(parkingSpotModel);
         }
@@ -89,8 +89,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(parkingSpot.CreatedBy, parkingSpot.LastUpdatedBy);
 
-                parkingSpot.CreatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
-                parkingSpot.LastUpdatedByAdminName = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+                parkingSpot.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
+                parkingSpot.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
             }
 
             return new ApiResponse().SetOk(parkingSpotModels);

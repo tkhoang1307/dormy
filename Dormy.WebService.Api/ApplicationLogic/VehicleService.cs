@@ -55,8 +55,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(vehicleModel.CreatedBy, vehicleModel.LastUpdatedBy);
 
-            vehicleModel.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
-            vehicleModel.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+            vehicleModel.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
+            vehicleModel.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
             vehicleModel.UserFullname = entity.User.FirstName + " " + entity.User.LastName;
 
             return new ApiResponse().SetOk(vehicleModel);
@@ -96,8 +96,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(vehicle.CreatedBy, vehicle.LastUpdatedBy);
 
-                vehicle.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
-                vehicle.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                vehicle.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                vehicle.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
                 vehicle.UserFullname = entities[i].User.FirstName + " " + entities[i].User.LastName;
 
                 vehicleModels.Add(vehicle);
@@ -118,8 +118,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(vehicle.CreatedBy, vehicle.LastUpdatedBy);
 
-                vehicle.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
-                vehicle.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                vehicle.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                vehicle.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
                 vehicle.UserFullname = entities[i].User.FirstName + " " + entities[i].User.LastName;
 
                 vehicleModels.Add(vehicle);

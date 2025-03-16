@@ -44,8 +44,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var (createdAuthor, lastUpdateAuthor) = await _unitOfWork.AdminRepository.GetAuthors(entity.CreatedBy, entity.LastUpdatedBy);
 
-            result.CreatedByAdminName = createdAuthor?.UserName ?? string.Empty;
-            result.LastUpdatedByAdminName = lastUpdateAuthor?.UserName ?? string.Empty;
+            result.CreatedByCreator = createdAuthor?.UserName ?? string.Empty;
+            result.LastUpdatedByUpdater = lastUpdateAuthor?.UserName ?? string.Empty;
 
             return new ApiResponse().SetOk(result);
         }
@@ -65,8 +65,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 var model = result[i];
                 var (createdAuthor, lastUpdateAuthor) = await _unitOfWork.AdminRepository.GetAuthors(model.CreatedBy, model.LastUpdatedBy);
-                model.CreatedByAdminName = createdAuthor?.UserName ?? string.Empty;
-                model.LastUpdatedByAdminName = lastUpdateAuthor?.UserName ?? string.Empty;
+                model.CreatedByCreator = createdAuthor?.UserName ?? string.Empty;
+                model.LastUpdatedByUpdater = lastUpdateAuthor?.UserName ?? string.Empty;
             }
 
             return new ApiResponse().SetOk(result);

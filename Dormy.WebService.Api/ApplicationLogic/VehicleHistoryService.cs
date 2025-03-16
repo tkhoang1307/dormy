@@ -81,7 +81,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var vehicleHistoryEntity = await _unitOfWork.VehicleHistoryRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Vehicle).Include(x => x.ParkingSpot), isNoTracking: true);
             if (vehicleHistoryEntity == null)
             {
-                return new ApiResponse().SetNotFound("Vehicle history not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle history"));
             }
 
             var result = new VehicleHisotryResponseModel
@@ -141,7 +141,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var vehicleHistoryEntity = await _unitOfWork.VehicleHistoryRepository.GetAsync(x => x.Id == id);
             if (vehicleHistoryEntity == null)
             {
-                return new ApiResponse().SetNotFound("Vehicle history not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle history"));
             }
 
             vehicleHistoryEntity.IsDeleted = true;

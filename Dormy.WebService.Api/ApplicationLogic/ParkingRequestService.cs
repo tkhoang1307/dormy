@@ -103,7 +103,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 x => x
                 .Include(x => x.Vehicle)
                 .Include(x => x.Approver)
-                .Include(x => x.ParkingSpot));
+                .Include(x => x.ParkingSpot)
+                .Include(x => x.User));
 
             if (parkingRequest == null)
             {
@@ -119,8 +120,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 VehicleId = parkingRequest.VehicleId,
                 ParkingSpotId = parkingRequest.ParkingSpotId,
                 ApproverId = parkingRequest.ApproverId,
-                ApproverUserFullName = parkingRequest.Approver.LastName + " " + parkingRequest.Approver.FirstName,
-                ApproverUserName = parkingRequest.Approver.UserName,
+                ApproverUserFullName = parkingRequest?.Approver?.LastName + " " + parkingRequest?.Approver?.FirstName,
                 LicensePlate = parkingRequest.Vehicle.LicensePlate,
                 VehicleType = parkingRequest.Vehicle.VehicleType,
                 UserName = parkingRequest.User.UserName,

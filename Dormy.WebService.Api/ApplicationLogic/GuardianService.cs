@@ -49,8 +49,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(guardian.CreatedBy, guardian.LastUpdatedBy);
 
-                guardian.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
-                guardian.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                guardian.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                guardian.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
 
                 guardianModels.Add(guardian);
             }
@@ -76,8 +76,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(guardianModel.CreatedBy, guardianModel.LastUpdatedBy);
 
-            guardianModel.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
-            guardianModel.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+            guardianModel.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
+            guardianModel.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
 
             return new ApiResponse().SetOk(guardianModel);
         }
@@ -162,8 +162,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(guardian.CreatedBy, guardian.LastUpdatedBy);
 
-                guardian.CreatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(createdUser);
-                guardian.LastUpdatedByUserFullName = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
+                guardian.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
+                guardian.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
             }
 
             return new ApiResponse().SetOk(guardianModels);
