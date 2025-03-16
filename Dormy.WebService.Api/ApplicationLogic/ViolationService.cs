@@ -4,6 +4,7 @@ using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
+        private readonly ViolationMapper _violationMapper;
 
         public ViolationService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
+            _violationMapper = new ViolationMapper();
         }
 
         public async Task<ApiResponse> CreateViolation(ViolationRequestModel model)
@@ -29,17 +32,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound("User not found");
             }
 
-            var violationEntity = new ViolationEntity
-            {
-                UserId = model.UserId,
-                Description = model.Description,
-                Penalty = model.Penalty,
-                ViolationDate = model.ViolationDate,
-                CreatedBy = _userContextService.UserId,
-                CreatedDateUtc = DateTime.UtcNow,
-                LastUpdatedBy = _userContextService.UserId,
-                LastUpdatedDateUtc = DateTime.UtcNow,
-            };
+            var violationEntity = _violationMapper.MapToViolationEntity(model);
+
+            violationEntity.CreatedBy = _userContextService.UserId;
+            violationEntity.LastUpdatedBy = _userContextService.UserId;
 
             await _unitOfWork.ViolationRepository.AddAsync(violationEntity);
             await _unitOfWork.SaveChangeAsync();
@@ -55,22 +51,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Violation"));
             }
 
-            var result = new ViolationResponseModel
-            {
-                Id = violationEntity.Id,
-                UserId = violationEntity.UserId,
-                Description = violationEntity.Description,
-                Penalty = violationEntity.Penalty,
-                ViolationDate = violationEntity.ViolationDate,
-                DateOfBirth = violationEntity.User.DateOfBirth,
-                FirstName = violationEntity.User.FirstName,
-                LastName = violationEntity.User.LastName,
-                Email = violationEntity.User.Email,
-                UserName = violationEntity.User.UserName,
-                PhoneNumber = violationEntity.User.PhoneNumber,
-                NationalIdNumber = violationEntity.User.NationalIdNumber,
-                IsDeleted = violationEntity.IsDeleted
-            };
+            var result = _violationMapper.MapToViolationResponseModel(violationEntity);
 
             return new ApiResponse().SetOk(result);
         }
@@ -117,22 +98,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 }
             }
 
-            var result = violationEntities.Select(violationEntity => new ViolationResponseModel
-            {
-                Id = violationEntity.Id,
-                UserId = violationEntity.UserId,
-                Description = violationEntity.Description,
-                Penalty = violationEntity.Penalty,
-                ViolationDate = violationEntity.ViolationDate,
-                DateOfBirth = violationEntity.User.DateOfBirth,
-                FirstName = violationEntity.User.FirstName,
-                LastName = violationEntity.User.LastName,
-                Email = violationEntity.User.Email,
-                UserName = violationEntity.User.UserName,
-                PhoneNumber = violationEntity.User.PhoneNumber,
-                NationalIdNumber = violationEntity.User.NationalIdNumber,
-                IsDeleted = violationEntity.IsDeleted
-            }).ToList();
+            var result = violationEntities.Select(violationEntity => _violationMapper.MapToViolationResponseModel(violationEntity)).ToList();
 
             return new ApiResponse().SetOk(result);
         }
