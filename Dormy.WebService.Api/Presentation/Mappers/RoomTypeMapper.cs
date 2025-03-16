@@ -38,6 +38,24 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 RoomServices = MapToRoomServiceModels(entity),
             };
         }
+
+        public RoomTypeBatchResponseModel MapToRoomTypeBatchResponseModel(RoomTypeEntity entity)
+        {
+            return new RoomTypeBatchResponseModel
+            {
+                Id = entity.Id,
+                Capacity = entity.Capacity,
+                CreatedDateUtc = entity.CreatedDateUtc,
+                Description = entity.Description,
+                Price = entity.Price,
+                RoomTypeName = entity.RoomTypeName,
+                LastUpdatedBy = entity.LastUpdatedBy,
+                LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
+                CreatedBy = entity.CreatedBy,
+                IsDeleted = entity.IsDeleted,
+            };
+        }
+
         public RoomTypeRegistrationResponseModel MapToRoomTypeRegistrationResponseModel(RoomTypeResponseModel source)
         {
             return new RoomTypeRegistrationResponseModel

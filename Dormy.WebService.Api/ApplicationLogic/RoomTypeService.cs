@@ -81,16 +81,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (isAdmin)
             {
-                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => true, x => x.Include(x => x.RoomTypeServices)
-                                                               .ThenInclude(x => x.RoomService));
+                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => true);
             }
             else
             {
-                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false, x => x.Include(x => x.RoomTypeServices)
-                                                               .ThenInclude(x => x.RoomService));
+                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false);
             }
 
-            var response = entities.Select(entity => _roomTypeMapper.MapToRoomTypeResponseModel(entity)).ToList();
+            var response = entities.Select(entity => _roomTypeMapper.MapToRoomTypeBatchResponseModel(entity)).ToList();
 
             return new ApiResponse().SetOk(response);
         }

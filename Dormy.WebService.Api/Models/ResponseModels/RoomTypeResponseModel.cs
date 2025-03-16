@@ -1,6 +1,6 @@
 ﻿namespace Dormy.WebService.Api.Models.ResponseModels
 {
-    public class RoomTypeResponseModel : BaseResponseModel
+    public class RoomTypeBatchResponseModel : BaseResponseModel
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -11,9 +11,14 @@
         public int Capacity { get; set; }
 
         public decimal Price { get; set; }
+    }
 
+    public class RoomTypeResponseModel : RoomTypeBatchResponseModel
+    {
         public List<RoomServiceResponseModel> RoomServices { get; set; } = [];
     }
+
+
     public class RoomTypeRegistrationResponseModel
     {
         public Guid Id { get; set; }
