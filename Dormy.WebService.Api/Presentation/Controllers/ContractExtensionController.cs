@@ -1,6 +1,9 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.ApplicationLogic;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +21,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPut("id/{id:guid}")]
         [Authorize(Roles = Role.USER)]
-        public async Task<IActionResult> UpdateContractExtension(Guid id, ContractExtensionRequestModel model)
+        public async Task<IActionResult> UpdateContractExtension(ContractExtensionUpdationRequestModel model)
         {
-            var result = await _contractExtensionService.UpdateContractExtension(id, model);
+            var modelValidator = await ContractValidator.ContractExtensionUpdationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
+            var result = await _contractExtensionService.UpdateContractExtension(model);
             return Ok(result);
         }
 
@@ -28,6 +37,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> CreateContractExtension(ContractExtensionRequestModel model)
         {
+            var modelValidator = await ContractValidator.ContractExtensionRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var result = await _contractExtensionService.CreateContractExtension(model);
             return Ok(result);
         }
@@ -52,31 +67,36 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ActiveContractExtension(Guid id)
         {
-            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, Models.Enums.ContractExtensionStatusEnum.ACTIVE);
+            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.ACTIVE);
             return Ok(result);
         }
 
-        [HttpPut("id/{id:guid}/accept")]
+        [HttpPut("id/{id:guid}/approve-or-reject")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> AcceptContractExtension(Guid id)
+        public async Task<IActionResult> ApproveOrRejectContractExtension(Guid id, [FromBody] ApproveOrRejectContractRequestModel model)
         {
-            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, Models.Enums.ContractExtensionStatusEnum.WAITING_PAYMENT);
-            return Ok(result);
-        }
+            var modelValidator = await ContractValidator.ApproveOrRejectContractRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
 
-        [HttpPut("id/{id:guid}/reject")]
-        [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> RejectContract(Guid id)
-        {
-            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, Models.Enums.ContractExtensionStatusEnum.REJECTED);
-            return Ok(result);
+            var status = ContractExtensionStatusEnum.REJECTED;
+            if (model.IsAccepted)
+            {
+                status = ContractExtensionStatusEnum.WAITING_PAYMENT;
+            }
+
+            var response = await _contractExtensionService.UpdateContractExtensionStatus(id, status);
+
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("id/{id:guid}/expired")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ExpiredContractExtension(Guid id)
         {
-            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, Models.Enums.ContractExtensionStatusEnum.EXPIRED);
+            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.EXPIRED);
             return Ok(result);
         }
 
@@ -84,7 +104,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> TerminateContract(Guid id)
         {
-            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, Models.Enums.ContractExtensionStatusEnum.TERMINATED);
+            var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.TERMINATED);
             return Ok(result);
         }
     }

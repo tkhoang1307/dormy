@@ -10,6 +10,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetSingleContractExtensionById(Guid id);
         Task<ApiResponse> GetContractExtensionBatch(GetBatchRequestModel model);
         Task<ApiResponse> UpdateContractExtensionStatus(Guid id, ContractExtensionStatusEnum status);
-        Task<ApiResponse> UpdateContractExtension(Guid id, ContractExtensionRequestModel model);
+        Task<ApiResponse> UpdateContractExtension(ContractExtensionUpdationRequestModel model);
     }
 }

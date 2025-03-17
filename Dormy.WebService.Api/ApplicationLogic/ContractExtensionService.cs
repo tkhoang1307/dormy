@@ -1,9 +1,13 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Mappers;
+using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
@@ -15,64 +19,46 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private readonly IContractService _contractService;
+        private readonly ContractExtensionMapper _contractExtensionMapper;
+        private readonly IInvoiceService _invoiceService;
 
-        public ContractExtensionService(IUnitOfWork unitOfWork, IUserContextService userContextService, IContractService contractService)
+        public ContractExtensionService(IUnitOfWork unitOfWork, 
+                                        IUserContextService userContextService, 
+                                        IContractService contractService,
+                                        IInvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
             _contractService = contractService;
+            _invoiceService = invoiceService;
+            _contractExtensionMapper = new ContractExtensionMapper();
         }
 
         public async Task<ApiResponse> CreateContractExtension(ContractExtensionRequestModel model)
         {
-            // Verify startdate and enddate and not in the past
-            if (model.StartDate < DateTime.Now || model.EndDate < DateTime.Now)
-            {
-                return new ApiResponse().SetBadRequest("Start date and end date must be in the future");
-            }
-
-            if (model.StartDate < DateTime.Now || model.EndDate < DateTime.Now)
-            {
-                return new ApiResponse().SetBadRequest(message: "Start date and end date must be in the future");
-            }
-
-            if (model.StartDate > model.EndDate)
-            {
-                return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
-            }
-
             var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == model.ContractId && x.UserId == _userContextService.UserId, x => x.Include(x => x.Room), isNoTracking: true);
             if (contractEntity == null)
             {
-                return new ApiResponse().SetNotFound("Contract not found");
-            }
+                return new ApiResponse().SetNotFound(model.ContractId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
+            }    
 
-            if (model.StartDate < contractEntity.EndDate || contractEntity.Status != ContractStatusEnum.EXPIRED)
+            if (!DateTimeHelper.AreValidStartDateEndDateWithoutTime(contractEntity.EndDate, model.StartDate, true) ||  
+                contractEntity.Status != ContractStatusEnum.EXPIRED)
             {
-                return new ApiResponse().SetConflict(message: "Contract has not been expired yet");
+                return new ApiResponse().SetConflict(model.ContractId, message: string.Format(ErrorMessages.ContractHasNotBeenExpiredYet));
             }
 
             if (contractEntity.NumberExtension >= 3)
             {
-                return new ApiResponse().SetConflict(message: "Contract has reached maximum number of extension");
+                return new ApiResponse().SetConflict(model.ContractId, message: string.Format(ErrorMessages.ContractHasReachedMaxNumberOfExtension));
             }
 
-            if (contractEntity.Room.Status == RoomStatusEnum.FULL)
+            var contractExtensionEntity = _contractExtensionMapper.MapToContractExtensionEntity(model);
+
+            if (contractEntity.NumberExtension == 0)
             {
-                return new ApiResponse().SetConflict(message: "Room is full");
+                contractEntity.Status = ContractStatusEnum.EXTENDED;
             }
-
-            var contractExtensionEntity = new ContractExtensionEntity
-            {
-                ContractId = model.ContractId,
-                StartDate = model.StartDate,
-                EndDate = model.EndDate,
-                Status = ContractExtensionStatusEnum.PENDING,
-                SubmissionDate = DateTime.UtcNow,
-                CreatedDateUtc = DateTime.UtcNow,
-                CreatedBy = _userContextService.UserId,
-            };
-
             contractEntity.NumberExtension += 1;
 
             await _unitOfWork.ContractExtensionRepository.AddAsync(contractExtensionEntity);
@@ -156,7 +142,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, isNoTracking: true);
             if (contractExtensionEntity == null)
             {
-                return new ApiResponse().SetNotFound("Contract extension not found");
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract extension"));
             }
 
             var contractExtensionResponse = new ContractExtensionResponseModel
@@ -172,65 +158,44 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(contractExtensionResponse);
         }
 
-        public async Task<ApiResponse> UpdateContractExtension(Guid id, ContractExtensionRequestModel model)
+        public async Task<ApiResponse> UpdateContractExtension(ContractExtensionUpdationRequestModel model)
         {
-            // Verify startdate and enddate and not in the past
-            if (model.StartDate < DateTime.Now || model.EndDate < DateTime.Now)
-            {
-                return new ApiResponse().SetBadRequest("Start date and end date must be in the future");
-            }
-
-            if (model.StartDate < DateTime.Now || model.EndDate < DateTime.Now)
-            {
-                return new ApiResponse().SetBadRequest(message: "Start date and end date must be in the future");
-            }
-
-            if (model.StartDate > model.EndDate)
-            {
-                return new ApiResponse().SetUnprocessableEntity(message: "Start date cannot be after end date");
-            }
-
-            var contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, isNoTracking: false);
+            var contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == model.Id, isNoTracking: false);
             if (contractExtensionEntity == null)
             {
-                return new ApiResponse().SetNotFound("Contract extension not found");
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract extension"));
             }
 
             if (contractExtensionEntity.Status != ContractExtensionStatusEnum.PENDING)
             {
-                return new ApiResponse().SetConflict("Contract extension is not pending");
+                return new ApiResponse().SetConflict(model.Id, message: string.Format(ErrorMessages.UpdateContractConflict));
             }
 
-            var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == contractExtensionEntity.ContractId && x.UserId == _userContextService.UserId, x => x.Include(x => x.Room), isNoTracking: true);
+            var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == contractExtensionEntity.ContractId, x => x.Include(x => x.Room), isNoTracking: true);
             if (contractEntity == null)
             {
-                return new ApiResponse().SetNotFound("Contract not found");
+                return new ApiResponse().SetNotFound(contractExtensionEntity.ContractId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
             }
 
-            if (model.StartDate < contractEntity.EndDate || contractEntity.Status != ContractStatusEnum.EXPIRED)
+            if (contractEntity.UserId != _userContextService.UserId)
             {
-                return new ApiResponse().SetConflict(message: "Contract has not been expired yet");
+                return new ApiResponse().SetForbidden(model.Id, message: string.Format(ErrorMessages.AccountDoesNotHavePermissionEntity, "contract"));
             }
 
-            if (contractEntity.NumberExtension >= 3)
+            if (!DateTimeHelper.AreValidStartDateEndDateWithoutTime(contractEntity.EndDate, model.StartDate, true) ||
+                contractEntity.Status != ContractStatusEnum.EXPIRED)
             {
-                return new ApiResponse().SetConflict(message: "Contract has reached maximum number of extension");
-            }
-
-            if (contractEntity.Room.Status == RoomStatusEnum.FULL)
-            {
-                return new ApiResponse().SetConflict(message: "Room is full");
+                return new ApiResponse().SetConflict(contractEntity.Id, message: string.Format(ErrorMessages.ContractHasNotBeenExpiredYet));
             }
 
             contractExtensionEntity.StartDate = model.StartDate;
             contractExtensionEntity.EndDate = model.EndDate;
             contractExtensionEntity.LastUpdatedBy = _userContextService.UserId;
-            contractExtensionEntity.ContractId = model.ContractId;
             contractExtensionEntity.LastUpdatedDateUtc = DateTime.UtcNow;
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetAccepted(contractExtensionEntity.Id);
         }
 
         public async Task<ApiResponse> UpdateContractExtensionStatus(Guid id, ContractExtensionStatusEnum status)
@@ -241,88 +206,84 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetForbidden(message: "User not authenticated");
             }
 
+            ContractExtensionEntity? contractExtensionEntity;
+            if (_userContextService.UserRoles.Contains(Role.ADMIN))
+            {
+                contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Contract));
+            }
+            else
+            {
+                contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id && x.Contract.UserId == userId, x => x.Include(x => x.Contract));
+            }
+
+            if (contractExtensionEntity == null)
+            {
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract extension"));
+            }
+
+            var (isError, errorMessage) = ContractExtensionStatusChangeValidator.VerifyContractExtensionStatusChangeValidator(contractExtensionEntity.Status, status);
+            if (isError)
+            {
+                return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Contract extension"));
+            }
+
+            Guid invoiceIdTracking = Guid.Empty;
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
                 new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
                 TransactionScopeAsyncFlowOption.Enabled))
             {
-                ContractExtensionEntity? contractExtensionEntity;
-
-                if (_userContextService.UserRoles.Contains(Role.ADMIN))
-                {
-                    contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Contract));
-                }
-                else
-                {
-                    contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id && x.Contract.UserId == userId, x => x.Include(x => x.Contract));
-                }
-
-                if (contractExtensionEntity == null)
-                {
-                    return new ApiResponse().SetNotFound(message: "Contract not found");
-                }
-
                 contractExtensionEntity.Status = status;
                 contractExtensionEntity.LastUpdatedBy = userId;
                 contractExtensionEntity.LastUpdatedDateUtc = DateTime.UtcNow;
 
                 switch (status)
                 {
+                    case ContractExtensionStatusEnum.WAITING_PAYMENT:
+                        var roomTypeId = (await _unitOfWork.RoomRepository.GetAsync(x => x.Id == contractExtensionEntity.Contract.RoomId)).RoomTypeId;
+                        var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == roomTypeId, x => x.Include(x => x.RoomService));
+                        var roomServiceIdRentalPayment = roomTypeServices.Where(x => x.RoomService.RoomServiceType == RoomServiceTypeEnum.RENTAL_PAYMENT)
+                                                                         .Select(x => x.RoomServiceId).FirstOrDefault();
+                        var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
+                        {
+                            DueDate = DateTime.Now.AddDays(15),
+                            Type = InvoiceTypeEnum.PAYMENT_CONTRACT.ToString(),
+                            RoomId = contractExtensionEntity.Contract.RoomId,
+                            ContractId = contractExtensionEntity.Id,
+                            InvoiceItems = new List<InvoiceItemRequestModel>()
+                            {
+                                new InvoiceItemRequestModel()
+                                {
+                                    RoomServiceId = roomServiceIdRentalPayment,
+                                    Quantity = 1
+                                }
+                            }
+                        });
+
+                        if (!responseCreateInvoice.IsSuccess)
+                        {
+                            return responseCreateInvoice;
+                        }
+
+                        invoiceIdTracking = (Guid)responseCreateInvoice.Result;
+                        contractExtensionEntity.InvoiceId = invoiceIdTracking;
+                        contractExtensionEntity.ApproverId = userId;
+                        break;
                     case ContractExtensionStatusEnum.ACTIVE:
-                        {
-                            if (contractExtensionEntity.Contract.Status != ContractStatusEnum.WAITING_PAYMENT)
-                            {
-                                return new ApiResponse().SetConflict(message: "Contract has not complete payment yet");
-                            }
-
-                            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == contractExtensionEntity.Contract.RoomId);
-                            if (roomEntity == null)
-                            {
-                                return new ApiResponse().SetNotFound(message: "Room not found");
-                            }
-
-                            if (roomEntity.Status == RoomStatusEnum.FULL)
-                            {
-                                return new ApiResponse().SetConflict(message: "Room is full");
-                            }
-
-                            roomEntity.TotalUsedBed += 1;
-                            roomEntity.Status = roomEntity.TotalUsedBed == roomEntity.TotalAvailableBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                            roomEntity.LastUpdatedBy = userId;
-                            roomEntity.LastUpdatedDateUtc = DateTime.UtcNow;
-
-                            contractExtensionEntity.Contract.StartDate = contractExtensionEntity.StartDate;
-                            contractExtensionEntity.Contract.EndDate = contractExtensionEntity.EndDate;
-                            contractExtensionEntity.Contract.Status = ContractStatusEnum.EXTENDED;
-                            contractExtensionEntity.Contract.LastUpdatedBy = userId;
-                            contractExtensionEntity.Contract.LastUpdatedDateUtc = DateTime.UtcNow;
-
-                            break;
-                        }
+                        break;
                     case ContractExtensionStatusEnum.EXPIRED:
+                        contractExtensionEntity.Contract.Status = ContractStatusEnum.EXPIRED;
+                        break;
                     case ContractExtensionStatusEnum.TERMINATED:
-                        {
-                            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id == contractExtensionEntity.Contract.RoomId);
-                            if (roomEntity == null)
-                            {
-                                return new ApiResponse().SetNotFound(message: "Room not found");
-                            }
-
-                            roomEntity.TotalUsedBed = roomEntity.TotalUsedBed > 0 ? roomEntity.TotalUsedBed - 1 : 0;
-                            roomEntity.Status = roomEntity.TotalUsedBed == roomEntity.TotalAvailableBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
-                            roomEntity.LastUpdatedBy = userId;
-                            roomEntity.LastUpdatedDateUtc = DateTime.UtcNow;
-
-                            contractExtensionEntity.Contract.Status = ContractStatusEnum.TERMINATED;
-
-                            break;
-                        }
+                    case ContractExtensionStatusEnum.REJECTED:
+                        contractExtensionEntity.Contract.Status = ContractStatusEnum.TERMINATED;
+                        break;
                 }
 
                 await _unitOfWork.SaveChangeAsync();
                 scope.Complete();
             }
-            return new ApiResponse().SetOk();
+            return new ApiResponse().SetOk(contractExtensionEntity.Id);
         }
     }
 }
