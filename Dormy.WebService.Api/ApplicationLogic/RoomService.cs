@@ -197,6 +197,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest(message: ErrorMessages.SomeRoomTypesAreNotExisted);
             }
 
+            if (entity.RoomTypeId != model.RoomTypeId)
+            {
+                if (entity.TotalUsedBed < roomType.Capacity)
+                {
+                    entity.Status = RoomStatusEnum.AVAILABLE;
+                }
+                else
+                {
+                    entity.Status = RoomStatusEnum.FULL;
+                }
+                entity.TotalAvailableBed = roomType.Capacity;
+            }
+
             if (entity.FloorNumber != model.FloorNumber)
             {
                 entity.FloorNumber = model.FloorNumber;
@@ -205,6 +218,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 int roomCountOnFloor = buildingEntity.Rooms.Count(r => r.FloorNumber == entity.FloorNumber);
                 entity.RoomNumber = entity.FloorNumber * 100 + roomCountOnFloor + 1;
             }
+
             entity.RoomTypeId = model.RoomTypeId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
