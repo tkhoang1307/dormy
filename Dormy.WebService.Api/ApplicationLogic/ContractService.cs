@@ -202,10 +202,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 scope.Complete();
             }
 
-            return new ApiResponse().SetCreated(new RegisterModel
+            return new ApiResponse().SetCreated(new RegistrationResponseModel
             {
                 ContractId = contractIdTracking,
-                User = userData,
+                UserId = userIdTracking,
+                HealthInsuranceId = healthInsuranceIdTracking,
+                GuardianIds = guardianIdsTracking,
+                VehicleIds = vehicleIdsTracking,
             });
         }
 
@@ -276,7 +279,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             ContractEntity? contractEntity;
-
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
                 contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Room));
@@ -340,6 +342,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     case ContractStatusEnum.EXTENDED:
                         break;
                     case ContractStatusEnum.EXPIRED:
+                        break;
                     case ContractStatusEnum.TERMINATED:
                     case ContractStatusEnum.REJECTED:
                         contractEntity.Room.TotalUsedBed = contractEntity.Room.TotalUsedBed > 0 ? contractEntity.Room.TotalUsedBed - 1 : 0;
@@ -368,10 +371,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     await _unitOfWork.ContractRepository
                     .GetAsync(x => x.Id == id, x => x
                         .Include(x => x.Approver)
-                        .Include(x => x.User)
-                            .ThenInclude(u => u.Guardians)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Vehicles)
                         .Include(u => u.User)
                             .ThenInclude(u => u.HealthInsurance)
                         .Include(u => u.User)
@@ -379,9 +378,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.Building)
                         .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType)
-                                .ThenInclude(t => t.RoomTypeServices)
-                                    .ThenInclude(s => s.RoomService),
+                            .ThenInclude(r => r.RoomType),
                     isNoTracking: true);
 
             if (contractEntity == null)
@@ -417,10 +414,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     await _unitOfWork.ContractRepository
                     .GetAllAsync(x => true, x => x
                         .Include(x => x.Approver)
-                        .Include(x => x.User)
-                            .ThenInclude(u => u.Guardians)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Vehicles)
                         .Include(u => u.User)
                             .ThenInclude(u => u.HealthInsurance)
                         .Include(u => u.User)
@@ -428,9 +421,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.Building)
                         .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType)
-                                .ThenInclude(t => t.RoomTypeServices)
-                                    .ThenInclude(s => s.RoomService),
+                            .ThenInclude(r => r.RoomType),
                     isNoTracking: true);
                 }
                 else
@@ -439,10 +430,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     await _unitOfWork.ContractRepository
                     .GetAllAsync(x => model.Ids.Contains(x.Id), x => x
                         .Include(x => x.Approver)
-                        .Include(x => x.User)
-                            .ThenInclude(u => u.Guardians)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Vehicles)
                         .Include(u => u.User)
                             .ThenInclude(u => u.HealthInsurance)
                         .Include(u => u.User)
@@ -450,9 +437,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.Building)
                         .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType)
-                                .ThenInclude(t => t.RoomTypeServices)
-                                    .ThenInclude(s => s.RoomService),
+                            .ThenInclude(r => r.RoomType),
                     isNoTracking: true);
                 }
             }
@@ -464,10 +449,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     await _unitOfWork.ContractRepository
                     .GetAllAsync(x => x.UserId == userId, x => x
                         .Include(x => x.Approver)
-                        .Include(x => x.User)
-                            .ThenInclude(u => u.Guardians)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Vehicles)
                         .Include(u => u.User)
                             .ThenInclude(u => u.HealthInsurance)
                         .Include(u => u.User)
@@ -475,9 +456,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.Building)
                         .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType)
-                                .ThenInclude(t => t.RoomTypeServices)
-                                    .ThenInclude(s => s.RoomService),
+                            .ThenInclude(r => r.RoomType),
                     isNoTracking: true);
                 }
                 else
@@ -486,10 +465,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     await _unitOfWork.ContractRepository
                     .GetAllAsync(x => x.UserId == userId && model.Ids.Contains(x.Id), x => x
                         .Include(x => x.Approver)
-                        .Include(x => x.User)
-                            .ThenInclude(u => u.Guardians)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Vehicles)
                         .Include(u => u.User)
                             .ThenInclude(u => u.HealthInsurance)
                         .Include(u => u.User)
@@ -497,9 +472,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.Building)
                         .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType)
-                                .ThenInclude(t => t.RoomTypeServices)
-                                    .ThenInclude(s => s.RoomService),
+                            .ThenInclude(r => r.RoomType),
                     isNoTracking: true);
                 }
             }
@@ -521,6 +494,29 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var response = contractEntities.Select(x => _contractMapper.MapToContractModel(x)).ToList();
 
             return new ApiResponse().SetOk(response);
+        }
+
+        public async Task<ApiResponse> GetInitialRegistrationData()
+        {
+            var genderEnums = EnumHelper.GetAllEnumDescriptions<GenderEnum>();
+            var relationshipEnums = EnumHelper.GetAllEnumDescriptions<RelationshipEnum>();
+            var workplaceEntities = await _unitOfWork.WorkplaceRepository.GetAllAsync(x => x.IsDeleted == false);
+            var listWorkplaces = workplaceEntities.Select(entity => 
+            new InitialDataWorkplaceResponseModel()
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Abbrevation = entity.Abbrevation,
+            }).ToList();
+
+            var initialRegistrationData = new InitialRegistrationDataResponseModel() 
+            {
+                GenderEnums = genderEnums,
+                RelationshipEnums = relationshipEnums,
+                ListWorkplaces = listWorkplaces,
+            };
+
+            return new ApiResponse().SetOk(initialRegistrationData);
         }
     }
 }

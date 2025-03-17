@@ -11,5 +11,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> AddNewContract(ContractRequestModel model);
         Task<ApiResponse> GetSingleContract(Guid id);
         Task<ApiResponse> GetContractBatch(GetBatchRequestModel model);
+        Task<ApiResponse> GetInitialRegistrationData();
     }
 }

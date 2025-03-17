@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Models.ResponseModels
+﻿using Dormy.WebService.Api.Core.Entities;
+
+namespace Dormy.WebService.Api.Models.ResponseModels
 {
     public class ContractResponseModel
     {
@@ -12,22 +14,40 @@
 
         public string Status { get; set; } = string.Empty;
 
+        public Guid? InvoiceId { get; set; }
+
         public int NumberExtension { get; set; } = 0;
+
+        public Guid UserId { get; set; }
+
+        public string UserFullname { get; set; } = string.Empty;
 
         public Guid? ApproverId { get; set; }
 
-        public string? ApproverName { get; set; }
+        public string ApproverFullName { get; set; } = string.Empty;
 
-        public RoomResponseModel Room { get; set; } = null!;
+        public Guid RoomId { get; set; }
 
-        public UserResponseModel User { get; set; } = null!;
+        public int RoomNumber { get; set; }
 
-        public WorkplaceResponseModel? Workplace { get; set; }
+        public Guid RoomTypeId { get; set; }
 
-        public HealthInsuranceResponseModel? HealthInsurance { get; set; }
+        public string RoomTypeName { get; set; } = string.Empty;
 
-        public List<GuardianResponseModel> Guardians { get; set; } = [];
+        public decimal Price { get; set; }
 
-        public List<VehicleResponseModel> Vehicles { get; set; } = [];
+        public Guid BuildingId { get; set; }
+
+        public string BuildingName { get; set; } = string.Empty;
+
+        public Guid? WorkplaceId { get; set; }
+
+        public string WorkplaceName { get; set; } = string.Empty;
+
+        public string InsuranceCardNumber { get; set; } = string.Empty;
+
+        public string RegisteredHospital { get; set; } = string.Empty;
+
+        public DateTime ExpirationDate { get; set; }
     }
 }
