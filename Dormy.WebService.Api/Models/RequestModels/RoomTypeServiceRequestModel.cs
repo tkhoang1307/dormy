@@ -2,14 +2,14 @@
 {
     public class RoomTypeServiceCreationRequestModel
     {
-        public Guid RoomTypeId { get; set; }
+        public List<Guid> RoomTypeIds { get; set; } = null!;
 
         public List<Guid> RoomServiceIds { get; set; } = null!;
     }
 
     public class RoomTypeServiceDeletionRequestModel
     {
-        public Guid RoomTypeId { get; set; }
+        public List<Guid> RoomTypeIds { get; set; } = null!;
 
         public List<Guid> RoomServiceIds { get; set; } = null!;
     }

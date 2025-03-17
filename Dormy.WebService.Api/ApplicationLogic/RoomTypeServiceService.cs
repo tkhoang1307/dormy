@@ -22,28 +22,29 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> AddRoomTypeService(RoomTypeServiceCreationRequestModel model)
         {
-            var roomType = await _unitOfWork.RoomTypeRepository.GetAsync(x => x.Id == model.RoomTypeId);
-
-            if (roomType == null)
+            var roomTypes = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => model.RoomTypeIds.Contains(x.Id));
+            if (roomTypes == null || roomTypes.Count != model.RoomTypeIds.Count)
             {
-                return new ApiResponse().SetNotFound(model.RoomTypeId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room type"));
+                return new ApiResponse().SetNotFound(message: ErrorMessages.SomeRoomTypesAreNotExisted);
             }
 
             var roomServices = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => model.RoomServiceIds.Contains(x.Id));
-
             if (roomServices == null || roomServices.Count != model.RoomServiceIds.Count)
             {
-                return new ApiResponse().SetBadRequest(message: ErrorMessages.SomeServicesAreNotExisted);
+                return new ApiResponse().SetNotFound(message: ErrorMessages.SomeServicesAreNotExisted);
             }
 
             var roomTypeServiceModel = new List<RoomTypeServiceRequestModel>();
-            foreach (var roomService in model.RoomServiceIds)
+            foreach(var roomTypeId in model.RoomTypeIds)
             {
-                roomTypeServiceModel.Add(new RoomTypeServiceRequestModel()
+                foreach(var roomServiceId in model.RoomServiceIds)
                 {
-                    RoomTypeId = model.RoomTypeId,
-                    RoomServiceId = roomService,
-                });
+                    roomTypeServiceModel.Add(new RoomTypeServiceRequestModel()
+                    {
+                        RoomTypeId = roomTypeId,
+                        RoomServiceId = roomServiceId,
+                    });
+                }    
             }
 
             var roomTypeServiceEntity = roomTypeServiceModel.Select(x => _roomTypeServiceMapper.MapToRoomTypeServiceEntity(x)).ToList();
@@ -57,13 +58,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.RoomTypeServiceRepository.AddRangeAsync(roomTypeServiceEntity);
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetCreated(model.RoomTypeId);
+            return new ApiResponse().SetCreated();
         }
 
         public async Task<ApiResponse> RemoveRoomTypeService(RoomTypeServiceDeletionRequestModel model)
         {
             var roomTypeService = await _unitOfWork.RoomTypeServiceRepository.
-                                                    GetAllAsync(x => model.RoomServiceIds.Contains(x.RoomServiceId) && x.RoomTypeId == model.RoomTypeId);
+                                                    GetAllAsync(x => model.RoomServiceIds.Contains(x.RoomServiceId) &&
+                                                                     model.RoomTypeIds.Contains(x.RoomTypeId));
 
             if (roomTypeService == null || roomTypeService.Count != model.RoomServiceIds.Count)
             {
@@ -77,7 +79,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(model.RoomTypeId);
+            return new ApiResponse().SetOk();
         }
     }
 }
