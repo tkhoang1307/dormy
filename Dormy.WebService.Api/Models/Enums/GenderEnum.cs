@@ -4,11 +4,11 @@ namespace Dormy.WebService.Api.Models.Enums
 {
     public enum GenderEnum
     {
-        [Description("Other")]
+        [Description("Other /*-*/ Khác")]
         OTHER,
-        [Description("Male")]
+        [Description("Male /*-*/ Nam")]
         MALE,
-        [Description("Female")]
+        [Description("Female /*-*/ Nữ")]
         FEMALE,
     }
 }

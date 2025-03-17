@@ -15,13 +15,13 @@
         public bool IsServiceIndicatorUsed { get; set; }
     }
 
-    public class RoomServiceTypeResponseModel
+    public class EnumResponseModel
     {
-        public string RoomServiceType { get; set; } = string.Empty;
+        public string EnumValue { get; set; } = string.Empty;
 
-        public string VietnameseRoomServiceTypeName { get; set; } = string.Empty;
+        public string VietnameseEnumDescription { get; set; } = string.Empty;
 
-        public string EnglishRoomServiceTypeName { get; set; } = string.Empty;
+        public string EnglishEnumDescription { get; set; } = string.Empty;
     }
 
     public class RoomServiceRegistrationResponseModel

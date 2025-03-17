@@ -86,7 +86,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetAllRoomServiceTypes()
         {
-            var roomServiceTypes = RoomServiceTypeEnumHelper.GetAllRoomServiceTypes();
+            var roomServiceTypes = EnumHelper.GetAllEnumDescriptions<RoomServiceTypeEnum>();
 
             return Ok(roomServiceTypes);
         }
