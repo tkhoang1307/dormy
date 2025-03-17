@@ -29,5 +29,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var result = await _contractService.Register(model);
             return StatusCode((int)result.StatusCode, result);
         }
+
+        [HttpGet("register-initial-data")]
+        public async Task<IActionResult> GetInitialRegistrationData()
+        {
+            var result = await _contractService.GetInitialRegistrationData();
+            return StatusCode((int)result.StatusCode, result);
+        }
     }
 }

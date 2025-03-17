@@ -198,10 +198,10 @@ namespace Dormy.WebService.Api.Presentation.Validations
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Status)));
             }
 
-            if (!Enum.TryParse(model.Status, out RoomStatusEnum result))
+            if (!Enum.TryParse(model.Status, out InvoiceStatusEnum result))
             {
                 return new ApiResponse().SetPreconditionFailed(message:
-                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.Status, nameof(RoomStatusEnum)));
+                    string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.Status, nameof(InvoiceStatusEnum)));
             }
 
             return new ApiResponse().SetOk();
