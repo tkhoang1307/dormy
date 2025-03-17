@@ -2,12 +2,14 @@
 {
     public class SettingResponseModel : BaseResponseModel
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
-        public string Name { get; set; } = string.Empty;
+        public string KeyName { get; set; } = string.Empty;
 
-        public bool ParameterBool { get; set; }
+        public string Value { get; set; } = string.Empty;
 
-        public DateTime ParameterDate { get; set; } = DateTime.Now;
+        public string DataType { get; set; } = string.Empty;
+
+        public bool IsApplied { get; set; }
     }
 }

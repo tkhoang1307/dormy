@@ -1,4 +1,7 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Core.Utilities;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -22,37 +25,83 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateSetting(SettingRequestModel model)
         {
+            var settingEntity = _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == model.KeyName);
+            if (settingEntity == null)
+            {
+                return new ApiResponse().SetConflict(model.KeyName, message: string.Format(ErrorMessages.KeyNameIsExistedInSystem, model.KeyName));
+            }
+
             var entity = _mapper.MapToSettingEntity(model);
+
             entity.CreatedBy = _userContextService.UserId;
-            entity.AdminId = _userContextService.UserId;
+            entity.LastUpdatedBy = _userContextService.UserId;
 
             await _unitOfWork.SettingRepository.AddAsync(entity);
             await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetCreated(entity.Id);
         }
 
-        public async Task<ApiResponse> GetSettingById(Guid id)
+        public async Task<ApiResponse> UpdateSetting(SettingUpdateValueRequestModel model)
         {
-            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Admin));
+            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == model.KeyName);
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(id);
+                return new ApiResponse().SetNotFound(model.KeyName, message: string.Format(ErrorMessages.PropertyDoesNotExist, model.KeyName));
+            }
+
+            
+            entity.Value = model.Value;
+            entity.DataType = (SettingDataTypeEnum)Enum.Parse(typeof(SettingDataTypeEnum), model.DataType);
+            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(model.KeyName);
+        }
+
+        public async Task<ApiResponse> TurnOnOrTurnOffSetting(SettingTurnOnOffRequestModel model)
+        {
+            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == model.KeyName);
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(model.KeyName, message: string.Format(ErrorMessages.PropertyDoesNotExist, model.KeyName));
+            }
+
+
+            entity.IsApplied = model.IsApplied;
+            entity.LastUpdatedBy = _userContextService.UserId;
+            entity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(model.KeyName);
+        }
+
+        public async Task<ApiResponse> GetSettingByKeyName(string keyname)
+        {
+            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == keyname);
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(keyname, message: string.Format(ErrorMessages.PropertyDoesNotExist, keyname));
             }
 
             var result = _mapper.MapToSettingResponseModel(entity);
 
             var (createdAuthor, lastUpdateAuthor) = await _unitOfWork.AdminRepository.GetAuthors(entity.CreatedBy, entity.LastUpdatedBy);
 
-            result.CreatedByCreator = createdAuthor?.UserName ?? string.Empty;
-            result.LastUpdatedByUpdater = lastUpdateAuthor?.UserName ?? string.Empty;
+            result.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdAuthor);
+            result.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdateAuthor);
 
             return new ApiResponse().SetOk(result);
         }
 
-        public async Task<ApiResponse> GetSettings()
+        public async Task<ApiResponse> GetAllSettings()
         {
-            var entities = await _unitOfWork.SettingRepository.GetAllAsync(x => true, x => x.Include(x => x.Admin));
+            var entities = await _unitOfWork.SettingRepository.GetAllAsync(x => true);
 
             if (entities is null || entities.Count == 0)
             {
@@ -65,48 +114,27 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 var model = result[i];
                 var (createdAuthor, lastUpdateAuthor) = await _unitOfWork.AdminRepository.GetAuthors(model.CreatedBy, model.LastUpdatedBy);
-                model.CreatedByCreator = createdAuthor?.UserName ?? string.Empty;
-                model.LastUpdatedByUpdater = lastUpdateAuthor?.UserName ?? string.Empty;
+
+                model.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdAuthor);
+                model.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdateAuthor);
             }
 
             return new ApiResponse().SetOk(result);
         }
 
-        public async Task<ApiResponse> SoftDeleteSetting(Guid id)
+        public async Task<ApiResponse> HardDeleteSettingByKeyName(string keyname)
         {
-            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.Id == id);
+            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == keyname);
 
             if (entity == null)
             {
-                return new ApiResponse().SetNotFound(id);
+                return new ApiResponse().SetNotFound(keyname, message: string.Format(ErrorMessages.PropertyDoesNotExist, keyname));
             }
 
-            entity.IsDeleted = true;
-            
+            await _unitOfWork.SettingRepository.DeleteByIdAsync(entity.Id);
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(entity.Id);
-        }
-
-        public async Task<ApiResponse> UpdateSetting(SettingUpdateRequestModel model)
-        {
-            var entity = await _unitOfWork.SettingRepository.GetAsync(x => x.Id == model.Id);
-
-            if (entity == null)
-            {
-                return new ApiResponse().SetNotFound(model.Id);
-            }
-
-            entity.LastUpdatedBy = _userContextService.UserId;
-            entity.LastUpdatedDateUtc = DateTime.UtcNow;
-            entity.AdminId = _userContextService.UserId;
-            entity.Name = model.Name;
-            entity.ParameterDate = model.ParameterDate;
-            entity.ParameterBool = model.ParameterBool;
-
-            await _unitOfWork.SaveChangeAsync();
-
-            return new ApiResponse().SetOk(model.Id);
+            return new ApiResponse().SetOk(keyname);
         }
     }
 }

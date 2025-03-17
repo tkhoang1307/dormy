@@ -1,4 +1,5 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 
@@ -11,11 +12,12 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             return new SettingEntity
             {
                 Id = Guid.NewGuid(),
-                Name = model.Name,
+                KeyName = model.KeyName,
+                Value = model.Value,
+                DataType = (SettingDataTypeEnum)Enum.Parse(typeof(SettingDataTypeEnum), model.DataType),
+                IsApplied = model?.IsApplied ?? false,
                 CreatedDateUtc = DateTime.Now,
                 LastUpdatedDateUtc = DateTime.Now,
-                ParameterBool = model.ParameterBool,
-                ParameterDate = model.ParameterDate,
             };
         }
 
@@ -24,10 +26,11 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             return new()
             {
                 Id = entity.Id,
-                Name = entity.Name,
-                CreatedDateUtc = DateTime.Now,
-                ParameterBool = entity.ParameterBool,
-                ParameterDate = entity.ParameterDate,
+                KeyName = entity.KeyName,
+                Value = entity.Value,
+                DataType = entity.DataType.ToString(),
+                IsApplied = entity.IsApplied,
+                CreatedDateUtc = entity.CreatedDateUtc,
                 CreatedBy = entity.CreatedBy,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,

@@ -1,17 +1,17 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
     public class SettingEntity: BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string Name { get; set; } = string.Empty;
+        public string KeyName { get; set; } = string.Empty;
 
-        public bool ParameterBool { get; set; }
+        public string Value { get; set; } = string.Empty;
 
-        public DateTime ParameterDate { get; set; } = DateTime.Now;
+        public SettingDataTypeEnum DataType {  get; set; }
 
-        public Guid AdminId { get; set; }
-
-        public AdminEntity Admin { get; set; } = null!;
+        public bool IsApplied { get; set; } = false;
     }
 }

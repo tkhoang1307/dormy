@@ -1,6 +1,9 @@
-﻿using Dormy.WebService.Api.Core.Interfaces;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
+using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,20 +20,20 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _settingService = settingService;
         }
 
-        [HttpGet("id/{id:guid}")]
+        [HttpGet("keyname/{keyname:guid}")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> GetSettingById(Guid id)
+        public async Task<IActionResult> GetSettingByKeyname(string keyname)
         {
-            var response = await _settingService.GetSettingById(id);
+            var response = await _settingService.GetSettingByKeyName(keyname);
 
             return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet("all")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> GetSettings()
+        public async Task<IActionResult> GetAllSettings()
         {
-            var response = await _settingService.GetSettings();
+            var response = await _settingService.GetAllSettings();
 
             return StatusCode((int)response.StatusCode, response);
         }
@@ -39,6 +42,12 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> CreateSetting(SettingRequestModel model)
         {
+            var modelValidator = await SettingValidator.SettingRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var response = await _settingService.CreateSetting(model);
 
             return StatusCode((int)response.StatusCode, response);
@@ -46,18 +55,39 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPut]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> UpdateSetting(SettingUpdateRequestModel model)
+        public async Task<IActionResult> UpdateSetting(SettingUpdateValueRequestModel model)
         {
+            var modelValidator = await SettingValidator.SettingUpdateValueRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
             var response = await _settingService.UpdateSetting(model);
 
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("id/{id:guid}")]
+        [HttpPut("turn-on-off")]
         [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> DeleteSetting(Guid id)
+        public async Task<IActionResult> TurnOnOffSettingByKeyname(SettingTurnOnOffRequestModel model)
         {
-            var response = await _settingService.SoftDeleteSetting(id);
+            var modelValidator = await SettingValidator.SettingTurnOnOffRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
+            var response = await _settingService.TurnOnOrTurnOffSetting(model);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpDelete("keyname/{keyname:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> DeleteSetting(string keyname)
+        {
+            var response = await _settingService.HardDeleteSettingByKeyName(keyname);
 
             return StatusCode((int)response.StatusCode, response);
         }

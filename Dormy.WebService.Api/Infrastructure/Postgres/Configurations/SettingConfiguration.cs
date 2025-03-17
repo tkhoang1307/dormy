@@ -13,11 +13,8 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .ValueGeneratedOnAdd();
 
             builder
-                .HasOne(setting => setting.Admin)
-                .WithMany(admin => admin.Settings)
-                .HasForeignKey(setting => setting.AdminId);
-
-
+                .Property(setting => setting.DataType)
+                .HasConversion<string>();
         }
     }
 }

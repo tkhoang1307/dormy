@@ -6,9 +6,10 @@ namespace Dormy.WebService.Api.Core.Interfaces
     public interface ISettingService
     {
         Task<ApiResponse> CreateSetting(SettingRequestModel model);
-        Task<ApiResponse> UpdateSetting(SettingUpdateRequestModel model);
-        Task<ApiResponse> GetSettings();
-        Task<ApiResponse> GetSettingById(Guid id);
-        Task<ApiResponse> SoftDeleteSetting(Guid id);
+        Task<ApiResponse> UpdateSetting(SettingUpdateValueRequestModel model);
+        Task<ApiResponse> TurnOnOrTurnOffSetting(SettingTurnOnOffRequestModel model);
+        Task<ApiResponse> GetAllSettings();
+        Task<ApiResponse> GetSettingByKeyName(string keyname);
+        Task<ApiResponse> HardDeleteSettingByKeyName(string keyname);
     }
 }
