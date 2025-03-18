@@ -105,6 +105,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
             }
 
+            if (entity.CurrentQuantity >= model.CapacitySpots)
+            {
+                entity.Status = ParkingSpotStatusEnum.FULL;
+            }
+
             entity.CapacitySpots = model.CapacitySpots;
             entity.ParkingSpotName = model.ParkingSpotName;
             entity.LastUpdatedBy = _userContextService.UserId;
@@ -140,7 +145,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
             }
 
-            entity.Status = (ParkingSpotStatusEnum)Enum.Parse(typeof(GenderEnum), model.Status);
+            entity.Status = (ParkingSpotStatusEnum)Enum.Parse(typeof(ParkingSpotStatusEnum), model.Status);
             entity.LastUpdatedBy = _userContextService.UserId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
 
