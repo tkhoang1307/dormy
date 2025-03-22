@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250315154013_EditDB")]
-    partial class EditDB
+    [Migration("20250318152044_UpdateDB")]
+    partial class UpdateDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -958,17 +958,25 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AdminId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("DataType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsApplied")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("KeyName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("LastUpdatedBy")
                         .HasColumnType("uuid");
@@ -976,19 +984,11 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("ParameterBool")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("ParameterDate")
-                        .HasColumnType("timestamp without time zone");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("AdminId");
 
                     b.ToTable("Settings");
                 });
@@ -1117,8 +1117,9 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Action")
-                        .HasColumnType("integer");
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
@@ -1474,17 +1475,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Navigation("RoomService");
                 });
 
-            modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.SettingEntity", b =>
-                {
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Admin")
-                        .WithMany("Settings")
-                        .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Admin");
-                });
-
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.UserEntity", b =>
                 {
                     b.HasOne("Dormy.WebService.Api.Core.Entities.HealthInsuranceEntity", "HealthInsurance")
@@ -1554,8 +1544,6 @@ namespace Dormy.WebService.Api.Migrations
                     b.Navigation("ParkingRequests");
 
                     b.Navigation("Requests");
-
-                    b.Navigation("Settings");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.BuildingEntity", b =>

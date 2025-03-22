@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Dormy.WebService.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class EditDB : Migration
+    public partial class UpdateDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,6 +23,14 @@ namespace Dormy.WebService.Api.Migrations
                 name: "FK_ParkingRequests_Admins_ApproverId",
                 table: "ParkingRequests");
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_Settings_Admins_AdminId",
+                table: "Settings");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Settings_AdminId",
+                table: "Settings");
+
             migrationBuilder.DropIndex(
                 name: "IX_OvernightAbsences_AdminId",
                 table: "OvernightAbsences");
@@ -34,11 +42,51 @@ namespace Dormy.WebService.Api.Migrations
 
             migrationBuilder.DropColumn(
                 name: "AdminId",
+                table: "Settings");
+
+            migrationBuilder.DropColumn(
+                name: "ParameterDate",
+                table: "Settings");
+
+            migrationBuilder.DropColumn(
+                name: "AdminId",
                 table: "OvernightAbsences");
 
             migrationBuilder.DropColumn(
                 name: "Metadata",
                 table: "InvoiceItems");
+
+            migrationBuilder.RenameColumn(
+                name: "ParameterBool",
+                table: "Settings",
+                newName: "IsApplied");
+
+            migrationBuilder.RenameColumn(
+                name: "Name",
+                table: "Settings",
+                newName: "Value");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Action",
+                table: "VehicleHistories",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "integer");
+
+            migrationBuilder.AddColumn<string>(
+                name: "DataType",
+                table: "Settings",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "KeyName",
+                table: "Settings",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ApproverId",
@@ -135,6 +183,14 @@ namespace Dormy.WebService.Api.Migrations
                 table: "OvernightAbsences");
 
             migrationBuilder.DropColumn(
+                name: "DataType",
+                table: "Settings");
+
+            migrationBuilder.DropColumn(
+                name: "KeyName",
+                table: "Settings");
+
+            migrationBuilder.DropColumn(
                 name: "ApproverId",
                 table: "OvernightAbsences");
 
@@ -149,6 +205,38 @@ namespace Dormy.WebService.Api.Migrations
             migrationBuilder.DropColumn(
                 name: "OldIndicator",
                 table: "InvoiceItems");
+
+            migrationBuilder.RenameColumn(
+                name: "Value",
+                table: "Settings",
+                newName: "Name");
+
+            migrationBuilder.RenameColumn(
+                name: "IsApplied",
+                table: "Settings",
+                newName: "ParameterBool");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "Action",
+                table: "VehicleHistories",
+                type: "integer",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "text");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "AdminId",
+                table: "Settings",
+                type: "uuid",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ParameterDate",
+                table: "Settings",
+                type: "timestamp without time zone",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ApproverId",
@@ -200,6 +288,11 @@ namespace Dormy.WebService.Api.Migrations
                 values: new object[] { new Guid("7dc1f8a5-f467-47b1-a6fb-acdf5a99c49a"), new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 3, 9, 17, 47, 11, 228, DateTimeKind.Local).AddTicks(7509), new DateTime(2025, 3, 9, 17, 47, 11, 228, DateTimeKind.Local).AddTicks(7515), "hungdv190516@gmail.com", "Admin", "MALE", false, "Admin", "", null, null, "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "", "admin" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Settings_AdminId",
+                table: "Settings",
+                column: "AdminId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OvernightAbsences_AdminId",
                 table: "OvernightAbsences",
                 column: "AdminId");
@@ -224,6 +317,14 @@ namespace Dormy.WebService.Api.Migrations
                 name: "FK_ParkingRequests_Admins_ApproverId",
                 table: "ParkingRequests",
                 column: "ApproverId",
+                principalTable: "Admins",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Settings_Admins_AdminId",
+                table: "Settings",
+                column: "AdminId",
                 principalTable: "Admins",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
