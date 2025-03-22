@@ -19,6 +19,8 @@
     public class GetBatchInvoiceRequestModel : GetBatchRequestModel
     {
         public Guid? RoomId { get; set; }
+
+        public string InvoiceType { get; set; } = string.Empty;
     }
 
     public class GetBatchServiceIndicatorRequestModel

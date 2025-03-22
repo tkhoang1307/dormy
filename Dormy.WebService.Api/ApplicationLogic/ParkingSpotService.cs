@@ -60,13 +60,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entities = new List<ParkingSpotEntity>();
 
-            if (model.IsGetAll)
+            entities = await _unitOfWork.ParkingSpotRepository.GetAllAsync(x => true);
+
+            if (model.Ids.Count > 0)
             {
-                entities = await _unitOfWork.ParkingSpotRepository.GetAllAsync(x => true);
-            }
-            else
-            {
-                entities = await _unitOfWork.ParkingSpotRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+                entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var parkingSpotModels = new List<ParkingSpotResponseModel>();

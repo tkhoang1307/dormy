@@ -71,21 +71,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var entities = new List<VehicleEntity>();
 
-            if (model.IsGetAll)
-            {
-                entities = await _unitOfWork.VehicleRepository.GetAllAsync(x => true, include: vehicle => vehicle.Include(v => v.User));
-            }
-            else
-            {
-                if (model.UserId != null)
-                {
-                    entities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.UserId == model.UserId, include: vehicle => vehicle.Include(v => v.User));
-                }
-                else
-                {
-                    entities = await _unitOfWork.VehicleRepository.GetAllAsync(x => model.Ids.Contains(x.Id), include: vehicle => vehicle.Include(v => v.User));
+            entities = await _unitOfWork.VehicleRepository.GetAllAsync(x => true, include: vehicle => vehicle.Include(v => v.User));
 
-                }
+            if (model.UserId != null)
+            {
+                entities = entities.Where(x => x.UserId == model.UserId).ToList();
+            }
+
+            if (model.Ids.Count > 0)
+            {
+                entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var vehicleModels = new List<VehicleResponseModel>();

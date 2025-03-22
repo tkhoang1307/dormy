@@ -159,17 +159,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(id);
         }
 
-        public async Task<ApiResponse> GetUserBatch(bool isGetAll, List<Guid> ids)
+        public async Task<ApiResponse> GetUserBatch(GetBatchRequestModel request)
         {
             List<UserEntity> users = [];
 
-            if (isGetAll)
+            users = await _unitOfWork.UserRepository.GetAllAsync(x => true, x => x.Include(y => y.Workplace)?.Include(z => z.Guardians));
+
+            if (request.Ids.Count > 0)
             {
-                users = await _unitOfWork.UserRepository.GetAllAsync(x => true, x => x.Include(y => y.Workplace)?.Include(z => z.Guardians));
-            }
-            else
-            {
-                users = await _unitOfWork.UserRepository.GetAllAsync(x => ids.Contains(x.Id), x => x.Include(y => y.Workplace)?.Include(z => z.Guardians));
+                users = users.Where(x => request.Ids.Contains(x.Id)).ToList();
             }
 
             var result = users.Select(x => _userMapper.MapToUserResponseModel(x)).ToList();

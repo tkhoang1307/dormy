@@ -61,39 +61,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.IsGetAll)
-                {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => true, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(x => x.Building));
-                }
-                else
-                {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(x => x.Building));
-                }
+                requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => true, 
+                                                    x => x.Include(x => x.Approver)
+                                                          .Include(x => x.User)
+                                                          .Include(x => x.Room)
+                                                            .ThenInclude(x => x.Building));
             }
             else
             {
-                if (model.IsGetAll)
-                {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(x => x.Building));
-                }
-                else
-                {
-                    requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => model.Ids.Contains(x.Id) && x.UserId == userId, x => x.Include(x => x.Approver).Include(x => x.User).Include(x => x.Room).ThenInclude(x => x.Building));
-                }
+                requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => x.UserId == userId, 
+                                                                                  x => x.Include(x => x.Approver)
+                                                                                        .Include(x => x.User)
+                                                                                        .Include(x => x.Room)
+                                                                                            .ThenInclude(x => x.Building));
             }
 
-            if (!model.IsGetAll)
+            if (model.Ids.Count > 0)
             {
-                if (requestEntities.Count != model.Ids.Count)
-                {
-                    // Find the missing request IDs
-                    var foundRequestIds = requestEntities.Select(r => r.Id).ToList();
-                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
-
-                    // Return with error message listing the missing request IDs
-                    var errorMessage = $"Request(s) not found: {string.Join(", ", missingRequestIds)}";
-                    return new ApiResponse().SetNotFound(message: errorMessage);
-                }
+                requestEntities = requestEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var response = requestEntities.Select(x => _requestMapper.MapToRequestModel(x)).ToList();

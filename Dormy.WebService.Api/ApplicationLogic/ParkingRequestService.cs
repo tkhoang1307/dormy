@@ -11,6 +11,7 @@ using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -62,14 +63,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetCreated(parkingRequestEntity.Id);
         }
 
-        public async Task<ApiResponse> GetParkingRequestBatch(List<Guid> ids, bool isGetAll = false)
+        public async Task<ApiResponse> GetParkingRequestBatch(GetBatchRequestModel model)
         {
-            var parkingRequests = await _unitOfWork.ParkingRequestRepository.GetAllAsync(x => isGetAll || ids.Contains(x.Id),
-                x => x
+            var parkingRequests = await _unitOfWork.ParkingRequestRepository
+                .GetAllAsync(x => true, x => x
                 .Include(x => x.Vehicle)
                 .Include(x => x.Approver)
                 .Include(x => x.ParkingSpot)
                 .Include(x => x.User));
+
+            if (model.Ids.Count > 0)
+            {
+                parkingRequests = parkingRequests.Where(x => model.Ids.Contains(x.Id)).ToList();
+            }
 
             var result = parkingRequests.Select(x => _parkingRequestMapper.MapToParkingRequestResponseModel(x)).ToList();
 

@@ -140,7 +140,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 // Add HealthInsurance entity if provided
                 if (model.HealthInsurance != null)
                 {
-                    var responseCreateHealthInsurance = await _healthInsuranceService.AddHealthInsurance(model.HealthInsurance);
+                    var healthInsuranceCreationRequestModel = model.HealthInsurance;
+                    healthInsuranceCreationRequestModel.UserId = userIdTracking;
+                    var responseCreateHealthInsurance = await _healthInsuranceService.AddHealthInsurance(healthInsuranceCreationRequestModel);
                     if (!responseCreateHealthInsurance.IsSuccess)
                     {
                         return responseCreateHealthInsurance;
@@ -408,9 +410,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.IsGetAll)
-                {
-                    contractEntities =
+                contractEntities =
                     await _unitOfWork.ContractRepository
                     .GetAllAsync(x => true, x => x
                         .Include(x => x.Approver)
@@ -423,72 +423,27 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.RoomType),
                     isNoTracking: true);
-                }
-                else
-                {
-                    contractEntities =
-                    await _unitOfWork.ContractRepository
-                    .GetAllAsync(x => model.Ids.Contains(x.Id), x => x
-                        .Include(x => x.Approver)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.HealthInsurance)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Workplace)
-                        .Include(x => x.Room)
-                            .ThenInclude(r => r.Building)
-                        .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType),
-                    isNoTracking: true);
-                }
             }
             else
             {
-                if (model.IsGetAll)
-                {
-                    contractEntities =
-                    await _unitOfWork.ContractRepository
-                    .GetAllAsync(x => x.UserId == userId, x => x
-                        .Include(x => x.Approver)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.HealthInsurance)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Workplace)
-                        .Include(x => x.Room)
-                            .ThenInclude(r => r.Building)
-                        .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType),
-                    isNoTracking: true);
-                }
-                else
-                {
-                    contractEntities =
-                    await _unitOfWork.ContractRepository
-                    .GetAllAsync(x => x.UserId == userId && model.Ids.Contains(x.Id), x => x
-                        .Include(x => x.Approver)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.HealthInsurance)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Workplace)
-                        .Include(x => x.Room)
-                            .ThenInclude(r => r.Building)
-                        .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType),
-                    isNoTracking: true);
-                }
+                contractEntities =
+                        await _unitOfWork.ContractRepository
+                        .GetAllAsync(x => x.UserId == userId, x => x
+                            .Include(x => x.Approver)
+                            .Include(u => u.User)
+                                .ThenInclude(u => u.HealthInsurance)
+                            .Include(u => u.User)
+                                .ThenInclude(u => u.Workplace)
+                            .Include(x => x.Room)
+                                .ThenInclude(r => r.Building)
+                            .Include(x => x.Room)
+                                .ThenInclude(r => r.RoomType),
+                        isNoTracking: true);
             }
 
-            if (!model.IsGetAll)
+            if (model.Ids.Count > 0)
             {
-                if (contractEntities.Count != model.Ids.Count)
-                {
-                    // Find the missing request IDs
-                    var foundRequestIds = contractEntities.Select(r => r.Id).ToList();
-                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
-
-                    // Return with error message listing the missing request IDs
-                    var errorMessage = $"Contract(s) not found: {string.Join(", ", missingRequestIds)}";
-                    return new ApiResponse().SetNotFound(message: errorMessage);
-                }
+                contractEntities = contractEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var response = contractEntities.Select(x => _contractMapper.MapToContractModel(x)).ToList();

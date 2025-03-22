@@ -63,39 +63,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.IsGetAll)
-                {
-                    violationEntities = await _unitOfWork.ViolationRepository.GetAllAsync(x => true, x => x.Include(x => x.User), isNoTracking: true);
-                }
-                else
-                {
-                    violationEntities = await _unitOfWork.ViolationRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.User), isNoTracking: true);
-                }
+                violationEntities = await _unitOfWork.ViolationRepository.GetAllAsync(x => true, x => x.Include(x => x.User), isNoTracking: true);
             }
             else
             {
-                if (model.IsGetAll)
-                {
-                    violationEntities = await _unitOfWork.ViolationRepository.GetAllAsync(x => x.UserId == _userContextService.UserId, x => x.Include(x => x.User), isNoTracking: true);
-                }
-                else
-                {
-                    violationEntities = await _unitOfWork.ViolationRepository.GetAllAsync(x => x.UserId == _userContextService.UserId && model.Ids.Contains(x.Id), x => x.Include(x => x.User), isNoTracking: true);
-                }
+                violationEntities = await _unitOfWork.ViolationRepository.GetAllAsync(x => x.UserId == _userContextService.UserId, x => x.Include(x => x.User), isNoTracking: true);
             }
 
-            if (!model.IsGetAll)
+            if (model.Ids.Count > 0)
             {
-                if (violationEntities.Count != model.Ids.Count)
-                {
-                    // Find the missing request IDs
-                    var foundRequestIds = violationEntities.Select(r => r.Id).ToList();
-                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
-
-                    // Return with error message listing the missing request IDs
-                    var errorMessage = $"Violation(s) not found: {string.Join(", ", missingRequestIds)}";
-                    return new ApiResponse().SetNotFound(message: errorMessage);
-                }
+                violationEntities = violationEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var result = violationEntities.Select(violationEntity => _violationMapper.MapToViolationResponseModel(violationEntity)).ToList();

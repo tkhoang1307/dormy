@@ -70,55 +70,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.IsGetAll)
-                {
-                    entities =
-                    await _unitOfWork.OvernightAbsenceRepository
-                    .GetAllAsync(x => true, x => x
-                        .Include(x => x.User),
-                    isNoTracking: true);
-                }
-                else
-                {
-                    entities =
-                    await _unitOfWork.OvernightAbsenceRepository
-                    .GetAllAsync(x => model.Ids.Contains(x.Id), x => x
-                        .Include(x => x.User),
-                    isNoTracking: true);
-                }
+                entities = await _unitOfWork.OvernightAbsenceRepository
+                                            .GetAllAsync(x => true, x => x
+                                                .Include(x => x.User),
+                                            isNoTracking: true);
             }
             else
             {
-                if (model.IsGetAll)
-                {
-                    entities =
-                    await _unitOfWork.OvernightAbsenceRepository
-                    .GetAllAsync(x => x.UserId == userId, x => x
-                        .Include(x => x.User),
-                    isNoTracking: true);
-                }
-                else
-                {
-                    entities =
-                    await _unitOfWork.OvernightAbsenceRepository
-                    .GetAllAsync(x => x.UserId == userId && model.Ids.Contains(x.Id), x => x
-                        .Include(x => x.User),
-                    isNoTracking: true);
-                }
+                entities = await _unitOfWork.OvernightAbsenceRepository
+                                            .GetAllAsync(x => x.UserId == userId, x => x
+                                                .Include(x => x.User),
+                                            isNoTracking: true);
             }
 
-            if (!model.IsGetAll)
+            if (model.Ids.Count > 0)
             {
-                if (entities.Count != model.Ids.Count)
-                {
-                    // Find the missing request IDs
-                    var foundRequestIds = entities.Select(r => r.Id).ToList();
-                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
-
-                    // Return with error message listing the missing request IDs
-                    var errorMessage = $"Overnight Absence(s) not found: {string.Join(", ", missingRequestIds)}";
-                    return new ApiResponse().SetNotFound(message: errorMessage);
-                }
+                entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var response = entities.Select(entity => _overnightAbsenceMapper.MapToOvernightAbsentModel(entity)).ToList();

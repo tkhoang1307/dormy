@@ -137,21 +137,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entities = new List<GuardianEntity>();
 
-            if (model.IsGetAll)
-            {
-                entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => true);
-            }
-            else
-            {
-                if (model.UserId != null)
-                {
-                    entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => x.UserId == model.UserId);
-                }
-                else
-                {
-                    entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+            entities = await _unitOfWork.GuardianRepository.GetAllAsync(x => true);
 
-                }
+            if (model.UserId != null)
+            {
+                entities = entities.Where(x => x.UserId == model.UserId).ToList();
+            }
+
+            if (model.Ids.Count > 0)
+            {
+                entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var guardianModels = entities.Select(x => _guardianMapper.MapToGuardianResponseModel(x)).ToList();

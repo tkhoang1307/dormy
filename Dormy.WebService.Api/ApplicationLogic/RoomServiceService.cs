@@ -55,13 +55,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entities = new List<RoomServiceEntity>();
 
-            if (model.IsGetAll)
+            entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => true);
+
+            if (model.Ids.Count > 0)
             {
-                entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => true);
-            }
-            else
-            {
-                entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+                entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var roomServiceModels = entities.Select(x => _roomServiceMapper.MapToRoomServiceModel(x)).ToList();

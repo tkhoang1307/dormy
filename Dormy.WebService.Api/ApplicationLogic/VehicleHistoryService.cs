@@ -91,13 +91,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
         public async Task<ApiResponse> GetVehicleHistories(GetBatchRequestModel model)
         {
             var vehicleHistoryEntities = new List<VehicleHistoryEntity>();
-            if (model.IsGetAll)
+
+            vehicleHistoryEntities = await _unitOfWork.VehicleHistoryRepository
+                                                      .GetAllAsync(x => true, 
+                                                                   x => x.Include(x => x.Vehicle)
+                                                                         .Include(x => x.ParkingSpot), isNoTracking: true);
+
+            if (model.Ids.Count > 0)
             {
-                vehicleHistoryEntities = await _unitOfWork.VehicleHistoryRepository.GetAllAsync(x => true, x => x.Include(x => x.Vehicle).Include(x => x.ParkingSpot), isNoTracking: true);
-            }
-            else
-            {
-                vehicleHistoryEntities = await _unitOfWork.VehicleHistoryRepository.GetAllAsync(x => model.Ids.Contains(x.Id), x => x.Include(x => x.Vehicle).Include(x => x.ParkingSpot), isNoTracking: true);
+                vehicleHistoryEntities = vehicleHistoryEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var result = vehicleHistoryEntities.Select(x => _vehicleHistoryMapper.MapToVehicleHistoryResponseModel(x)).ToList();

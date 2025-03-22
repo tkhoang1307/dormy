@@ -173,7 +173,18 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (entity.Capacity != model.Capacity)
             {
-                await TriggerCapacityAndStatusOfRoom(model.Id, model.Capacity);
+                foreach (var roomEntity in entity.Rooms)
+                {
+                    roomEntity.TotalAvailableBed = model.Capacity;
+                    if (roomEntity.TotalUsedBed < model.Capacity)
+                    {
+                        roomEntity.Status = RoomStatusEnum.AVAILABLE;
+                    }
+                    else
+                    {
+                        roomEntity.Status = RoomStatusEnum.FULL;
+                    }
+                }
             }
 
             entity.RoomTypeName = model.RoomTypeName;
@@ -205,25 +216,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetAccepted(entity.Id);
-        }
-
-        private async Task TriggerCapacityAndStatusOfRoom(Guid roomTypeId, int newCapacity)
-        {
-            var roomEntities = await _unitOfWork.RoomRepository.GetAllAsync(x => x.RoomTypeId == roomTypeId && x.IsDeleted == false);
-            foreach (var roomEntity in roomEntities)
-            {
-                roomEntity.TotalAvailableBed = newCapacity;
-                if (roomEntity.TotalUsedBed < newCapacity)
-                {
-                    roomEntity.Status = RoomStatusEnum.AVAILABLE;
-                }
-                else
-                {
-                    roomEntity.Status = RoomStatusEnum.FULL;
-                }
-            }
-
-            await _unitOfWork.SaveChangeAsync();
         }
     }
 }

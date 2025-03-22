@@ -7,7 +7,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     {
         Task<ApiResponse> SignUp(UserRequestModel model);
         Task<ApiResponse> Login(LoginRequestModel model);
-        Task<ApiResponse> GetUserBatch(bool isGetAll, List<Guid> ids);
+        Task<ApiResponse> GetUserBatch(GetBatchRequestModel request);
         Task<ApiResponse> GetUserInformation(Guid id);
         Task<ApiResponse> ChangePassword(ChangePasswordRequestModel model);
         Task<ApiResponse> UpdateProfile(Guid id, UserUpdateRequestModel model);

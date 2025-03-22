@@ -235,18 +235,22 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(response);
         }
 
-        public async Task<ApiResponse> GetBuildingBatch(List<Guid> ids, bool isGetAll = false)
+        public async Task<ApiResponse> GetBuildingBatch(GetBatchRequestModel request)
         {
             var entities = await _unitOfWork.BuildingRepository
                 .GetAllAsync(
-                    building => isGetAll || ids.Contains(building.Id),
-                    include: building => building.Include(building => building.Rooms).ThenInclude(room => room.RoomType).ThenInclude(roomType => roomType.RoomTypeServices).ThenInclude(roomTypeService => roomTypeService.RoomService)
+                    building => true,
+                    include: building => building.Include(building => building.Rooms)
+                                                    .ThenInclude(room => room.RoomType)
+                                                    .ThenInclude(roomType => roomType.RoomTypeServices)
+                                                    .ThenInclude(roomTypeService => roomTypeService.RoomService)
                 );
 
-            if (entities == null)
+            if (request.Ids.Count > 0)
             {
-                return new ApiResponse().SetOk(new());
+                entities = entities.Where(x => request.Ids.Contains(x.Id)).ToList();
             }
+
             var buildingListResponseModel = entities.Select(entity => _buildingMapper.MapToBuildingBatchResponseModel(entity)).ToList();
 
 

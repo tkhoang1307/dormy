@@ -79,49 +79,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.IsGetAll)
-                {
-                    contractExtensionEntities =
-                        await _unitOfWork.ContractExtensionRepository
-                            .GetAllAsync(x => true, isNoTracking: true);
-                }
-                else
-                {
-                    contractExtensionEntities =
-                        await _unitOfWork.ContractExtensionRepository
-                            .GetAllAsync(x => model.Ids.Contains(x.Id), isNoTracking: true);
-                }
+                contractExtensionEntities = await _unitOfWork.ContractExtensionRepository
+                                                             .GetAllAsync(x => true, isNoTracking: true);
             }
             else
             {
-                if (model.IsGetAll)
-                {
-                    contractExtensionEntities =
-                        await _unitOfWork.ContractExtensionRepository
-                        .GetAllAsync(x => x.Contract.UserId == userId, x => x.Include(x => x.Contract),
-                            isNoTracking: true);
-                }
-                else
-                {
-                    contractExtensionEntities =
-                        await _unitOfWork.ContractExtensionRepository
-                        .GetAllAsync(x => x.Contract.UserId == userId && model.Ids.Contains(x.Id), x => x.Include(x => x.Contract),
-                            isNoTracking: true);
-                }
+                contractExtensionEntities = await _unitOfWork.ContractExtensionRepository
+                                                    .GetAllAsync(x => x.Contract.UserId == userId, x => x.Include(x => x.Contract),
+                                                                        isNoTracking: true);
             }
 
-            if (!model.IsGetAll)
+            if (model.Ids.Count > 0)
             {
-                if (contractExtensionEntities.Count != model.Ids.Count)
-                {
-                    // Find the missing request IDs
-                    var foundRequestIds = contractExtensionEntities.Select(r => r.Id).ToList();
-                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
-
-                    // Return with error message listing the missing request IDs
-                    var errorMessage = $"Contract(s) not found: {string.Join(", ", missingRequestIds)}";
-                    return new ApiResponse().SetNotFound(message: errorMessage);
-                }
+                contractExtensionEntities = contractExtensionEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var response = contractExtensionEntities.Select(async x => new ContractExtensionResponseModel

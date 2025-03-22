@@ -90,39 +90,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                if (model.IsGetAll)
-                {
-                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => true);
-                }
-                else
-                {
-                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
-                }
+                entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => true);
             }
             else
             {
-                if (model.IsGetAll)
-                {
-                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => x.User.Id == userId, x => x.Include(x => x.User));
-                }
-                else
-                {
-                    entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => x.User.Id == userId && model.Ids.Contains(x.Id), x => x.Include(x => x.User));
-                }
+                entities = await _unitOfWork.HealthInsuranceRepository.GetAllAsync(x => x.User.Id == userId, x => x.Include(x => x.User));
             }
 
-            if (!model.IsGetAll)
+            if (model.Ids.Count > 0)
             {
-                if (entities.Count != model.Ids.Count)
-                {
-                    // Find the missing request IDs
-                    var foundRequestIds = entities.Select(r => r.Id).ToList();
-                    var missingRequestIds = model.Ids.Except(foundRequestIds).ToList();
-
-                    // Return with error message listing the missing request IDs
-                    var errorMessage = $"Entity(s) not found: {string.Join(", ", missingRequestIds)}";
-                    return new ApiResponse().SetNotFound(message: errorMessage);
-                }
+                entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
             var healthInsuranceModels = entities.Select(x => _healthInsuranceMapper.MapToHealthInsuranceResponseModel(x)).ToList();

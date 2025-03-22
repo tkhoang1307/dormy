@@ -8,7 +8,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> CreateBuilding(BuildingCreationRequestModel model);
         Task<ApiResponse> CreateBuildingBatch(List<BuildingCreationRequestModel> models);
         Task<ApiResponse> GetBuildingById(Guid id);
-        Task<ApiResponse> GetBuildingBatch(List<Guid> ids, bool isGetAll);
+        Task<ApiResponse> GetBuildingBatch(GetBatchRequestModel request);
         Task<ApiResponse> UpdateBuilding(BuildingUpdationRequestModel model);
         Task<ApiResponse> SoftDeleteBuildingById(Guid id);
     }

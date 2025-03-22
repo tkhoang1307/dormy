@@ -25,8 +25,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateSetting(SettingRequestModel model)
         {
-            var settingEntity = _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == model.KeyName);
-            if (settingEntity == null)
+            var settingEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == model.KeyName);
+            if (settingEntity != null)
             {
                 return new ApiResponse().SetConflict(model.KeyName, message: string.Format(ErrorMessages.KeyNameIsExistedInSystem, model.KeyName));
             }
@@ -38,7 +38,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SettingRepository.AddAsync(entity);
             await _unitOfWork.SaveChangeAsync();
-            return new ApiResponse().SetCreated(entity.Id);
+            return new ApiResponse().SetCreated(entity.KeyName);
         }
 
         public async Task<ApiResponse> UpdateSetting(SettingUpdateValueRequestModel model)
