@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/setting")]
     [ApiController]
     public class SettingController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _settingService = settingService;
         }
 
-        [HttpGet("keyname/{keyname:guid}")]
+        [HttpGet("keyname/{keyname}")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetSettingByKeyname(string keyname)
         {
@@ -83,7 +83,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpDelete("keyname/{keyname:guid}")]
+        [HttpDelete("keyname/{keyname}/hard-delete")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> DeleteSetting(string keyname)
         {

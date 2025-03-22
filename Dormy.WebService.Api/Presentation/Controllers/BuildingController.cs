@@ -31,7 +31,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         public async Task<IActionResult> GetBuildingBatch([FromBody] GetBatchRequestModel request)
         {
-            var response = await _buildingService.GetBuildingBatch(request.Ids, request.IsGetAll);
+            var response = await _buildingService.GetBuildingBatch(request);
 
             return StatusCode((int)response.StatusCode, response);
         }

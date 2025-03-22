@@ -106,7 +106,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         public async Task<IActionResult> GetParkingRequestBatch(GetBatchRequestModel model)
         {
-            var result = await _parkingRequestService.GetParkingRequestBatch(model.Ids, model.IsGetAll);
+            var result = await _parkingRequestService.GetParkingRequestBatch(model);
 
             return StatusCode((int)result.StatusCode, result);
         }

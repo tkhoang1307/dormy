@@ -152,7 +152,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetUserBatch([FromBody] GetBatchRequestModel request)
         {
-            var response = await _userService.GetUserBatch(request.IsGetAll, request.Ids);
+            var response = await _userService.GetUserBatch(request);
 
             return StatusCode((int)response.StatusCode, response);
         }
