@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Dormy.WebService.Api.Presentation.Validations
 {
@@ -9,11 +10,11 @@ namespace Dormy.WebService.Api.Presentation.Validations
     {
         public static async Task<ApiResponse> InvoiceRequestModelValidator(InvoiceRequestModel model)
         {
-            if (model?.DueDate == null)
-            {
-                return new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.DueDate)));
-            }
+            //if (model?.DueDate == null)
+            //{
+            //    return new ApiResponse().SetUnprocessableEntity(message:
+            //        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.DueDate)));
+            //}
 
             if (model?.RoomId == null)
             {
@@ -58,8 +59,23 @@ namespace Dormy.WebService.Api.Presentation.Validations
             {
                 if (invoiceItem?.RoomServiceId == null)
                 {
-                    return new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.RoomServiceId)));
+                    if (string.IsNullOrEmpty(invoiceItem?.RoomServiceName))
+                    {
+                        return new ApiResponse().SetUnprocessableEntity(message:
+                            string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.RoomServiceName)));
+                    }
+
+                    if (invoiceItem?.Cost == null)
+                    {
+                        return new ApiResponse().SetUnprocessableEntity(message:
+                            string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.Cost)));
+                    }
+
+                    if (string.IsNullOrEmpty(invoiceItem?.Unit))
+                    {
+                        return new ApiResponse().SetUnprocessableEntity(message:
+                            string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.Unit)));
+                    }
                 }
 
                 if (invoiceItem?.Quantity == null)
@@ -164,8 +180,23 @@ namespace Dormy.WebService.Api.Presentation.Validations
             {
                 if (invoiceItem?.RoomServiceId == null)
                 {
-                    return new ApiResponse().SetUnprocessableEntity(message:
-                        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.RoomServiceId)));
+                    if (string.IsNullOrEmpty(invoiceItem?.RoomServiceName))
+                    {
+                        return new ApiResponse().SetUnprocessableEntity(message:
+                            string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.RoomServiceName)));
+                    }
+
+                    if (invoiceItem?.Cost == null)
+                    {
+                        return new ApiResponse().SetUnprocessableEntity(message:
+                            string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.Cost)));
+                    }
+
+                    if (string.IsNullOrEmpty(invoiceItem?.Unit))
+                    {
+                        return new ApiResponse().SetUnprocessableEntity(message:
+                            string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.Unit)));
+                    }
                 }
 
                 if (invoiceItem?.Quantity == null)

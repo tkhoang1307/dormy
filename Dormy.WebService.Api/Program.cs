@@ -103,6 +103,7 @@ namespace Dormy.WebService.Api
             builder.Services.AddScoped<IViolationService, ViolationService>();
             builder.Services.AddScoped<IWorkplaceService, WorkplaceService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IDormyJobsService, DormyJobsService>();
 
             builder.Services.AddScoped<IUserContextService, UserContextService>();
 

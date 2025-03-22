@@ -4,7 +4,13 @@ namespace Dormy.WebService.Api.Models.RequestModels
 {
     public class InvoiceItemRequestModel
     {
-        public Guid RoomServiceId { get; set; }
+        public Guid? RoomServiceId { get; set; }
+
+        public string RoomServiceName { get; set; } = string.Empty;
+
+        public decimal? Cost { get; set; }
+
+        public string Unit { get; set; } = string.Empty;
 
         public decimal Quantity { get; set; }
 
@@ -15,9 +21,9 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
     public class InvoiceItemMapperRequestModel
     {
-        public string RoomServiceName { get; set; } = string.Empty;
-
         public Guid? RoomServiceId { get; set; }
+
+        public string RoomServiceName { get; set; } = string.Empty;
 
         public decimal Cost { get; set; }
 

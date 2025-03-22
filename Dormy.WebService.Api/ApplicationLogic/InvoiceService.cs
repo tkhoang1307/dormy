@@ -68,21 +68,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 }
             }
 
-            var roomServiceIds = model.InvoiceItems
-                       .Select(invoiceItem => invoiceItem.RoomServiceId)
-                       .Distinct()
-                       .ToList();
-
-            var roomServices = await _unitOfWork.RoomServiceRepository
-                                             .GetAllAsync(rt => roomServiceIds.Contains(rt.Id));
-
             Guid invoiceIdTracking = Guid.Empty;
-
-            if (roomServices.Count != roomServiceIds.Count)
-            {
-                var missingIds = roomServiceIds.Except(roomServices.Select(rt => rt.Id));
-                return new ApiResponse().SetBadRequest($"Room Services with IDs: {string.Join(", ", missingIds)} were not found");
-            }
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
                 new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
@@ -92,18 +78,38 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 decimal amountBeforePromotion = 0;
                 foreach (var invoiceItem in model.InvoiceItems)
                 {
-                    var roomService = roomServices.Where(rs => rs.Id == invoiceItem.RoomServiceId).FirstOrDefault();
+                    var roomServiceName = invoiceItem.RoomServiceName;
+                    var unit = invoiceItem.Unit;
+                    var cost = invoiceItem.Cost;
+                    var oldIndicator = invoiceItem.OldIndicator;
+                    var newIndicator = invoiceItem.NewIndicator;
+                    var quantity = (oldIndicator != null && newIndicator != null) ? (newIndicator - oldIndicator) : invoiceItem.Quantity;
+                    if (invoiceItem?.RoomServiceId != null)
+                    {
+                        var roomService = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id == invoiceItem.RoomServiceId);
+                        if (roomService == null && 
+                            (string.IsNullOrEmpty(roomServiceName) || string.IsNullOrEmpty(unit) || cost == null))
+                        {
+                            return new ApiResponse().SetNotFound(invoiceItem.RoomServiceId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room service"));
+                        }
+
+                        roomServiceName = roomService.RoomServiceName; 
+                        unit = roomService.Unit;
+                        cost = roomService?.Cost ?? 0;
+                        oldIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.OldIndicator : null;
+                        newIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.NewIndicator : null;
+                    }
                     invoiceItemsMapperRequestModel.Add(new InvoiceItemMapperRequestModel()
                     {
-                        RoomServiceId = invoiceItem.RoomServiceId,
-                        RoomServiceName = roomService.RoomServiceName,
-                        Cost = roomService.Cost,
-                        Quantity = invoiceItem.Quantity,
-                        Unit = roomService.Unit,
-                        OldIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.OldIndicator : null,
-                        NewIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.NewIndicator : null,
+                        RoomServiceId = invoiceItem?.RoomServiceId,
+                        RoomServiceName = roomServiceName,
+                        Cost = cost ?? 0,
+                        Quantity = quantity ?? 0,
+                        Unit = unit,
+                        OldIndicator = oldIndicator,
+                        NewIndicator = newIndicator,
                     });
-                    amountBeforePromotion = amountBeforePromotion + roomService.Cost * invoiceItem.Quantity;
+                    amountBeforePromotion = amountBeforePromotion + (cost * quantity ?? 0);
                 }
 
                 var invoiceUsersModel = new List<InvoiceUserMapperModel>();
@@ -127,6 +133,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         UserId = contractEntity.UserId,
                     });
                 }
+
                 var invoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")";
                 var invoiceStatus = InvoiceStatusEnum.DRAFT.ToString();
                 if (model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString())
@@ -137,7 +144,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var invoiceMapperRequestModel = new InvoiceMapperRequestModel()
                 {
                     InvoiceName = invoiceName,
-                    DueDate = model.DueDate,
+                    DueDate = model.DueDate ?? DateTime.Now,
                     AmountBeforePromotion = amountBeforePromotion,
                     AmountAfterPromotion = amountBeforePromotion,
                     Month = model.Month,
@@ -189,6 +196,161 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetCreated(invoiceIdTracking);
         }
 
+        public async Task<ApiResponse> UpdateInvoice(InvoiceUpdationRequestModel model)
+        {
+            var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == model.Id);
+            if (invoiceEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
+            }
+
+            if (invoiceEntity.Status != InvoiceStatusEnum.DRAFT)
+            {
+                return new ApiResponse().SetConflict(invoiceEntity.Id,
+                       message: string.Format(ErrorMessages.UpdateInvoiceConflict));
+            }
+
+            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(r => r.Id == model.RoomId);
+            if (roomEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
+            }
+
+            if (model.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY.ToString())
+            {
+                var invoiceEntityCheck = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id != invoiceEntity.Id &&
+                                                                                  i.RoomId == model.RoomId &&
+                                                                                  i.Month == model.Month &&
+                                                                                  i.Year == model.Year);
+
+                if (invoiceEntityCheck != null)
+                {
+                    return new ApiResponse().SetConflict(invoiceEntityCheck.Id,
+                        message: string.Format(ErrorMessages.CreateInvoiceConflict, invoiceEntityCheck.Month, invoiceEntityCheck.Year));
+                }
+            }
+
+            var responseDeleteBatchInvoiceItem = await _invoiceItemService.HardDeleteInvoiceItemsBatchByInvoiceId(invoiceEntity.Id);
+            if (!responseDeleteBatchInvoiceItem.IsSuccess)
+            {
+                return responseDeleteBatchInvoiceItem;
+            }
+
+            var invoiceItemEntities = new List<InvoiceItemEntity>();
+            decimal amountBeforePromotion = 0;
+            foreach (var invoiceItem in model.InvoiceItems)
+            {
+                var roomServiceName = invoiceItem.RoomServiceName;
+                var unit = invoiceItem.Unit;
+                var cost = invoiceItem.Cost;
+                var oldIndicator = invoiceItem.OldIndicator;
+                var newIndicator = invoiceItem.NewIndicator;
+                var quantity = (oldIndicator != null && newIndicator != null) ? (newIndicator - oldIndicator) : invoiceItem.Quantity;
+                if (invoiceItem?.RoomServiceId != null)
+                {
+                    var roomService = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id == invoiceItem.RoomServiceId);
+                    if (roomService == null &&
+                        (string.IsNullOrEmpty(roomServiceName) || string.IsNullOrEmpty(unit) || cost == null))
+                    {
+                        return new ApiResponse().SetNotFound(invoiceItem.RoomServiceId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room service"));
+                    }
+
+                    roomServiceName = roomService.RoomServiceName;
+                    unit = roomService.Unit;
+                    cost = roomService?.Cost ?? 0;
+                    oldIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.OldIndicator : null;
+                    newIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.NewIndicator : null;
+                }
+                var invoiceItemMapperRequestModel = new InvoiceItemMapperRequestModel()
+                {
+                    RoomServiceId = invoiceItem?.RoomServiceId,
+                    RoomServiceName = roomServiceName,
+                    Cost = cost ?? 0,
+                    Quantity = quantity ?? 0,
+                    Unit = unit,
+                    OldIndicator = oldIndicator,
+                    NewIndicator = newIndicator,
+                };
+
+                var invoiceItemEntity = _invoiceItemMapper.MapToInvoiceItemEntity(invoiceItemMapperRequestModel);
+                invoiceItemEntity.InvoiceId = invoiceEntity.Id;
+                invoiceItemEntity.CreatedBy = _userContextService.UserId;
+                invoiceItemEntity.LastUpdatedBy = _userContextService.UserId;
+                invoiceItemEntities.Add(invoiceItemEntity);
+                amountBeforePromotion = amountBeforePromotion + (cost * quantity ?? 0);
+            }
+
+
+            var responseDeleteBatchInvoiceUser = await _invoiceItemService.HardDeleteInvoiceItemsBatchByInvoiceId(invoiceEntity.Id);
+            if (!responseDeleteBatchInvoiceUser.IsSuccess)
+            {
+                return responseDeleteBatchInvoiceUser;
+            }
+            var userIds = _roomService.GetAllUsersOfRoomByRoomId(model.RoomId).Result;
+            var invoiceUserEntities = new List<InvoiceUserEntity>();
+            foreach (var userId in userIds)
+            {
+                var invoiceUserMapperModel = new InvoiceUserMapperModel()
+                {
+                    UserId = userId,
+                    InvoiceId = invoiceEntity.Id,
+                };
+
+                var invoiceUserEntity = _invoiceUserMapper.MapToInvoiceUserEntity(invoiceUserMapperModel);
+
+                invoiceUserEntity.CreatedBy = _userContextService.UserId;
+                invoiceUserEntity.LastUpdatedBy = _userContextService.UserId;
+
+                invoiceUserEntities.Add(invoiceUserEntity);
+            }
+
+            invoiceEntity.InvoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")";
+            invoiceEntity.DueDate = model.DueDate ?? DateTime.Now;
+            invoiceEntity.AmountBeforePromotion = amountBeforePromotion;
+            invoiceEntity.AmountAfterPromotion = amountBeforePromotion;
+            invoiceEntity.Month = model.Month;
+            invoiceEntity.Year = model.Year;
+            invoiceEntity.Type = (InvoiceTypeEnum)Enum.Parse(typeof(InvoiceTypeEnum), model.Type);
+            invoiceEntity.RoomId = model.RoomId;
+
+            if (_userContextService.UserId != Guid.Empty)
+            {
+                invoiceEntity.LastUpdatedBy = _userContextService.UserId;
+            }
+
+            await _unitOfWork.InvoiceItemRepository.AddRangeAsync(invoiceItemEntities);
+
+            await _unitOfWork.InvoiceUserRepository.AddRangeAsync(invoiceUserEntities);
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(invoiceEntity.Id);
+        }
+
+        public async Task<ApiResponse> UpdateInvoiceStatus(InvoiceStatusUpdationRequestModel model)
+        {
+            var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == model.Id);
+            if (invoiceEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
+            }
+            var statusChanged = (InvoiceStatusEnum)Enum.Parse(typeof(InvoiceStatusEnum), model.Status);
+            var (isError, errorMessage) = InvoiceStatusChangeValidator.VerifyInvoiceStatusChangeValidator(invoiceEntity.Status, statusChanged);
+            if (isError)
+            {
+                return new ApiResponse().SetConflict(invoiceEntity.Id,
+                                                     message: string.Format(errorMessage, "invoice"));
+            }
+
+            invoiceEntity.Status = statusChanged;
+            invoiceEntity.LastUpdatedBy = _userContextService.UserId;
+            invoiceEntity.LastUpdatedDateUtc = DateTime.Now;
+
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetAccepted(invoiceEntity.Id);
+        }
+
         public async Task<ApiResponse> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model)
         {
             var roomEntity = await _unitOfWork.RoomRepository.GetAsync(r => r.Id == model.RoomId);
@@ -199,23 +361,26 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var roomServiceIds = await _roomService.GetAllRoomServicesOfRoomByRoomId(roomEntity.Id);
             var initialRoomServices = new List<GetInitialInvoiceItemCreationResponseModel>();
-            foreach(var roomServiceId in roomServiceIds)
+            foreach (var roomServiceId in roomServiceIds)
             {
                 var roomServiceEntity = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id.Equals(roomServiceId));
-                var serviceIndicatorEntity = await _unitOfWork.ServiceIndicatorRepository
+                if (roomServiceEntity.RoomServiceType != RoomServiceTypeEnum.RENTAL_PAYMENT)
+                {
+                    var serviceIndicatorEntity = await _unitOfWork.ServiceIndicatorRepository
                                                                .GetAsync(si => si.RoomId.Equals(model.RoomId) &&
                                                                                si.RoomServiceId.Equals(roomServiceId) &&
                                                                                si.Month.Equals(model.Month) &&
                                                                                si.Year.Equals(model.Year));
-                
-                initialRoomServices.Add(new GetInitialInvoiceItemCreationResponseModel()
-                {
-                    RoomServiceId = roomServiceId,
-                    RoomServiceName = roomServiceEntity.RoomServiceName,
-                    RoomServiceType = roomServiceEntity.RoomServiceType.ToString(),
-                    IsServiceIndicatorUsed = roomServiceEntity.IsServiceIndicatorUsed,
-                    CurrentIndicator = roomServiceEntity.IsServiceIndicatorUsed ? (serviceIndicatorEntity?.NewIndicator ?? 0) : null,
-                });
+
+                    initialRoomServices.Add(new GetInitialInvoiceItemCreationResponseModel()
+                    {
+                        RoomServiceId = roomServiceId,
+                        RoomServiceName = roomServiceEntity.RoomServiceName,
+                        RoomServiceType = roomServiceEntity.RoomServiceType.ToString(),
+                        IsServiceIndicatorUsed = roomServiceEntity.IsServiceIndicatorUsed,
+                        CurrentIndicator = roomServiceEntity.IsServiceIndicatorUsed ? (serviceIndicatorEntity?.NewIndicator ?? 0) : null,
+                    });
+                }
             }
 
             var initialInvoiceCreation = new GetInitialInvoiceCreationResponseModel()
@@ -236,22 +401,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
             switch (_userContextService.UserRoles.FirstOrDefault())
             {
                 case Role.ADMIN:
-                    if (model.IsGetAll)
-                    {
-                        entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => true);
-                    }
-                    else
-                    {
-                        if (model.RoomId != null)
-                        {
-                            entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => x.RoomId == model.RoomId);
-                        }
-                        else
-                        {
-                            entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => model.Ids.Contains(x.Id));
+                    entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => true);
 
-                        }
+                    if (model.RoomId != null)
+                    {
+                        entities = entities.Where(x => x.RoomId == model.RoomId).ToList();
                     }
+
+                    if (!string.IsNullOrEmpty(model.InvoiceType))
+                    {
+                        entities = entities.Where(x => x.Type.ToString() == model.InvoiceType).ToList();
+                    }
+
+                    if (model.Ids.Count > 0)
+                    {
+                        entities = entities.Where(x => model.Ids.Contains(x.Id)).ToList();
+                    }
+
                     break;
                 case Role.USER:
                     var invoiceUsers = await _unitOfWork.InvoiceUserRepository.GetAllAsync(iu => iu.UserId == _userContextService.UserId);
@@ -332,154 +498,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(invoiceEntity.Id);
-        }
-
-        public async Task<ApiResponse> UpdateInvoice(InvoiceUpdationRequestModel model)
-        {
-            var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == model.Id);
-            if (invoiceEntity == null)
-            {
-                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
-            }
-
-            if (invoiceEntity.Status != InvoiceStatusEnum.DRAFT)
-            {
-                return new ApiResponse().SetConflict(invoiceEntity.Id,
-                       message: string.Format(ErrorMessages.UpdateInvoiceConflict));
-            }
-
-            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(r => r.Id == model.RoomId);
-            if (roomEntity == null)
-            {
-                return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
-            }
-
-            if (model.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY.ToString())
-            {
-                var invoiceEntityCheck = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id != invoiceEntity.Id &&
-                                                                                  i.RoomId == model.RoomId &&
-                                                                                  i.Month == model.Month &&
-                                                                                  i.Year == model.Year);
-
-                if (invoiceEntityCheck != null)
-                {
-                    return new ApiResponse().SetConflict(invoiceEntityCheck.Id,
-                        message: string.Format(ErrorMessages.CreateInvoiceConflict, invoiceEntityCheck.Month, invoiceEntityCheck.Year));
-                }
-            }
-
-            var roomServiceIds = model.InvoiceItems
-                       .Select(invoiceItem => invoiceItem.RoomServiceId)
-                       .Distinct()
-                       .ToList();
-
-            var roomServices = await _unitOfWork.RoomServiceRepository
-                                             .GetAllAsync(rt => roomServiceIds.Contains(rt.Id));
-
-            if (roomServices.Count != roomServiceIds.Count)
-            {
-                var missingIds = roomServiceIds.Except(roomServices.Select(rt => rt.Id));
-                return new ApiResponse().SetBadRequest($"Room Services with IDs: {string.Join(", ", missingIds)} were not found");
-            }
-
-            var responseDeleteBatchInvoiceItem = await _invoiceItemService.HardDeleteInvoiceItemsBatchByInvoiceId(invoiceEntity.Id);
-            if (!responseDeleteBatchInvoiceItem.IsSuccess)
-            {
-                return responseDeleteBatchInvoiceItem;
-            }
-
-            var invoiceItemEntities = new List<InvoiceItemEntity>();
-            decimal amountBeforePromotion = 0;
-            foreach (var invoiceItem in model.InvoiceItems)
-            {
-                var roomService = roomServices.Where(rs => rs.Id == invoiceItem.RoomServiceId).FirstOrDefault();
-                var invoiceItemMapperRequestModel = new InvoiceItemMapperRequestModel()
-                {
-                    RoomServiceId = invoiceItem.RoomServiceId,
-                    RoomServiceName = roomService.RoomServiceName,
-                    Cost = roomService.Cost,
-                    Quantity = invoiceItem.Quantity,
-                    Unit = roomService.Unit,
-                    OldIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.OldIndicator : null,
-                    NewIndicator = roomService.IsServiceIndicatorUsed ? invoiceItem.NewIndicator : null,
-                };
-                var invoiceItemEntity = _invoiceItemMapper.MapToInvoiceItemEntity(invoiceItemMapperRequestModel);
-                invoiceItemEntity.InvoiceId = invoiceEntity.Id;
-                invoiceItemEntity.CreatedBy = _userContextService.UserId;
-                invoiceItemEntity.LastUpdatedBy = _userContextService.UserId;
-                invoiceItemEntities.Add(invoiceItemEntity);
-                amountBeforePromotion = amountBeforePromotion + roomService.Cost * invoiceItem.Quantity;
-            }
-
-
-            var responseDeleteBatchInvoiceUser = await _invoiceItemService.HardDeleteInvoiceItemsBatchByInvoiceId(invoiceEntity.Id);
-            if (!responseDeleteBatchInvoiceUser.IsSuccess)
-            {
-                return responseDeleteBatchInvoiceUser;
-            }
-            var userIds = _roomService.GetAllUsersOfRoomByRoomId(model.RoomId).Result;
-            var invoiceUserEntities = new List<InvoiceUserEntity>();
-            foreach (var userId in userIds)
-            {
-                var invoiceUserMapperModel = new InvoiceUserMapperModel()
-                {
-                    UserId = userId,
-                    InvoiceId = invoiceEntity.Id,
-                };
-
-                var invoiceUserEntity = _invoiceUserMapper.MapToInvoiceUserEntity(invoiceUserMapperModel);
-
-                invoiceUserEntity.CreatedBy = _userContextService.UserId;
-                invoiceUserEntity.LastUpdatedBy = _userContextService.UserId;
-
-                invoiceUserEntities.Add(invoiceUserEntity);
-            }
-
-            invoiceEntity.InvoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")";
-            invoiceEntity.DueDate = model.DueDate;
-            invoiceEntity.AmountBeforePromotion = amountBeforePromotion;
-            invoiceEntity.AmountAfterPromotion = amountBeforePromotion;
-            invoiceEntity.Month = model.Month;
-            invoiceEntity.Year = model.Year;
-            invoiceEntity.Type = (InvoiceTypeEnum)Enum.Parse(typeof(InvoiceTypeEnum), model.Type);
-            invoiceEntity.RoomId = model.RoomId;
-
-            if (_userContextService.UserId != Guid.Empty)
-            {
-                invoiceEntity.LastUpdatedBy = _userContextService.UserId;
-            }
-
-            await _unitOfWork.InvoiceItemRepository.AddRangeAsync(invoiceItemEntities);
-
-            await _unitOfWork.InvoiceUserRepository.AddRangeAsync(invoiceUserEntities);
-
-            await _unitOfWork.SaveChangeAsync();
-
-            return new ApiResponse().SetAccepted(invoiceEntity.Id);
-        }
-
-        public async Task<ApiResponse> UpdateInvoiceStatus(InvoiceStatusUpdationRequestModel model)
-        {
-            var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == model.Id);
-            if (invoiceEntity == null)
-            {
-                return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
-            }
-            var statusChanged = (InvoiceStatusEnum)Enum.Parse(typeof(InvoiceStatusEnum), model.Status);
-            var (isError, errorMessage) = InvoiceStatusChangeValidator.VerifyInvoiceStatusChangeValidator(invoiceEntity.Status, statusChanged);
-            if (isError)
-            {
-                return new ApiResponse().SetConflict(invoiceEntity.Id,
-                                                     message: string.Format(errorMessage, "invoice"));
-            }
-
-            invoiceEntity.Status = statusChanged;
-            invoiceEntity.LastUpdatedBy = _userContextService.UserId;
-            invoiceEntity.LastUpdatedDateUtc = DateTime.Now;
-
-            await _unitOfWork.SaveChangeAsync();
-
-            return new ApiResponse().SetAccepted(invoiceEntity.Id);
         }
     }
 }
