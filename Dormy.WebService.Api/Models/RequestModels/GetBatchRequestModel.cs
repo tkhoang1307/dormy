@@ -2,7 +2,6 @@
 {
     public class GetBatchRequestModel
     {
-        public bool IsGetAll { get; set; } = false;
         public List<Guid> Ids { get; set; } = [];
     }
 
