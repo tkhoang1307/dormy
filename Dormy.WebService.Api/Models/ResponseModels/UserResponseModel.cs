@@ -21,6 +21,12 @@
         public string Status { get; set; } = string.Empty;
 
         public string Gender { get; set; } = string.Empty;
+
+        // Contract
+        public Guid? ContractId { get; set; } = null;
+        public string? ContractStatus { get; set; } = string.Empty;
+        public DateTime? ContractStartDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
     }
 
     public class UserCreationResponseModel

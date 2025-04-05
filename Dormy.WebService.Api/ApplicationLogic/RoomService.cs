@@ -105,7 +105,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var users = entity.Contracts?
                 .Where(c => c.Status == ContractStatusEnum.ACTIVE || c.Status == ContractStatusEnum.EXTENDED || c.Status == ContractStatusEnum.EXPIRED)
-                .Select(c => c.User).ToList() ?? [];
+                .Select(c =>
+                {
+                    c.User.Contracts = new List<ContractEntity> { c };
+                    return c.User;
+                }).ToList() ?? new List<UserEntity>();
 
             if (users != null && users.Count > 0)
             {

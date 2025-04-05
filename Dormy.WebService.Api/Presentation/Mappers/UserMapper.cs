@@ -29,6 +29,10 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 DateOfBirth = entity.DateOfBirth,
                 NationalIdNumber = entity.NationalIdNumber,
                 Status = entity.Status.ToString(),
+                ContractId = entity.Contracts?.FirstOrDefault()?.Id,
+                ContractStatus = entity.Contracts?.FirstOrDefault()?.Status.ToString(),
+                ContractStartDate = entity.Contracts?.FirstOrDefault()?.StartDate,
+                ContractEndDate = entity.Contracts?.FirstOrDefault()?.EndDate,
             };
         }
 
