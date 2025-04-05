@@ -93,7 +93,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .ThenInclude(roomType => roomType.RoomTypeServices)
                         .ThenInclude(roomTypeService => roomTypeService.RoomService)
                         .Include(x => x.Contracts)
-                        .ThenInclude(x => x.User));
+                        .ThenInclude(x => x.User)
+                        .Include(x => x.Building));
 
             if (entity == null)
             {
