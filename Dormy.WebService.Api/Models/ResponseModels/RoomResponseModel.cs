@@ -28,5 +28,6 @@
     public class RoomResponseModel : RoomBatchResponseModel
     {
         public List<RoomServiceResponseModel> RoomServices { get; set; } = [];
+        public List<UserResponseModel> Users { get; set; } = [];
     }
 }

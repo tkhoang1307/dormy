@@ -17,12 +17,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private readonly RoomMapper _roomMapper;
+        private readonly UserMapper _userMapper;
 
         public RoomService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
             _roomMapper = new RoomMapper();
+            _userMapper = new UserMapper();
         }
 
         public async Task<ApiResponse> CreateRoomBatch(List<RoomCreationRequestModel> rooms, Guid buildingId)
@@ -49,12 +51,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 var room = rooms[iRoom];
                 int totalRoomsCreated = RoomHelper.CalculateTotalRoomsWereCreatedBeforeInARequest(rooms, iRoom);
-                
+
                 int maxRoomNumberOnFloor = buildingEntity.Rooms
                                                          .Where(r => r.FloorNumber == room.FloorNumber)
                                                          .Max(r => (int?)r.RoomNumber) ?? 0;
                 int roomNumberStartToMark = RoomHelper.CalculateStartedRoomNumberInARequest(room.FloorNumber, maxRoomNumberOnFloor, totalRoomsCreated);
-                
+
                 for (var i = 0; i < room.TotalRoomsWantToCreate; i++)
                 {
                     var entity = _roomMapper.MapToRoomEntity(new RoomRequestModel()
@@ -72,7 +74,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     entities.Add(entity);
 
                     roomNumberStartToMark = roomNumberStartToMark + 1;
-                }    
+                }
             }
 
             await _unitOfWork.RoomRepository.AddRangeAsync(entities);
@@ -84,7 +86,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetRoomById(Guid id)
         {
-            var entity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(id), x => x.Include(x => x.RoomType).ThenInclude(roomType => roomType.RoomTypeServices).ThenInclude(roomTypeService => roomTypeService.RoomService));
+            var entity = await _unitOfWork.RoomRepository
+                .GetAsync(
+                    x => x.Id.Equals(id),
+                    x => x.Include(x => x.RoomType)
+                        .ThenInclude(roomType => roomType.RoomTypeServices)
+                        .ThenInclude(roomTypeService => roomTypeService.RoomService)
+                        .Include(x => x.Contracts)
+                        .ThenInclude(x => x.User));
 
             if (entity == null)
             {
@@ -93,18 +102,27 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var response = _roomMapper.MapToRoomResponseModel(entity);
 
+            var users = entity.Contracts?
+                .Where(c => c.Status == ContractStatusEnum.ACTIVE || c.Status == ContractStatusEnum.EXTENDED || c.Status == ContractStatusEnum.EXPIRED)
+                .Select(c => c.User).ToList() ?? [];
+
+            if (users != null && users.Count > 0)
+            {
+                response.Users = users.Select(_userMapper.MapToUserResponseModel).ToList();
+            }
+
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(response.CreatedBy, response.LastUpdatedBy);
 
             response.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
             response.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
-            foreach(var roomServiceModel in response.RoomServices)
+            foreach (var roomServiceModel in response.RoomServices)
             {
                 var (createdUserRoomService, lastUpdatedUserRoomService) = await _unitOfWork.AdminRepository.GetAuthors(roomServiceModel.CreatedBy, roomServiceModel.LastUpdatedBy);
 
                 roomServiceModel.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUserRoomService);
                 roomServiceModel.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUserRoomService);
-            }    
+            }
 
             return new ApiResponse().SetOk(response);
         }
@@ -121,7 +139,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             entity.Rooms ??= [];
 
             var response = entity.Rooms.Select(r => _roomMapper.MapToRoomBatchResponseModel(r)).OrderBy(r => r.RoomNumber).ToList();
-            foreach(var roomModel in response)
+            foreach (var roomModel in response)
             {
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(roomModel.CreatedBy, roomModel.LastUpdatedBy);
 
@@ -257,7 +275,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var entityContracts = await _unitOfWork.ContractRepository
                                                  .GetAllAsync(x => x.RoomId.Equals(roomId)
                                                               && (x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED));
-            
+
             var userIds = entityContracts.Select(c => c.UserId).ToList();
 
             return userIds;
