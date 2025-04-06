@@ -36,6 +36,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 BuildingId = requestEntity.Room?.BuildingId,
                 BuildingName = requestEntity.Room?.Building?.Name,
                 IsDeleted = requestEntity.IsDeleted,
+                CreatedDateUtc = requestEntity.CreatedDateUtc,
             };
         }
     }
