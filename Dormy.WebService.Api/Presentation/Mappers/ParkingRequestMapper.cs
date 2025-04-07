@@ -26,7 +26,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             {
                 Id = entity.Id,
                 Description = entity.Description,
-                Status = entity.Status,
+                Status = entity.Status.ToString(),
                 UserId = entity.UserId,
                 VehicleId = entity.VehicleId,
                 ParkingSpotId = entity.ParkingSpotId,
@@ -35,7 +35,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LicensePlate = entity.Vehicle.LicensePlate,
                 VehicleType = entity.Vehicle.VehicleType,
                 ParkingSpotName = entity.ParkingSpot.ParkingSpotName,
-                ParkingSpotStatus = entity.ParkingSpot.Status,
+                ParkingSpotStatus = entity.ParkingSpot.Status.ToString(),
                 UserFullName = entity.User.LastName + " " + entity.User.FirstName,
                 CreatedBy = entity.CreatedBy,
                 LastUpdatedBy = entity.LastUpdatedBy,

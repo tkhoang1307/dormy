@@ -8,7 +8,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string Description { get; set; } = string.Empty;
 
-        public RequestStatusEnum Status { get; set; }
+        public string Status { get; set; } = string.Empty;
 
         public Guid UserId { get; set; }
 
@@ -18,7 +18,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string ParkingSpotName { get; set; } = string.Empty;
 
-        public ParkingSpotStatusEnum ParkingSpotStatus { get; set; }
+        public string ParkingSpotStatus { get; set; } = string.Empty;
 
         public Guid VehicleId { get; set; }
 
