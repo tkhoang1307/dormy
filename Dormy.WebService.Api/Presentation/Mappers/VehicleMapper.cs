@@ -31,6 +31,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LastUpdatedBy = model.LastUpdatedBy,
                 LastUpdatedDateUtc = model.LastUpdatedDateUtc,
                 IsDeleted = model.IsDeleted,
+                UserFullname = string.Join(" ", [model.User.FirstName, model.User.LastName]),
             };
         }
     }

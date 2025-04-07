@@ -8,6 +8,7 @@ using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -49,7 +50,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var parkingSpotModel = _parkingSpotMapper.MapToParkingSpotModel(entity);
 
-            var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == entity.Id, isPaging: false);
+            var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == entity.Id, include: x => x.Include(x => x.User), isPaging: false);
             if (vehicleEntities != null && vehicleEntities.Count != 0)
             {
                 if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
@@ -101,7 +102,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 parkingSpot.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
                 parkingSpot.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
 
-                var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == parkingSpot.Id, isPaging: false);
+                var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == parkingSpot.Id, include: x => x.Include(x => x.User), isPaging: false);
                 if (vehicleEntities != null && vehicleEntities.Count != 0)
                 {
                     if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
