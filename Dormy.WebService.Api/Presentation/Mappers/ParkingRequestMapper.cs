@@ -31,7 +31,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 VehicleId = entity.VehicleId,
                 ParkingSpotId = entity.ParkingSpotId,
                 ApproverId = entity.ApproverId,
-                ApproverUserFullName = entity.Approver.LastName + " " + entity.Approver.FirstName,
+                ApproverUserFullName = entity.Approver != null ? entity.Approver.LastName + " " + entity.Approver.FirstName : string.Empty,
                 LicensePlate = entity.Vehicle.LicensePlate,
                 VehicleType = entity.Vehicle.VehicleType,
                 ParkingSpotName = entity.ParkingSpot.ParkingSpotName,
