@@ -456,22 +456,63 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var genderEnums = EnumHelper.GetAllEnumDescriptions<GenderEnum>();
             var relationshipEnums = EnumHelper.GetAllEnumDescriptions<RelationshipEnum>();
             var workplaceEntities = await _unitOfWork.WorkplaceRepository.GetAllAsync(x => x.IsDeleted == false);
+            var roomTypeEntities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false);
             var listWorkplaces = workplaceEntities.Select(entity => 
-            new InitialDataWorkplaceResponseModel()
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Abbrevation = entity.Abbrevation,
-            }).ToList();
+                new InitialDataWorkplaceResponseModel()
+                {
+                    Id = entity.Id,
+                    Name = entity.Name,
+                    Abbrevation = entity.Abbrevation,
+                }).ToList();
+
+            var listRoomTypes = roomTypeEntities.Select(entity =>
+                new InitialDataRoomTypeResponseModel()
+                {
+                    Id = entity.Id,
+                    RoomTypeName = entity.RoomTypeName,
+                    Capacity = entity.Capacity,
+                    Price = entity.Price,
+                }).ToList();
 
             var initialRegistrationData = new InitialRegistrationDataResponseModel() 
             {
                 GenderEnums = genderEnums,
                 RelationshipEnums = relationshipEnums,
                 ListWorkplaces = listWorkplaces,
+                ListRoomTypes = listRoomTypes,
             };
 
             return new ApiResponse().SetOk(initialRegistrationData);
+        }
+
+        public async Task<ApiResponse> SearchBuildingsAndRoomsByGenderAndRoomType(SearchBuildingAndRoomRequestModel model)
+        {
+            GenderEnum genderEnum = Enum.Parse<GenderEnum>(model.Gender);
+
+            var buildingEntities = await _unitOfWork.BuildingRepository.GetAllAsync(
+                building => building.GenderRestriction == genderEnum &&
+                            building.IsDeleted == false &&
+                            building.Rooms.Any(room => room.RoomTypeId == model.RoomTypeId && room.IsDeleted == false),
+                building => building.Include(b => b.Rooms)
+            );
+
+            var result = buildingEntities.Select(building => new SearchBuildingsAndRoomsResponseModel()
+            {
+                BuildingId = building.Id,
+                BuildingName = building.Name,
+                // copy other necessary building fields
+                ListRooms = building.Rooms.Select(room => new SearchRoomsResponseModel()
+                {
+                    RoomId = room.Id,
+                    RoomNumber = room.RoomNumber,
+                    FloorNumber = room.FloorNumber,
+                    TotalUsedBed = room.TotalUsedBed,
+                    TotalAvailableBed = room.TotalAvailableBed,
+                    Status = room.Status.ToString(),
+                }).ToList()
+            }).ToList();
+
+            return new ApiResponse().SetOk(result);
         }
     }
 }
