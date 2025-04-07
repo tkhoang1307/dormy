@@ -8,7 +8,6 @@ using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
-using Org.BouncyCastle.Crypto;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -17,12 +16,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private ParkingSpotMapper _parkingSpotMapper;
+        private readonly VehicleMapper _vehicleMapper;
 
         public ParkingSpotService(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
             _unitOfWork = unitOfWork;
             _parkingSpotMapper = new ParkingSpotMapper();
             _userContextService = userContextService;
+            _vehicleMapper = new VehicleMapper();
         }
 
         public async Task<ApiResponse> AddNewParkingSpot(ParkingSpotRequestModel model)
@@ -47,6 +48,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var parkingSpotModel = _parkingSpotMapper.MapToParkingSpotModel(entity);
+
+            var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == entity.Id, isPaging: false);
+            if (vehicleEntities != null && vehicleEntities.Count != 0)
+            {
+                if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
+                {
+                    vehicleEntities = vehicleEntities.Where(x => x.UserId == _userContextService.UserId).ToList();
+                }
+                parkingSpotModel.Vehicles = vehicleEntities.Select(v => _vehicleMapper.MapToVehicleResponseModel(v)).ToList();
+            }
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(parkingSpotModel.CreatedBy, parkingSpotModel.LastUpdatedBy);
 
@@ -74,7 +85,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 parkingSpotModels = entities.Where(x => x.IsDeleted == false)
                                             .Select(x => _parkingSpotMapper.MapToParkingSpotModel(x))
                                             .ToList();
-            }   
+            }
             else
             {
                 parkingSpotModels = entities.Select(x => _parkingSpotMapper.MapToParkingSpotModel(x)).ToList();
@@ -89,6 +100,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 parkingSpot.CreatedByCreator = UserHelper.ConvertAdminIdToAdminFullname(createdUser);
                 parkingSpot.LastUpdatedByUpdater = UserHelper.ConvertAdminIdToAdminFullname(lastUpdatedUser);
+
+                var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == parkingSpot.Id, isPaging: false);
+                if (vehicleEntities != null && vehicleEntities.Count != 0)
+                {
+                    if (_userContextService.UserRoles.FirstOrDefault() == Role.USER)
+                    {
+                        vehicleEntities = vehicleEntities.Where(x => x.UserId == _userContextService.UserId).ToList();
+                    }
+                    parkingSpot.Vehicles = vehicleEntities.Select(v => _vehicleMapper.MapToVehicleResponseModel(v)).ToList();
+                }
             }
 
             return new ApiResponse().SetOk(parkingSpotModels);
@@ -122,7 +143,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == id);
 
-            if (entity == null )
+            if (entity == null)
             {
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
             }

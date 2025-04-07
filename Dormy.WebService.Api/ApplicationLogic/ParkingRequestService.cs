@@ -59,7 +59,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.ParkingRequestRepository.AddAsync(parkingRequestEntity);
             await _unitOfWork.SaveChangeAsync();
-            
+
             return new ApiResponse().SetCreated(parkingRequestEntity.Id);
         }
 
@@ -141,9 +141,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 if (model.Status == RequestStatusEnum.APPROVED)
                 {
                     var vehicle = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == parkingRequest.VehicleId);
-                    vehicle.ParkingSpotId = parkingRequest.ParkingSpotId;
+                    if (vehicle != null)
+                    {
+                        vehicle.ParkingSpotId = parkingRequest.ParkingSpotId;
+                    }
                 }
-            };
+            }
+            ;
 
             await _unitOfWork.SaveChangeAsync();
 

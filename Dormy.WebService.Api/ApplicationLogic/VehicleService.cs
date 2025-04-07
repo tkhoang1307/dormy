@@ -87,14 +87,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             for (int i = 0; i < entities.Count; i++)
             {
-                var vehicle = _vehicleMapper.MapToVehicleResponseModel(entities[i]);
+                var vehicleEntity = entities[i];
+                var vehicle = _vehicleMapper.MapToVehicleResponseModel(vehicleEntity);
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(vehicle.CreatedBy, vehicle.LastUpdatedBy);
 
                 vehicle.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
                 vehicle.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
-                vehicle.UserFullname = entities[i].User.FirstName + " " + entities[i].User.LastName;
-
+                vehicle.UserFullname = vehicleEntity.User.FirstName + " " + vehicleEntity.User.LastName;
+                if (vehicleEntity.ParkingSpotId != null && vehicleEntity.ParkingSpotId != Guid.Empty)
+                {
+                    vehicle.ParkingSpotId = vehicleEntity.ParkingSpotId;
+                    var parkingSpot = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == vehicleEntity.ParkingSpotId);
+                    if (parkingSpot != null)
+                    {
+                        vehicle.ParkingSpotName = parkingSpot.ParkingSpotName;
+                    }
+                }
                 vehicleModels.Add(vehicle);
             }
 
@@ -109,14 +118,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             for (int i = 0; i < entities.Count; i++)
             {
-                var vehicle = _vehicleMapper.MapToVehicleResponseModel(entities[i]);
+                var vehicleEntity = entities[i];
+                var vehicle = _vehicleMapper.MapToVehicleResponseModel(vehicleEntity);
 
                 var (createdUser, lastUpdatedUser) = await _unitOfWork.UserRepository.GetAuthors(vehicle.CreatedBy, vehicle.LastUpdatedBy);
 
                 vehicle.CreatedByCreator = UserHelper.ConvertUserIdToUserFullname(createdUser);
                 vehicle.LastUpdatedByUpdater = UserHelper.ConvertUserIdToUserFullname(lastUpdatedUser);
-                vehicle.UserFullname = entities[i].User.FirstName + " " + entities[i].User.LastName;
+                vehicle.UserFullname = vehicleEntity.User.FirstName + " " + vehicleEntity.User.LastName;
 
+                if (vehicleEntity.ParkingSpotId != null && vehicleEntity.ParkingSpotId != Guid.Empty)
+                {
+                    vehicle.ParkingSpotId = vehicleEntity.ParkingSpotId;
+                    var parkingSpot = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == vehicleEntity.ParkingSpotId);
+                    if (parkingSpot != null)
+                    {
+                        vehicle.ParkingSpotName = parkingSpot.ParkingSpotName;
+                    }
+                }
                 vehicleModels.Add(vehicle);
             }
 

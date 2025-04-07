@@ -12,5 +12,7 @@
 
         // ParkingSpotStatusEnum
         public string Status { get; set; } = string.Empty;
+
+        public List<VehicleResponseModel> Vehicles { get; set; } = [];
     }
 }
