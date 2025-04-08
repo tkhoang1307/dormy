@@ -33,6 +33,8 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 FullName = entity.User.LastName + " " + entity.User.FirstName,
                 Email = entity.User.Email,
                 PhoneNumber = entity.User.PhoneNumber,
+                ApproverId = entity.ApproverId,
+                ApproverFullName = entity.Approver?.LastName + " " + entity.Approver?.FirstName,
                 CreatedBy = entity.CreatedBy,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 CreatedDateUtc = entity.CreatedDateUtc,

@@ -18,6 +18,10 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string FullName { get; set; } = string.Empty;
 
+        public Guid? ApproverId { get; set; }
+
+        public string ApproverFullName { get; set; } = string.Empty;
+
         public string Email { get; set; } = string.Empty;
 
         public string PhoneNumber { get; set; } = string.Empty;

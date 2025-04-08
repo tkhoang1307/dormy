@@ -47,7 +47,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetDetailOvernightAbsence(Guid id)
         {
-            var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.User), isNoTracking: true);
+            var entity = await _unitOfWork.OvernightAbsenceRepository.GetAsync(
+                                x => x.Id == id,
+                                x => x.Include(x => x.User)
+                                      .Include(x => x.Approver),
+                                isNoTracking: true);
             if (entity == null)
             {
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Overnight absence"));
@@ -72,14 +76,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 entities = await _unitOfWork.OvernightAbsenceRepository
                                             .GetAllAsync(x => true, x => x
-                                                .Include(x => x.User),
+                                                .Include(x => x.User)
+                                                .Include(x => x.Approver),
                                             isNoTracking: true);
             }
             else
             {
                 entities = await _unitOfWork.OvernightAbsenceRepository
                                             .GetAllAsync(x => x.UserId == userId, x => x
-                                                .Include(x => x.User),
+                                                .Include(x => x.User)
+                                                .Include(x=> x.Approver),
                                             isNoTracking: true);
             }
 

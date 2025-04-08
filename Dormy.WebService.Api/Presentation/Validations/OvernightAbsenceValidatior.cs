@@ -95,12 +95,6 @@ namespace Dormy.WebService.Api.Presentation.Validations
 
         public static async Task<ApiResponse> OvernightAbsentApproveOrRejectRequestModelValidator(OvernightAbsentApproveOrRejectRequestModel model)
         {
-            if (model?.Id == null)
-            {
-                return new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Id)));
-            }
-
             if (model?.IsApproved == null)
             {
                 return new ApiResponse().SetUnprocessableEntity(message:

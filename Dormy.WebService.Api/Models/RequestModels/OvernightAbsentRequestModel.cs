@@ -16,8 +16,6 @@
 
     public class OvernightAbsentApproveOrRejectRequestModel
     {
-        public Guid Id { get; set; }
-
         public bool IsApproved { get; set; }
     }
 }
