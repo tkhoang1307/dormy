@@ -7,7 +7,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     {
         Task<ApiResponse> CreateVehicleHistory(VehicleHistoryRequestModel model);
         Task<ApiResponse> GetVehicleHistories(GetBatchRequestModel model);
-        Task<ApiResponse> GetSingleVehicleHistory(Guid id);
+        Task<ApiResponse> GetVehicleHistoriesByVehicleId(Guid vehicleId);
         Task<ApiResponse> SoftDeleteVehicleHistory(Guid id);
     }
 }

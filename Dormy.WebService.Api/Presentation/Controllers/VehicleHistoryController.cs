@@ -20,10 +20,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpGet("id/{id:guid}")]
-        [Authorize(Roles = Role.ADMIN)]
+        [Authorize(Roles = $"{Role.ADMIN} {Role.USER}")]
         public async Task<IActionResult> GetVehicleHistory(Guid id)
         {
-            var result = await _vehicleHistoryService.GetSingleVehicleHistory(id);
+            var result = await _vehicleHistoryService.GetVehicleHistoriesByVehicleId(id);
             return Ok(result);
         }
 

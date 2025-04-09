@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -26,21 +27,26 @@ namespace Dormy.WebService.Api.ApplicationLogic
         public async Task<ApiResponse> CreateVehicleHistory(VehicleHistoryRequestModel model)
         {
             var vehicleEntity = await _unitOfWork.VehicleRepository.GetAsync(x => x.Id == model.VehicleId, isNoTracking: true);
+
             if (vehicleEntity == null)
             {
                 return new ApiResponse().SetNotFound(model.VehicleId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle"));
             }
 
-            var parkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == model.ParkingSpotId, isNoTracking: false);
+            var parkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == vehicleEntity.ParkingSpotId, isNoTracking: false);
             if (parkingSpotEntity == null)
             {
-                return new ApiResponse().SetNotFound(model.ParkingSpotId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
+                return new ApiResponse().SetNotFound(vehicleEntity.ParkingSpotId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
             }
 
             if (parkingSpotEntity.Status == Models.Enums.ParkingSpotStatusEnum.UNDER_MAINTENANCE)
             {
                 return new ApiResponse().SetBadRequest(message: ErrorMessages.ParkingSpotIsUnderMaintenance);
             }
+
+            var histories = await _unitOfWork.VehicleHistoryRepository.GetAllAsync(x => x.VehicleId == vehicleEntity.Id, isNoTracking: true);
+            var lastHistory = histories.OrderByDescending(x => x.CreatedDateUtc).FirstOrDefault();
+            var lastAction = lastHistory != null ? lastHistory.Action == VehicleActionEnum.IN ? VehicleActionEnum.OUT : VehicleActionEnum.IN : VehicleActionEnum.IN;
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
@@ -62,7 +68,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 //    await _unitOfWork.SaveChangeAsync();
                 //}
 
-                var vehicleHistoryEntity = _vehicleHistoryMapper.MapToVehicleHistoryEntity(model);
+                var vehicleHistoryEntity = _vehicleHistoryMapper.MapToVehicleHistoryEntity(model, parkingSpotEntity.Id, lastAction);
 
                 vehicleHistoryEntity.CreatedBy = _userContextService.UserId;
                 vehicleHistoryEntity.LastUpdatedBy = _userContextService.UserId;
@@ -75,15 +81,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetCreated();
         }
 
-        public async Task<ApiResponse> GetSingleVehicleHistory(Guid id)
+        public async Task<ApiResponse> GetVehicleHistoriesByVehicleId(Guid vehicleId)
         {
-            var vehicleHistoryEntity = await _unitOfWork.VehicleHistoryRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Vehicle).Include(x => x.ParkingSpot), isNoTracking: true);
-            if (vehicleHistoryEntity == null)
+            var vehicleHistoryEntities = await _unitOfWork.VehicleHistoryRepository.GetAllAsync(x => x.VehicleId == vehicleId, x => x.Include(x => x.Vehicle).Include(x => x.ParkingSpot), isNoTracking: true);
+            if (vehicleHistoryEntities == null)
             {
-                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle history"));
+                return new ApiResponse().SetNotFound(vehicleId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Vehicle history"));
             }
 
-            var result = _vehicleHistoryMapper.MapToVehicleHistoryResponseModel(vehicleHistoryEntity);
+            var result = vehicleHistoryEntities.Select(_vehicleHistoryMapper.MapToVehicleHistoryResponseModel).OrderByDescending(x => x.CreatedDateUtc).ToList();
 
             return new ApiResponse().SetOk(result);
         }

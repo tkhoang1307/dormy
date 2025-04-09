@@ -7,13 +7,13 @@ namespace Dormy.WebService.Api.Presentation.Mappers
 {
     public class VehicleHistoryMapper
     {
-        public VehicleHistoryEntity MapToVehicleHistoryEntity(VehicleHistoryRequestModel model)
+        public VehicleHistoryEntity MapToVehicleHistoryEntity(VehicleHistoryRequestModel model, Guid parkingSpotId, VehicleActionEnum action)
         {
             return new VehicleHistoryEntity
             {
                 VehicleId = model.VehicleId,
-                ParkingSpotId = model.ParkingSpotId,
-                Action = model.IsIn ? VehicleActionEnum.IN : VehicleActionEnum.OUT,
+                ParkingSpotId = parkingSpotId,
+                Action = action,
                 CreatedDateUtc = DateTime.UtcNow,
                 LastUpdatedDateUtc = DateTime.UtcNow,
             };
