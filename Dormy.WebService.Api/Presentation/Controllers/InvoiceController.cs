@@ -37,21 +37,6 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        [HttpPost("create-initial-data")]
-        [Authorize(Roles = Role.ADMIN)]
-        public async Task<IActionResult> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model)
-        {
-            var modelValidator = await InvoiceValidator.GetInitialInvoiceCreationRequestModelValidator(model);
-            if (!modelValidator.IsSuccess)
-            {
-                return StatusCode((int)modelValidator.StatusCode, modelValidator);
-            }
-
-            var response = await _invoiceService.GetInitialInvoiceCreation(model);
-
-            return StatusCode((int)response.StatusCode, response);
-        }
-
         [HttpPut]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> UpdateInvoice(InvoiceUpdationRequestModel model)
@@ -96,6 +81,30 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _invoiceService.UpdateInvoiceStatus(model);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpPost("create-initial-data")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetInitialInvoiceCreation(GetInitialInvoiceCreationRequestModel model)
+        {
+            var modelValidator = await InvoiceValidator.GetInitialInvoiceCreationRequestModelValidator(model);
+            if (!modelValidator.IsSuccess)
+            {
+                return StatusCode((int)modelValidator.StatusCode, modelValidator);
+            }
+
+            var response = await _invoiceService.GetInitialInvoiceCreation(model);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpGet("create-initial-data/rooms")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetRoomsForInitialInvoiceCreation()
+        {
+            var response = await _invoiceService.GetRoomsForInitialInvoiceCreation();
 
             return StatusCode((int)response.StatusCode, response);
         }

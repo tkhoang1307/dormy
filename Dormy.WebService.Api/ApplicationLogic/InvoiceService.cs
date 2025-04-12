@@ -377,6 +377,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         RoomServiceId = roomServiceId,
                         RoomServiceName = roomServiceEntity.RoomServiceName,
                         RoomServiceType = roomServiceEntity.RoomServiceType.ToString(),
+                        Cost = roomServiceEntity.Cost,
+                        Unit = roomServiceEntity.Unit,
                         IsServiceIndicatorUsed = roomServiceEntity.IsServiceIndicatorUsed,
                         CurrentIndicator = roomServiceEntity.IsServiceIndicatorUsed ? (serviceIndicatorEntity?.NewIndicator ?? 0) : null,
                     });
@@ -498,6 +500,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(invoiceEntity.Id);
+        }
+
+        public async Task<ApiResponse> GetRoomsForInitialInvoiceCreation()
+        {
+            var roomEntities = await _unitOfWork.RoomRepository.GetAllAsync(x => true, include: q => q.Include(i => i.Building));
+
+            var roomModels = roomEntities
+                .OrderBy(room => room.Building.Name)
+                .ThenBy(room => room.RoomNumber)
+                .Select(room => new RoomsForInvoiceResponseModel
+                {
+                    RoomId = room.Id,
+                    RoomNumber = room.RoomNumber,
+                    FloorNumber = room.FloorNumber,
+                    BuildingName = room.Building.Name,
+                });
+
+            return new ApiResponse().SetOk(roomModels);
         }
     }
 }
