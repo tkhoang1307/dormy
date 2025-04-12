@@ -27,6 +27,7 @@
         public string? ContractStatus { get; set; } = string.Empty;
         public DateTime? ContractStartDate { get; set; }
         public DateTime? ContractEndDate { get; set; }
+        public Guid? RoomId { get; set; }
     }
 
     public class UserCreationResponseModel

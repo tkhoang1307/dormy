@@ -40,7 +40,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
                                                Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
                                                int pageIndex = 1,
                                                int pageSize = 25,
-                                               bool isPaging = true,
+                                               bool isPaging = false,
                                                bool isNoTracking = true)
         {
             IQueryable<T> query = _dbSet;
