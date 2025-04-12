@@ -17,9 +17,15 @@ namespace Dormy.WebService.Api.Presentation.Mappers
 
         public UserResponseModel MapToUserResponseModel(UserEntity entity)
         {
+            if (entity == null)
+            {
+                return new UserResponseModel();
+            }
+
+            var activeContract = entity?.Contracts?.FirstOrDefault(c => c.Status == ContractStatusEnum.ACTIVE || c.Status == ContractStatusEnum.EXTENDED);
             return new UserResponseModel
             {
-                UserId = entity.Id,
+                UserId = entity!.Id,
                 UserName = entity.UserName,
                 FirstName = entity.FirstName,
                 LastName = entity.LastName,
@@ -29,10 +35,11 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 DateOfBirth = entity.DateOfBirth,
                 NationalIdNumber = entity.NationalIdNumber,
                 Status = entity.Status.ToString(),
-                ContractId = entity.Contracts?.FirstOrDefault()?.Id,
-                ContractStatus = entity.Contracts?.FirstOrDefault()?.Status.ToString(),
-                ContractStartDate = entity.Contracts?.FirstOrDefault()?.StartDate,
-                ContractEndDate = entity.Contracts?.FirstOrDefault()?.EndDate,
+                ContractId = activeContract?.Id,
+                ContractStatus = activeContract?.Status.ToString(),
+                ContractStartDate = activeContract?.StartDate,
+                ContractEndDate = activeContract?.EndDate,
+                RoomId = activeContract?.RoomId,
             };
         }
 

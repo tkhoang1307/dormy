@@ -177,7 +177,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetUserInformation(Guid id)
         {
-            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == id, x => x.Include(y => y.Guardians)?.Include(z => z.Workplace)?.Include(w => w.HealthInsurance));
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(x => x.Id == id, x => x.Include(y => y.Guardians)?.Include(z => z.Workplace)?.Include(w => w.HealthInsurance)?.Include(x => x.Contracts));
             if (userEntity == null)
             {
                 return new ApiResponse().SetNotFound(id);
