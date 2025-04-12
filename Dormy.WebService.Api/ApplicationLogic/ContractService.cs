@@ -314,6 +314,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == roomTypeId, x => x.Include(x => x.RoomService));
                         var roomServiceIdRentalPayment = roomTypeServices.Where(x => x.RoomService.RoomServiceType == RoomServiceTypeEnum.RENTAL_PAYMENT)
                                                                          .Select(x => x.RoomServiceId).FirstOrDefault();
+                        TimeSpan duration = contractEntity.EndDate - contractEntity.StartDate;
                         var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
                         {
                             DueDate = DateTime.Now.AddDays(15),
@@ -321,13 +322,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                             RoomId = contractEntity.RoomId,
                             ContractId = contractEntity.Id,
                             InvoiceItems = new List<InvoiceItemRequestModel>()
-                        {
-                            new InvoiceItemRequestModel()
                             {
-                                RoomServiceId = roomServiceIdRentalPayment,
-                                Quantity = 1
+                                new InvoiceItemRequestModel()
+                                {
+                                    RoomServiceId = roomServiceIdRentalPayment,
+                                    Quantity = (decimal)Math.Round(duration.TotalDays / 30, 2),
+                                }
                             }
-                        }
                         });
 
                         if (!responseCreateInvoice.IsSuccess)
