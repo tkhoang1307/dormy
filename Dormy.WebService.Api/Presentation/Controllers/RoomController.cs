@@ -46,7 +46,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpGet("id/{id:guid}")]
-        [Authorize(Roles = Role.ADMIN)]
+        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
         public async Task<IActionResult> GetRoomById(Guid id)
         {
             var response = await _roomService.GetRoomById(id);
