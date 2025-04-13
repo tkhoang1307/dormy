@@ -11,5 +11,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<List<AdminResponseModel>> GetAllUser();
         Task<ApiResponse> GetAdminAccount(Guid id);
         Task<ApiResponse> ChangeAdminPassword(ChangePasswordRequestModel model);
+        Task<ApiResponse> GetDashboardInformation();
     }
 }

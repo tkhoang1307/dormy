@@ -3,6 +3,7 @@ using Dormy.WebService.Api.Core.CustomExceptions;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -86,6 +87,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 .Select(x => _adminMapper.MapToAdminResponseModel(x))
                 .ToList();
             return results;
+        }
+
+        public async Task<ApiResponse> GetDashboardInformation()
+        {
+            var registrations = await _unitOfWork.ContractRepository.GetAllAsync(x => true, isPaging: false);
+            var extendRegistrations = await _unitOfWork.ContractExtensionRepository.GetAllAsync(x => true, isPaging: false);
+            var rooms = await _unitOfWork.RoomRepository.GetAllAsync(x => true, isPaging: false);
+            var users = await _unitOfWork.UserRepository.GetAllAsync(x => true, isPaging: false);
+            var requests = await _unitOfWork.RequestRepository.GetAllAsync(x => true, isPaging: false);
+            var parkingRequests = await _unitOfWork.ParkingRequestRepository.GetAllAsync(x => true, isPaging: false);
+
+            var result = new AdminDashboardResponseModel();
+            result.TotalRequests = requests.Count;
+            result.TotalParkingRequests = parkingRequests.Count;
+            result.TotalUnResovledRequests = requests.Where(x => x.Status == RequestStatusEnum.SUBMITTED).ToList().Count;
+            result.TotalUnResovledParkingRequests = parkingRequests.Where(x => x.Status == RequestStatusEnum.SUBMITTED).ToList().Count;
+            result.TotalUsers = users.Count;
+            result.TotalCurrentUsers = users.Where(x => x.Status == UserStatusEnum.ACTIVE).ToList().Count;
+            result.TotalRegistrations = registrations.Count;
+            result.TotalEmptyBeds = rooms.Sum(x => x.TotalAvailableBed);
+            result.TotalUsedBeds = rooms.Sum(x => x.TotalUsedBed);
+            result.TotalBeds = result.TotalEmptyBeds + result.TotalUsedBeds;
+            result.TotalMaleUsers = users.Where(x => x.Gender == GenderEnum.MALE).ToList().Count;
+            result.TotalFemaleUsers = users.Where(x => x.Gender == GenderEnum.FEMALE).ToList().Count;
+
+            return new ApiResponse().SetOk(result);
         }
 
         public async Task<ApiResponse> Login(LoginRequestModel model)

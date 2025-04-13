@@ -76,5 +76,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             return StatusCode((int)result.StatusCode, result);
         }
+
+        [HttpGet("dashboard")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetDashBoardInformation()
+        {
+            var response = await _adminService.GetDashboardInformation();
+            return StatusCode((int)response.StatusCode, response.Result);
+        }
     }
 }
