@@ -341,6 +341,17 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         contractEntity.ApproverId = userId;
                         break;
                     case ContractStatusEnum.ACTIVE:
+                        var invoiceId = contractEntity.InvoiceId;
+                        var payload = new InvoiceStatusUpdationRequestModel()
+                        {
+                            Id = contractEntity.InvoiceId ?? Guid.Empty,
+                            Status = InvoiceStatusEnum.PAID.ToString(),
+                        };
+                        var responseUpdateInvoiceStatus = await _invoiceService.UpdateInvoiceStatus(payload);
+                        if (!responseUpdateInvoiceStatus.IsSuccess)
+                        {
+                            return responseUpdateInvoiceStatus;
+                        }
                         break;
                     case ContractStatusEnum.EXTENDED:
                         break;
@@ -365,7 +376,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 scope.Complete();
             }
 
-            return new ApiResponse().SetOk(id);
+            return new ApiResponse().SetAccepted(id);
         }
 
         public async Task<ApiResponse> GetSingleContract(Guid id)

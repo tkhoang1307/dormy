@@ -425,6 +425,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     var invoiceUsers = await _unitOfWork.InvoiceUserRepository.GetAllAsync(iu => iu.UserId == _userContextService.UserId);
                     var invoiceIds = invoiceUsers.Select(iu => iu.InvoiceId).ToList();
                     entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => invoiceIds.Contains(x.Id) && x.Status != InvoiceStatusEnum.DRAFT);
+                    if (!string.IsNullOrEmpty(model.InvoiceType))
+                    {
+                        entities = entities.Where(x => x.Type.ToString() == model.InvoiceType).ToList();
+                    }
+
                     break;
             }
 

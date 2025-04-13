@@ -39,8 +39,8 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ActiveContract(Guid id)
         {
-            var result = await _contractService.UpdateContractStatus(id, ContractStatusEnum.ACTIVE);
-            return Ok(result);
+            var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.ACTIVE);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("id/{id:guid}/approve-or-reject")]
@@ -75,16 +75,16 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> TerminateContract(Guid id)
         {
-            var result = await _contractService.UpdateContractStatus(id, ContractStatusEnum.TERMINATED);
-            return Ok(result);
+            var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.TERMINATED);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("id/{id:guid}/expire")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> ExpiredContract(Guid id)
         {
-            var result = await _contractService.UpdateContractStatus(id, ContractStatusEnum.EXPIRED);
-            return Ok(result);
+            var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.EXPIRED);
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }
