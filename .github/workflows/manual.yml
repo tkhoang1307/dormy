@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: Build & Test .NET 8 API
+    name: Code Build & Tests
     runs-on: ubuntu-latest
 
     steps:
