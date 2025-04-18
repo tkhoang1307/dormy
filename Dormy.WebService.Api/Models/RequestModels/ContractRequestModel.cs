@@ -4,9 +4,19 @@ namespace Dormy.WebService.Api.Models.RequestModels
 {
     public class ContractRequestModel
     {
-        public DateTime StartDate { get; set; }
+        private DateTime _startDate;
+        public DateTime StartDate
+        {
+            get => _startDate;
+            set => _startDate = value.Date;
+        }
 
-        public DateTime EndDate { get; set; }
+        private DateTime _endDate;
+        public DateTime EndDate
+        {
+            get => _endDate;
+            set => _endDate = value.Date;
+        }
 
         public Guid RoomId { get; set; }
 
@@ -17,9 +27,19 @@ namespace Dormy.WebService.Api.Models.RequestModels
     {
         public Guid ContractId { get; set; }
 
-        public DateTime StartDate { get; set; }
+        private DateTime _startDate;
+        public DateTime StartDate
+        {
+            get => _startDate;
+            set => _startDate = value.Date;
+        }
 
-        public DateTime EndDate { get; set; }
+        private DateTime _endDate;
+        public DateTime EndDate
+        {
+            get => _endDate;
+            set => _endDate = value.Date;
+        }
 
         public Guid RoomId { get; set; }
     }

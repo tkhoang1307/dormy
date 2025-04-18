@@ -141,7 +141,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(entity.Id);
+            return new ApiResponse().SetAccepted(entity.Id);
         }
 
         public async Task<ApiResponse> UpdateStatusOvernightAbsence(Guid id, OvernightAbsenceStatusEnum status)

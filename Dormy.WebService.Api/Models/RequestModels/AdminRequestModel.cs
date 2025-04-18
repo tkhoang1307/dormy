@@ -14,7 +14,12 @@ namespace Dormy.WebService.Api.Models.RequestModels
 
         public string Password { get; set; } = string.Empty;
 
-        public DateTime DateOfBirth { get; set; } = DateTime.Now;
+        private DateTime _dateOfBirth;
+        public DateTime DateOfBirth
+        {
+            get => _dateOfBirth;
+            set => _dateOfBirth = value.Date;
+        }
 
         public string PhoneNumber { get; set; } = string.Empty;
 

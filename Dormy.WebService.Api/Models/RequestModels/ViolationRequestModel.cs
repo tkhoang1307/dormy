@@ -4,7 +4,12 @@
     {
         public string Description { get; set; } = string.Empty;
 
-        public DateTime ViolationDate { get; set; } = DateTime.Now;
+        private DateTime _violationDate;
+        public DateTime ViolationDate
+        {
+            get => _violationDate;
+            set => _violationDate = value.Date;
+        }
 
         public decimal Penalty { get; set; }
 

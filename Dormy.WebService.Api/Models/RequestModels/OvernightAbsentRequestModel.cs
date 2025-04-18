@@ -2,9 +2,19 @@
 {
     public class OvernightAbsentRequestModel
     {
-        public DateTime StartDateTime { get; set; } = DateTime.Now;
+        private DateTime _startDateTime;
+        public DateTime StartDateTime
+        {
+            get => _startDateTime;
+            set => _startDateTime = value.Date;
+        }
 
-        public DateTime EndDateTime { get; set; } = DateTime.Now.AddDays(1);
+        private DateTime _endDateTime = DateTime.Now.AddDays(1);
+        public DateTime EndDateTime
+        {
+            get => _endDateTime;
+            set => _endDateTime = value.Date;
+        }
 
         public string Reason { get; set; } = string.Empty;
     }

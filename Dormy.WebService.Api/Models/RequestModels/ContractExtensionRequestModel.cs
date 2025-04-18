@@ -2,9 +2,19 @@
 {
     public class ContractExtensionRequestModel
     {
-        public DateTime StartDate { get; set; } = DateTime.Now;
+        private DateTime _startDate;
+        public DateTime StartDate
+        {
+            get => _startDate;
+            set => _startDate = value.Date;
+        }
 
-        public DateTime EndDate { get; set; } = DateTime.Now;
+        private DateTime _endDate;
+        public DateTime EndDate
+        {
+            get => _endDate;
+            set => _endDate = value.Date;
+        }
 
         public Guid ContractId { get; set; }
     }
@@ -13,8 +23,18 @@
     {
         public Guid Id { get; set; }
 
-        public DateTime StartDate { get; set; } = DateTime.Now;
+        private DateTime _startDate;
+        public DateTime StartDate
+        {
+            get => _startDate;
+            set => _startDate = value.Date;
+        }
 
-        public DateTime EndDate { get; set; } = DateTime.Now;
+        private DateTime _endDate;
+        public DateTime EndDate
+        {
+            get => _endDate;
+            set => _endDate = value.Date;
+        }
     }
 }

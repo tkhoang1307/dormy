@@ -5,7 +5,12 @@ namespace Dormy.WebService.Api.Models.RequestModels
 {
     public class InvoiceRequestModel
     {
-        public DateTime? DueDate { get; set; }
+        private DateTime? _dueDate;
+        public DateTime? DueDate
+        {
+            get => _dueDate;
+            set => _dueDate = value?.Date; // Use ?.Date to handle null safely
+        }
 
         public int? Month { get; set; }
 

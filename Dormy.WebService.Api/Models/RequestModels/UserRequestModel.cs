@@ -8,7 +8,12 @@
 
         public string Email { get; set; } = string.Empty;
 
-        public DateTime DateOfBirth { get; set; } = DateTime.Now;
+        private DateTime _dateOfBirth;
+        public DateTime DateOfBirth
+        {
+            get => _dateOfBirth;
+            set => _dateOfBirth = value.Date;
+        }
 
         public string PhoneNumber { get; set; } = string.Empty;
 
@@ -26,7 +31,12 @@
 
         public string Email { get; set; } = string.Empty;
 
-        public DateTime DateOfBirth { get; set; } = DateTime.Now;
+        private DateTime _dateOfBirth;
+        public DateTime DateOfBirth
+        {
+            get => _dateOfBirth;
+            set => _dateOfBirth = value.Date;
+        }
 
         public string PhoneNumber { get; set; } = string.Empty;
 
@@ -47,7 +57,12 @@
 
         public string Email { get; set; } = string.Empty;
 
-        public DateTime DateOfBirth { get; set; } = DateTime.Now;
+        private DateTime _dateOfBirth;
+        public DateTime DateOfBirth
+        {
+            get => _dateOfBirth;
+            set => _dateOfBirth = value.Date;
+        }
 
         public string PhoneNumber { get; set; } = string.Empty;
 

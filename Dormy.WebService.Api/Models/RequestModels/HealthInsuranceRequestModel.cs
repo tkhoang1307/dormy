@@ -6,7 +6,12 @@
 
         public string RegisteredHospital { get; set; } = string.Empty;
 
-        public DateTime ExpirationDate { get; set; } = DateTime.Now;
+        private DateTime _expirationDate;
+        public DateTime ExpirationDate
+        {
+            get => _expirationDate;
+            set => _expirationDate = value.Date;
+        }
 
         public Guid? UserId { get; set; }
     }
@@ -19,7 +24,12 @@
 
         public string RegisteredHospital { get; set; } = string.Empty;
 
-        public DateTime ExpirationDate { get; set; } = DateTime.Now;
+        private DateTime _expirationDate;
+        public DateTime ExpirationDate
+        {
+            get => _expirationDate;
+            set => _expirationDate = value.Date;
+        }
 
     }
 }
