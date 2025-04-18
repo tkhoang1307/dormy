@@ -15,7 +15,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
             builder
                 .Property(building => building.GenderRestriction)
                 .HasConversion<string>();
-
         }
     }
 }

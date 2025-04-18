@@ -1,6 +1,7 @@
 ﻿using Dormy.WebService.Api.Core.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Dormy.WebService.Api.Core.Constants;
 
 namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
 {
@@ -21,6 +22,13 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .HasOne(roomTypeService => roomTypeService.RoomService)
                 .WithMany(roomService => roomService.RoomTypeServices)
                 .HasForeignKey(roomTypeService => roomTypeService.RoomServiceId);
+
+            builder.HasData(new RoomTypeServiceEntity()
+            {
+                Id = Guid.NewGuid(),
+                RoomServiceId = SeedData.RoomServiceId,
+                RoomTypeId = SeedData.RoomTypeId,
+            });
         }
     }
 }

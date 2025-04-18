@@ -52,11 +52,13 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AdminConfiguration());
+            modelBuilder.ApplyConfiguration(new WorkplaceConfiguration());
+            modelBuilder.ApplyConfiguration(new HealthInsuranceConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new GuardianConfiguration());
             modelBuilder.ApplyConfiguration(new BuildingConfiguration());
             modelBuilder.ApplyConfiguration(new ContractConfiguration());
             modelBuilder.ApplyConfiguration(new ContractExtensionConfiguration());
-            modelBuilder.ApplyConfiguration(new GuardianConfiguration());
-            modelBuilder.ApplyConfiguration(new HealthInsuranceConfiguration());
             modelBuilder.ApplyConfiguration(new InvoiceConfiguration());
             modelBuilder.ApplyConfiguration(new InvoiceItemConfiguration());
             modelBuilder.ApplyConfiguration(new InvoiceUserConfiguration());
@@ -71,11 +73,9 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres
             modelBuilder.ApplyConfiguration(new RoomTypeServiceConfiguration());
             modelBuilder.ApplyConfiguration(new ServiceIndicatorConfigurationn());
             modelBuilder.ApplyConfiguration(new SettingConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new VehicleConfiguration());
             modelBuilder.ApplyConfiguration(new VehicleHistoryConfiguration());
             modelBuilder.ApplyConfiguration(new ViolationConfiguration());
-            modelBuilder.ApplyConfiguration(new WorkplaceConfiguration());
         }
     }
 }

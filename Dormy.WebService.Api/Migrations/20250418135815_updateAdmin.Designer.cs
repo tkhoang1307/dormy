@@ -3,6 +3,7 @@ using System;
 using Dormy.WebService.Api.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dormy.WebService.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250418135815_updateAdmin")]
+    partial class updateAdmin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,7 +90,7 @@ namespace Dormy.WebService.Api.Migrations
                         {
                             Id = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 21, 14, 33, 957, DateTimeKind.Local).AddTicks(5375),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 20, 58, 13, 963, DateTimeKind.Local).AddTicks(810),
                             DateOfBirth = new DateTime(2000, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@gmail.com",
                             FirstName = "Le",
@@ -306,7 +309,7 @@ namespace Dormy.WebService.Api.Migrations
                             Id = new Guid("f851a1d0-d1d5-44c7-be81-2c204f0149ba"),
                             Address = "Kien Giang",
                             CreatedBy = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 14, 14, 33, 958, DateTimeKind.Utc).AddTicks(1090),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 13, 58, 13, 963, DateTimeKind.Utc).AddTicks(9709),
                             Email = "bacba@gmail.com",
                             IsDeleted = false,
                             Name = "Bac Ba",
@@ -357,7 +360,7 @@ namespace Dormy.WebService.Api.Migrations
                         {
                             Id = new Guid("aabe7f9b-92ba-44ee-a73c-cae62fdfabcc"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 21, 14, 33, 957, DateTimeKind.Local).AddTicks(7785),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 20, 58, 13, 963, DateTimeKind.Local).AddTicks(4853),
                             ExpirationDate = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             InsuranceCardNumber = "12312312",
                             IsDeleted = false,
@@ -868,7 +871,7 @@ namespace Dormy.WebService.Api.Migrations
                             Id = new Guid("24bddd89-6e61-4f8b-8522-7ef98ad58655"),
                             Cost = 3000m,
                             CreatedBy = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 21, 14, 33, 961, DateTimeKind.Local).AddTicks(5038),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 20, 58, 13, 968, DateTimeKind.Local).AddTicks(2313),
                             IsDeleted = false,
                             IsServiceIndicatorUsed = true,
                             RoomServiceName = "Water",
@@ -922,7 +925,7 @@ namespace Dormy.WebService.Api.Migrations
                             Id = new Guid("af4a50d0-c16e-4804-81e1-4622513eeef9"),
                             Capacity = 5,
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 21, 14, 33, 961, DateTimeKind.Local).AddTicks(5666),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 20, 58, 13, 968, DateTimeKind.Local).AddTicks(2591),
                             Description = "Room type normal",
                             IsDeleted = false,
                             Price = 100000m,
@@ -968,9 +971,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d6c06528-0fb2-45c4-b077-a44124c12e6b"),
+                            Id = new Guid("56422101-f0a3-45ab-b641-3a53c8912f96"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 21, 14, 33, 962, DateTimeKind.Local).AddTicks(1820),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 20, 58, 13, 968, DateTimeKind.Local).AddTicks(6425),
                             IsDeleted = false,
                             RoomServiceId = new Guid("24bddd89-6e61-4f8b-8522-7ef98ad58655"),
                             RoomTypeId = new Guid("af4a50d0-c16e-4804-81e1-4622513eeef9")
@@ -1153,7 +1156,7 @@ namespace Dormy.WebService.Api.Migrations
                         {
                             Id = new Guid("3f86e0b9-868c-49fb-a0de-a527d467a673"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 21, 14, 33, 957, DateTimeKind.Local).AddTicks(9456),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 20, 58, 13, 963, DateTimeKind.Local).AddTicks(7409),
                             DateOfBirth = new DateTime(2000, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "user@gmail.com",
                             FirstName = "Van",
@@ -1162,7 +1165,7 @@ namespace Dormy.WebService.Api.Migrations
                             IsDeleted = false,
                             LastName = "Ba",
                             NationalIdNumber = "30239840329",
-                            Password = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+                            Password = "user",
                             PhoneNumber = "0123456789",
                             Status = "ACTIVE",
                             UserName = "user",
@@ -1337,7 +1340,7 @@ namespace Dormy.WebService.Api.Migrations
                             Abbrevation = "20000",
                             Address = "VNG Q1 HCM City",
                             CreatedBy = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
-                            CreatedDateUtc = new DateTime(2025, 4, 18, 14, 14, 33, 957, DateTimeKind.Utc).AddTicks(7485),
+                            CreatedDateUtc = new DateTime(2025, 4, 18, 13, 58, 13, 963, DateTimeKind.Utc).AddTicks(3831),
                             IsDeleted = false,
                             Name = "VNG Block 1 HCM"
                         });
