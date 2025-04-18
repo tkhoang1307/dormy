@@ -513,7 +513,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 BuildingId = building.Id,
                 BuildingName = building.Name,
                 // copy other necessary building fields
-                ListRooms = building.Rooms.Select(room => new SearchRoomsResponseModel()
+                ListRooms = building.Rooms.Where(room => room.RoomTypeId == model.RoomTypeId && room.TotalUsedBed < room.TotalAvailableBed)
+                                          .Select(room => new SearchRoomsResponseModel()
                 {
                     RoomId = room.Id,
                     RoomNumber = room.RoomNumber,
