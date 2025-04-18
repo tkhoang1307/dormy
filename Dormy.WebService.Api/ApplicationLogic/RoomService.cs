@@ -260,7 +260,17 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
             }
 
-            entity.Status = (RoomStatusEnum)Enum.Parse(typeof(RoomStatusEnum), model.Status);
+            var roomStatusUpdate = (RoomStatusEnum)Enum.Parse(typeof(RoomStatusEnum), model.Status);
+
+            if (roomStatusUpdate == RoomStatusEnum.UNDER_MAINTENANCE)
+            {
+                if (entity.Contracts != null && entity.Contracts.Any(x => x.Status == ContractStatusEnum.EXTENDED || x.Status == ContractStatusEnum.ACTIVE))
+                {
+                    return new ApiResponse().SetConflict(message: "Active or Extended Contract Exist");
+                }
+            }
+
+            entity.Status = roomStatusUpdate;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
             entity.LastUpdatedBy = _userContextService.UserId;
 
