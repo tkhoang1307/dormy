@@ -65,12 +65,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetParkingRequestBatch(GetBatchRequestModel model)
         {
-            var parkingRequests = await _unitOfWork.ParkingRequestRepository
-                .GetAllAsync(x => true, x => x
-                .Include(x => x.Vehicle)
-                .Include(x => x.Approver)
-                .Include(x => x.ParkingSpot)
-                .Include(x => x.User));
+            var userId = _userContextService.UserId;
+            if (userId == Guid.Empty)
+            {
+                return new ApiResponse().SetNotFound("User not found");
+            }
+
+            var parkingRequests = new List<ParkingRequestEntity>();
+
+            if (_userContextService.UserRoles.Contains(Role.ADMIN))
+            {
+                parkingRequests = await _unitOfWork.ParkingRequestRepository
+                    .GetAllAsync(x => true, x => x
+                    .Include(x => x.Vehicle)
+                    .Include(x => x.Approver)
+                    .Include(x => x.ParkingSpot)
+                    .Include(x => x.User));
+            }
+            else
+            {
+                parkingRequests = await _unitOfWork.ParkingRequestRepository
+                    .GetAllAsync(x => x.UserId.Equals(userId), x => x
+                    .Include(x => x.Vehicle)
+                    .Include(x => x.Approver)
+                    .Include(x => x.ParkingSpot)
+                    .Include(x => x.User));
+            }
 
             if (model.Ids.Count > 0)
             {
