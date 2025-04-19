@@ -98,6 +98,38 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var requests = await _unitOfWork.RequestRepository.GetAllAsync(x => true, isPaging: false);
             var parkingRequests = await _unitOfWork.ParkingRequestRepository.GetAllAsync(x => true, isPaging: false);
 
+            // Calculate total contracts per month for the last 12 months
+            var now = DateTime.UtcNow;
+            var lastYear = now.AddMonths(-12);
+
+            var totalContractsPerMonth = registrations
+                .Where(c => c.SubmissionDate >= lastYear) // Filter contracts from the last 12 months
+                .GroupBy(c => new { c.SubmissionDate.Year, c.SubmissionDate.Month }) // Group by year and month
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month) // Order by year and month
+                .Select(g => new
+                {
+                    Month = g.Key.Month,
+                    Year = g.Key.Year,
+                    TotalContracts = g.Count()
+                })
+                .ToList();
+
+            // Ensure all 12 months are included, even if there are no contracts for some months
+            var totalContractsForLast12Months = Enumerable.Range(0, 12)
+                .Select(i =>
+                {
+                    var date = now.AddMonths(-i);
+                    var month = date.Month;
+                    var year = date.Year;
+
+                    var totalContracts = totalContractsPerMonth
+                        .FirstOrDefault(x => x.Month == month && x.Year == year)?.TotalContracts ?? 0;
+
+                    return totalContracts;
+                })
+                .Reverse() // Reverse to get the months in chronological order
+                .ToList();
+
             var result = new AdminDashboardResponseModel();
             result.TotalRequests = requests.Count;
             result.TotalParkingRequests = parkingRequests.Count;
@@ -111,6 +143,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             result.TotalBeds = result.TotalEmptyBeds + result.TotalUsedBeds;
             result.TotalMaleUsers = users.Where(x => x.Gender == GenderEnum.MALE).ToList().Count;
             result.TotalFemaleUsers = users.Where(x => x.Gender == GenderEnum.FEMALE).ToList().Count;
+            result.ContractsPerMonths = totalContractsForLast12Months;
+
 
             return new ApiResponse().SetOk(result);
         }

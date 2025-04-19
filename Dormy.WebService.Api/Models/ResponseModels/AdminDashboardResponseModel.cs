@@ -14,5 +14,6 @@
         public int TotalUnResovledParkingRequests { get; set; }
         public int TotalMaleUsers { get; set; }
         public int TotalFemaleUsers { get; set; }
+        public List<int> ContractsPerMonths { get; set; } = [];
     }
 }
