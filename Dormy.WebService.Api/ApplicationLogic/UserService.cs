@@ -315,21 +315,33 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Gender = userEntity.Gender.ToString(),
                     Status = userEntity.Status.ToString(),
                 },
-                Workplace = new UserProfileWorkplaceResponseModel()
+            };
+
+            if (userEntity.Workplace != null)
+            {
+                reponseUserProfile.Workplace = new UserProfileWorkplaceResponseModel()
                 {
                     Id = userEntity.Workplace.Id,
                     Name = userEntity.Workplace.Name,
                     Address = userEntity.Workplace.Address,
                     Abbrevation = userEntity.Workplace.Abbrevation,
-                },
-                HealthInsurance = new UserProfileHealthInsuranceResponseModel()
+                };
+            }
+
+            if (userEntity.HealthInsurance != null)
+            {
+                reponseUserProfile.HealthInsurance = new UserProfileHealthInsuranceResponseModel()
                 {
                     Id = userEntity.HealthInsurance.Id,
                     InsuranceCardNumber = userEntity.HealthInsurance.InsuranceCardNumber,
                     RegisteredHospital = userEntity.HealthInsurance.RegisteredHospital,
                     ExpirationDate = userEntity.HealthInsurance.ExpirationDate,
-                },
-                Guardians = userEntity.Guardians.Select(guardian => new UserProfileGuardianResponseModel()
+                };
+            }
+
+            if (userEntity.Guardians?.Count > 0)
+            {
+                reponseUserProfile.Guardians = userEntity.Guardians.Select(guardian => new UserProfileGuardianResponseModel()
                 {
                     Id = guardian.Id,
                     Name = guardian.Name,
@@ -337,24 +349,30 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Email = guardian.Email,
                     PhoneNumber = guardian.PhoneNumber,
                     RelationshipToUser = guardian.RelationshipToUser,
-                }).ToList(),
-                Contract = new UserProfileContractResponseModel()
+                }).ToList();
+            }
+
+            if (userEntity.Contracts?.Count > 0 && userEntity.Contracts.Any(x => x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED))
+            {
+                var currentContract = userEntity.Contracts.First(x => x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED);
+                reponseUserProfile.Contract = new UserProfileContractResponseModel()
                 {
-                    Id = userEntity.Contracts[0].Id,
-                    SubmissionDate = userEntity.Contracts[0].SubmissionDate,
-                    StartDate = userEntity.Contracts[0].StartDate,
-                    EndDate = userEntity.Contracts[0].EndDate,
-                    Status = userEntity.Contracts[0].Status.ToString(),
-                    NumberExtension = userEntity.Contracts[0].NumberExtension,
-                    RoomId = userEntity.Contracts[0].Room.Id,
-                    RoomNumber = userEntity.Contracts[0].Room.RoomNumber,
-                    RoomTypeId = userEntity.Contracts[0].Room.RoomType.Id,
-                    RoomTypeName = userEntity.Contracts[0].Room.RoomType.RoomTypeName,
-                    Price = userEntity.Contracts[0].Room.RoomType.Price,
-                    BuildingId = userEntity.Contracts[0].Room.Building.Id,
-                    BuildingName = userEntity.Contracts[0].Room.Building.Name,
-                }
-            };
+                    Id = currentContract.Id,
+                    SubmissionDate = currentContract.SubmissionDate,
+                    StartDate = currentContract.StartDate,
+                    EndDate = currentContract.EndDate,
+                    Status = currentContract.Status.ToString(),
+                    NumberExtension = currentContract.NumberExtension,
+                    RoomId = currentContract.Room.Id,
+                    RoomNumber = currentContract.Room.RoomNumber,
+                    RoomTypeId = currentContract.Room.RoomType.Id,
+                    RoomTypeName = currentContract.Room.RoomType.RoomTypeName,
+                    Price = currentContract.Room.RoomType.Price,
+                    BuildingId = currentContract.Room.Building.Id,
+                    BuildingName = currentContract.Room.Building.Name,
+                };
+            }
+
             return new ApiResponse().SetOk(reponseUserProfile);
         }
     }
