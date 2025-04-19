@@ -20,8 +20,8 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public UserEntity User { get; set; } = null!;
 
-        public Guid RoomId { get; set; }
+        public Guid? RoomId { get; set; }
 
-        public RoomEntity Room { get; set; } = null!;
+        public RoomEntity? Room { get; set; } = null!;
     }
 }
