@@ -14,5 +14,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> ResetPassword(Guid id);
         Task<ApiResponse> UpdateUserWorkplace(Guid workplaceId, Guid userId);
         Task<ApiResponse> UpdateUserHealthInsurance(HealthInsuranceRequestModel? model, Guid userId);
+        Task<ApiResponse> GetUserProfileByUseridForAdmin(Guid id);
     }
 }

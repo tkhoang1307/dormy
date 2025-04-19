@@ -1,3 +1,4 @@
+using Dormy.WebService.Api.ApplicationLogic;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -16,18 +17,21 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         private readonly IEmailService _emailService;
         private readonly ILogger<AdminController> _logger;
         private readonly ITokenRetriever _tokenRetriever;
+        private readonly IUserService _userService;
 
         public AdminController(IConfiguration configuration,
             ILogger<AdminController> logger,
             IAdminService adminService,
             ITokenRetriever tokenRetriever,
-            IEmailService emailService)
+            IEmailService emailService,
+            IUserService userService)
         {
             _configuration = configuration;
             _logger = logger;
             _adminService = adminService;
             _tokenRetriever = tokenRetriever;
             _emailService = emailService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -83,6 +87,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _adminService.GetDashboardInformation();
             return StatusCode((int)response.StatusCode, response.Result);
+        }
+
+        [HttpGet("userId/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetUserProfileByUseridForAdmin(Guid id)
+        {
+            var response = await _userService.GetUserProfileByUseridForAdmin(id);
+
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

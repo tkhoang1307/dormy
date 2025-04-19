@@ -279,5 +279,83 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetOk(healthInsurance.Id);
         }
+
+        public async Task<ApiResponse> GetUserProfileByUseridForAdmin(Guid id)
+        {
+            var userEntity = await _unitOfWork.UserRepository.GetAsync(
+                x => x.Id == id,
+                x => x.Include(y => y.Guardians)
+                      .Include(z => z.Workplace)
+                      .Include(w => w.HealthInsurance)
+                      .Include(u => u.Contracts)
+                          .ThenInclude(c => c.ContractExtensions)
+                      .Include(u => u.Contracts)
+                          .ThenInclude(c => c.Room)
+                              .ThenInclude(r => r.Building)
+                      .Include(u => u.Contracts)
+                          .ThenInclude(c => c.Room)
+                              .ThenInclude(r => r.RoomType)
+            );
+
+            if (userEntity == null)
+            {
+                return new ApiResponse().SetNotFound(id);
+            }
+            var reponseUserProfile = new UserProfileResponseModel()
+            {
+                User = new UserProfileDetailInformationResponseModel()
+                {
+                    Id = userEntity.Id,
+                    FirstName = userEntity.FirstName,
+                    LastName = userEntity.LastName,
+                    Email = userEntity.Email,
+                    DateOfBirth = userEntity.DateOfBirth,
+                    PhoneNumber = userEntity.PhoneNumber,
+                    NationalIdNumber = userEntity.NationalIdNumber,
+                    Gender = userEntity.Gender.ToString(),
+                    Status = userEntity.Status.ToString(),
+                },
+                Workplace = new UserProfileWorkplaceResponseModel()
+                {
+                    Id = userEntity.Workplace.Id,
+                    Name = userEntity.Workplace.Name,
+                    Address = userEntity.Workplace.Address,
+                    Abbrevation = userEntity.Workplace.Abbrevation,
+                },
+                HealthInsurance = new UserProfileHealthInsuranceResponseModel()
+                {
+                    Id = userEntity.HealthInsurance.Id,
+                    InsuranceCardNumber = userEntity.HealthInsurance.InsuranceCardNumber,
+                    RegisteredHospital = userEntity.HealthInsurance.RegisteredHospital,
+                    ExpirationDate = userEntity.HealthInsurance.ExpirationDate,
+                },
+                Guardians = userEntity.Guardians.Select(guardian => new UserProfileGuardianResponseModel()
+                {
+                    Id = guardian.Id,
+                    Name = guardian.Name,
+                    Address = guardian.Address,
+                    Email = guardian.Email,
+                    PhoneNumber = guardian.PhoneNumber,
+                    RelationshipToUser = guardian.RelationshipToUser,
+                }).ToList(),
+                Contract = new UserProfileContractResponseModel()
+                {
+                    Id = userEntity.Contracts[0].Id,
+                    SubmissionDate = userEntity.Contracts[0].SubmissionDate,
+                    StartDate = userEntity.Contracts[0].StartDate,
+                    EndDate = userEntity.Contracts[0].EndDate,
+                    Status = userEntity.Contracts[0].Status.ToString(),
+                    NumberExtension = userEntity.Contracts[0].NumberExtension,
+                    RoomId = userEntity.Contracts[0].Room.Id,
+                    RoomNumber = userEntity.Contracts[0].Room.RoomNumber,
+                    RoomTypeId = userEntity.Contracts[0].Room.RoomType.Id,
+                    RoomTypeName = userEntity.Contracts[0].Room.RoomType.RoomTypeName,
+                    Price = userEntity.Contracts[0].Room.RoomType.Price,
+                    BuildingId = userEntity.Contracts[0].Room.Building.Id,
+                    BuildingName = userEntity.Contracts[0].Room.Building.Name,
+                }
+            };
+            return new ApiResponse().SetOk(reponseUserProfile);
+        }
     }
 }
