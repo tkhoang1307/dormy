@@ -34,10 +34,10 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 EndDate = contractEntity.EndDate,
                 Status = contractEntity.Status.ToString(),
                 NumberExtension = contractEntity.NumberExtension,
-                InvoiceId = contractEntity.InvoiceId,
-                ApproverId = contractEntity.ApproverId,
+                //InvoiceId = contractEntity.InvoiceId,
+                //ApproverId = contractEntity.ApproverId,
                 UserId = contractEntity.UserId,
-                ApproverFullName = contractEntity.Approver == null ? string.Empty : $"{contractEntity.Approver?.FirstName} {contractEntity.Approver?.LastName}",
+                //ApproverFullName = contractEntity.Approver == null ? string.Empty : $"{contractEntity.Approver?.FirstName} {contractEntity.Approver?.LastName}",
                 UserFullname = contractEntity.User == null ? string.Empty : $"{contractEntity.User.FirstName} {contractEntity.User.LastName}",
                 RoomId = contractEntity.Room.Id,
                 RoomNumber = contractEntity.Room.RoomNumber,
@@ -51,6 +51,14 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 InsuranceCardNumber = contractEntity.User.HealthInsurance.InsuranceCardNumber,
                 RegisteredHospital = contractEntity.User.HealthInsurance.RegisteredHospital,
                 ExpirationDate = contractEntity.User.HealthInsurance.ExpirationDate,
+                ContractExtensions = contractEntity.ContractExtensions.Select(contractEntity => new ContractExtensionExtendContractResponseModel()
+                {
+                    ContractExtensionId = contractEntity.Id,
+                    SubmissionDate = contractEntity.SubmissionDate,
+                    StartDate = contractEntity.StartDate,
+                    EndDate = contractEntity.EndDate,
+                    Status = contractEntity.Status.ToString(),
+                }).ToList(),
             };
         }
 

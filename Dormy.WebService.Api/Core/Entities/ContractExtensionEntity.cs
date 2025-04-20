@@ -6,6 +6,8 @@ namespace Dormy.WebService.Api.Core.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        public int OrderNo { get; set; }
+
         public DateTime SubmissionDate { get; set; } = DateTime.Now;
 
         public DateTime StartDate { get; set; } = DateTime.Now;
@@ -19,6 +21,10 @@ namespace Dormy.WebService.Api.Core.Entities
         public Guid? ApproverId { get; set; }
 
         public AdminEntity? Approver { get; set; } = null!;
+
+        public Guid RoomId { get; set; }
+
+        public RoomEntity Room { get; set; } = null!;
 
         public Guid ContractId { get; set; }
 

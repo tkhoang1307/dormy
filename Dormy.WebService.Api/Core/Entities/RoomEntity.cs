@@ -30,6 +30,8 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public List<ContractEntity>? Contracts { get; set; }
 
+        public List<ContractExtensionEntity>? ContractExtensions { get; set; }
+
         public List<RequestEntity>? Requests { get; set; }
     }
 }

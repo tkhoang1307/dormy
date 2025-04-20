@@ -18,53 +18,58 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
-        private readonly IContractService _contractService;
         private readonly ContractExtensionMapper _contractExtensionMapper;
         private readonly IInvoiceService _invoiceService;
 
         public ContractExtensionService(IUnitOfWork unitOfWork, 
-                                        IUserContextService userContextService, 
-                                        IContractService contractService,
+                                        IUserContextService userContextService,
                                         IInvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
-            _contractService = contractService;
             _invoiceService = invoiceService;
             _contractExtensionMapper = new ContractExtensionMapper();
         }
 
         public async Task<ApiResponse> CreateContractExtension(ContractExtensionRequestModel model)
         {
-            var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == model.ContractId && x.UserId == _userContextService.UserId, x => x.Include(x => x.Room), isNoTracking: true);
+            var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.UserId == _userContextService.UserId &&
+                                                                                    (x.Status == ContractStatusEnum.ACTIVE || 
+                                                                                     x.Status == ContractStatusEnum.EXPIRED || 
+                                                                                     x.Status == ContractStatusEnum.EXTENDED), 
+                                                                               x => x.Include(x => x.Room), isNoTracking: true);
             if (contractEntity == null)
             {
-                return new ApiResponse().SetNotFound(model.ContractId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
+                return new ApiResponse().SetConflict(message: string.Format(ErrorMessages.ConflictContractExtension));
             }    
 
-            if (!DateTimeHelper.AreValidStartDateEndDateWithoutTime(contractEntity.EndDate, model.StartDate, true) ||  
-                contractEntity.Status != ContractStatusEnum.EXPIRED)
+            if (!DateTimeHelper.AreValidStartDateEndDateWithoutTime(contractEntity.EndDate, model.StartDate, true))
             {
-                return new ApiResponse().SetConflict(model.ContractId, message: string.Format(ErrorMessages.ContractHasNotBeenExpiredYet));
+                return new ApiResponse().SetConflict(contractEntity.Id, message: string.Format(ErrorMessages.ConflictDateWhenExtendContract));
             }
 
             if (contractEntity.NumberExtension >= 3)
             {
-                return new ApiResponse().SetConflict(model.ContractId, message: string.Format(ErrorMessages.ContractHasReachedMaxNumberOfExtension));
+                return new ApiResponse().SetConflict(contractEntity.Id, message: string.Format(ErrorMessages.ContractHasReachedMaxNumberOfExtension));
             }
 
             var contractExtensionEntity = _contractExtensionMapper.MapToContractExtensionEntity(model);
+            contractExtensionEntity.ContractId = contractEntity.Id;
+            contractExtensionEntity.CreatedBy = _userContextService.UserId;
+            contractExtensionEntity.LastUpdatedBy = _userContextService.UserId;
 
             if (contractEntity.NumberExtension == 0)
             {
                 contractEntity.Status = ContractStatusEnum.EXTENDED;
             }
             contractEntity.NumberExtension += 1;
+            contractEntity.EndDate = model.EndDate;
+            contractExtensionEntity.OrderNo = contractEntity.NumberExtension;
 
             await _unitOfWork.ContractExtensionRepository.AddAsync(contractExtensionEntity);
             await _unitOfWork.SaveChangeAsync();
 
-            return new ApiResponse().SetOk(contractExtensionEntity.Id);
+            return new ApiResponse().SetCreated(contractExtensionEntity.Id);
         }
 
         public async Task<ApiResponse> GetContractExtensionBatch(GetBatchRequestModel model)
@@ -101,7 +106,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 EndDate = x.EndDate,
                 Status = x.Status.ToString(),
                 SubmissionDate = x.SubmissionDate,
-                Contract = (await _contractService.GetSingleContract(x.ContractId)).Result as ContractResponseModel
+                //Contract = (await _contractService.GetSingleContract(x.ContractId)).Result as ContractResponseModel
             }).ToList();
 
             return new ApiResponse().SetOk(response);
@@ -122,7 +127,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 EndDate = contractExtensionEntity.EndDate,
                 Status = contractExtensionEntity.Status.ToString(),
                 SubmissionDate = contractExtensionEntity.SubmissionDate,
-                Contract = (await _contractService.GetSingleContract(contractExtensionEntity.ContractId)).Result as ContractResponseModel
+                //Contract = (await _contractService.GetSingleContract(contractExtensionEntity.ContractId)).Result as ContractResponseModel
             };
 
             return new ApiResponse().SetOk(contractExtensionResponse);
@@ -179,11 +184,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
             ContractExtensionEntity? contractExtensionEntity;
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, x => x.Include(x => x.Contract));
+                contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, 
+                                                                                                 x => x.Include(x => x.Contract)
+                                                                                                       .Include(x => x.Room));
             }
             else
             {
-                contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id && x.Contract.UserId == userId, x => x.Include(x => x.Contract));
+                contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id && x.Contract.UserId == userId, 
+                                                                                                 x => x.Include(x => x.Contract)
+                                                                                                       .Include(x => x.Room));
             }
 
             if (contractExtensionEntity == null)
@@ -203,10 +212,6 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
                 TransactionScopeAsyncFlowOption.Enabled))
             {
-                contractExtensionEntity.Status = status;
-                contractExtensionEntity.LastUpdatedBy = userId;
-                contractExtensionEntity.LastUpdatedDateUtc = DateTime.UtcNow;
-
                 switch (status)
                 {
                     case ContractExtensionStatusEnum.WAITING_PAYMENT:
@@ -214,6 +219,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         var roomTypeServices = await _unitOfWork.RoomTypeServiceRepository.GetAllAsync(x => x.RoomTypeId == roomTypeId, x => x.Include(x => x.RoomService));
                         var roomServiceIdRentalPayment = roomTypeServices.Where(x => x.RoomService.RoomServiceType == RoomServiceTypeEnum.RENTAL_PAYMENT)
                                                                          .Select(x => x.RoomServiceId).FirstOrDefault();
+                        TimeSpan duration = contractExtensionEntity.EndDate - contractExtensionEntity.StartDate;
                         var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
                         {
                             DueDate = DateTime.Now.AddDays(15),
@@ -225,7 +231,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                 new InvoiceItemRequestModel()
                                 {
                                     RoomServiceId = roomServiceIdRentalPayment,
-                                    Quantity = 1
+                                    Quantity = (decimal)Math.Round(duration.TotalDays / 30, 2),
                                 }
                             }
                         });
@@ -240,15 +246,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         contractExtensionEntity.ApproverId = userId;
                         break;
                     case ContractExtensionStatusEnum.ACTIVE:
+                        var invoiceId = contractExtensionEntity.InvoiceId;
+                        var payload = new InvoiceStatusUpdationRequestModel()
+                        {
+                            Id = contractExtensionEntity.InvoiceId ?? Guid.Empty,
+                            Status = InvoiceStatusEnum.PAID.ToString(),
+                        };
+                        var responseUpdateInvoiceStatus = await _invoiceService.UpdateInvoiceStatus(payload);
+                        if (!responseUpdateInvoiceStatus.IsSuccess)
+                        {
+                            return responseUpdateInvoiceStatus;
+                        }
                         break;
                     case ContractExtensionStatusEnum.EXPIRED:
-                        contractExtensionEntity.Contract.Status = ContractStatusEnum.EXPIRED;
                         break;
                     case ContractExtensionStatusEnum.TERMINATED:
                     case ContractExtensionStatusEnum.REJECTED:
-                        contractExtensionEntity.Contract.Status = ContractStatusEnum.TERMINATED;
+                        contractExtensionEntity.Room.TotalUsedBed = contractExtensionEntity.Room.TotalUsedBed > 0 ? contractExtensionEntity.Room.TotalUsedBed - 1 : 0;
+                        contractExtensionEntity.Room.Status = contractExtensionEntity.Room.TotalAvailableBed == contractExtensionEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
+                        contractExtensionEntity.Room.LastUpdatedBy = userId;
+                        contractExtensionEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
                         break;
                 }
+
+                contractExtensionEntity.Status = status;
+                contractExtensionEntity.LastUpdatedBy = userId;
+                contractExtensionEntity.LastUpdatedDateUtc = DateTime.UtcNow;
 
                 await _unitOfWork.SaveChangeAsync();
                 scope.Complete();
