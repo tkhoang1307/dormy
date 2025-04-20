@@ -127,10 +127,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 if (model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString())
                 {
-                    var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == model.ContractId);
+                    var contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == model.ContractId, x => x.Include(x => x.Contract));
                     invoiceUsersModel.Add(new InvoiceUserMapperModel()
                     {
-                        UserId = contractEntity.UserId,
+                        UserId = contractExtensionEntity.Contract.UserId,
                     });
                 }
 

@@ -37,7 +37,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                                                                     (x.Status == ContractStatusEnum.ACTIVE || 
                                                                                      x.Status == ContractStatusEnum.EXPIRED || 
                                                                                      x.Status == ContractStatusEnum.EXTENDED), 
-                                                                               x => x.Include(x => x.Room), isNoTracking: true);
+                                                                               x => x.Include(x => x.Room));
             if (contractEntity == null)
             {
                 return new ApiResponse().SetConflict(message: string.Format(ErrorMessages.ConflictContractExtension));
@@ -55,6 +55,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var contractExtensionEntity = _contractExtensionMapper.MapToContractExtensionEntity(model);
             contractExtensionEntity.ContractId = contractEntity.Id;
+            contractExtensionEntity.RoomId = contractEntity.RoomId;
             contractExtensionEntity.CreatedBy = _userContextService.UserId;
             contractExtensionEntity.LastUpdatedBy = _userContextService.UserId;
 

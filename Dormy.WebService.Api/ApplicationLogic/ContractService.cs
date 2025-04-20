@@ -276,6 +276,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 contractExtensionEntity.CreatedBy = model?.UserId ?? _userContextService.UserId;
                 contractExtensionEntity.LastUpdatedBy = model?.UserId ?? _userContextService.UserId;
                 contractExtensionEntity.OrderNo = 0;
+                contractExtensionEntity.RoomId = model.RoomId;
                 contractEntity.CreatedBy = model?.UserId ?? _userContextService.UserId;
                 contractEntity.LastUpdatedBy = model?.UserId ?? _userContextService.UserId;
 
@@ -333,6 +334,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                                             .GetAllAsync(x => x.ContractId == contractEntity.Id))
                                                             .OrderByDescending(x => x.OrderNo)
                                                             .FirstOrDefault();
+
+            if (contractExtensionEntity == null)
+            {
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract"));
+            }
 
             Guid invoiceIdTracking = Guid.Empty;
             using (var scope = new TransactionScope(
