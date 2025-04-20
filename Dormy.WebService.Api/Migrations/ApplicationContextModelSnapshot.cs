@@ -87,7 +87,7 @@ namespace Dormy.WebService.Api.Migrations
                         {
                             Id = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 22, 23, 13, 262, DateTimeKind.Local).AddTicks(8302),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 17, 38, 40, 681, DateTimeKind.Local).AddTicks(1633),
                             DateOfBirth = new DateTime(2000, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@gmail.com",
                             FirstName = "Le",
@@ -144,9 +144,6 @@ namespace Dormy.WebService.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ApproverId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
@@ -155,9 +152,6 @@ namespace Dormy.WebService.Api.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("InvoiceId")
-                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -188,8 +182,6 @@ namespace Dormy.WebService.Api.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApproverId");
 
                     b.HasIndex("RoomId");
 
@@ -231,6 +223,12 @@ namespace Dormy.WebService.Api.Migrations
                     b.Property<DateTime?>("LastUpdatedDateUtc")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int>("OrderNo")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -246,6 +244,8 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasIndex("ApproverId");
 
                     b.HasIndex("ContractId");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("ContractExtensions");
                 });
@@ -306,7 +306,7 @@ namespace Dormy.WebService.Api.Migrations
                             Id = new Guid("f851a1d0-d1d5-44c7-be81-2c204f0149ba"),
                             Address = "Kien Giang",
                             CreatedBy = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 15, 23, 13, 263, DateTimeKind.Utc).AddTicks(5017),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 10, 38, 40, 681, DateTimeKind.Utc).AddTicks(8093),
                             Email = "bacba@gmail.com",
                             IsDeleted = false,
                             Name = "Bac Ba",
@@ -357,7 +357,7 @@ namespace Dormy.WebService.Api.Migrations
                         {
                             Id = new Guid("aabe7f9b-92ba-44ee-a73c-cae62fdfabcc"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 22, 23, 13, 263, DateTimeKind.Local).AddTicks(1267),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 17, 38, 40, 681, DateTimeKind.Local).AddTicks(4747),
                             ExpirationDate = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             InsuranceCardNumber = "12312312",
                             IsDeleted = false,
@@ -868,7 +868,7 @@ namespace Dormy.WebService.Api.Migrations
                             Id = new Guid("24bddd89-6e61-4f8b-8522-7ef98ad58655"),
                             Cost = 3000m,
                             CreatedBy = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 22, 23, 13, 267, DateTimeKind.Local).AddTicks(4168),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 17, 38, 40, 684, DateTimeKind.Local).AddTicks(8581),
                             IsDeleted = false,
                             IsServiceIndicatorUsed = true,
                             RoomServiceName = "Water",
@@ -922,7 +922,7 @@ namespace Dormy.WebService.Api.Migrations
                             Id = new Guid("af4a50d0-c16e-4804-81e1-4622513eeef9"),
                             Capacity = 5,
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 22, 23, 13, 267, DateTimeKind.Local).AddTicks(4415),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 17, 38, 40, 684, DateTimeKind.Local).AddTicks(8854),
                             Description = "Room type normal",
                             IsDeleted = false,
                             Price = 100000m,
@@ -968,9 +968,9 @@ namespace Dormy.WebService.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("37df3b3c-8c33-40ab-b1c4-da38802bf768"),
+                            Id = new Guid("a65a5c9c-38d6-42a4-bf72-6c63118df8ec"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 22, 23, 13, 267, DateTimeKind.Local).AddTicks(7477),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 17, 38, 40, 685, DateTimeKind.Local).AddTicks(1172),
                             IsDeleted = false,
                             RoomServiceId = new Guid("24bddd89-6e61-4f8b-8522-7ef98ad58655"),
                             RoomTypeId = new Guid("af4a50d0-c16e-4804-81e1-4622513eeef9")
@@ -1153,7 +1153,7 @@ namespace Dormy.WebService.Api.Migrations
                         {
                             Id = new Guid("3f86e0b9-868c-49fb-a0de-a527d467a673"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 22, 23, 13, 263, DateTimeKind.Local).AddTicks(3186),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 17, 38, 40, 681, DateTimeKind.Local).AddTicks(6496),
                             DateOfBirth = new DateTime(2000, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "user@gmail.com",
                             FirstName = "Van",
@@ -1337,7 +1337,7 @@ namespace Dormy.WebService.Api.Migrations
                             Abbrevation = "20000",
                             Address = "VNG Q1 HCM City",
                             CreatedBy = new Guid("49e51699-8249-4cc3-899b-bb0b9773e2c3"),
-                            CreatedDateUtc = new DateTime(2025, 4, 19, 15, 23, 13, 263, DateTimeKind.Utc).AddTicks(827),
+                            CreatedDateUtc = new DateTime(2025, 4, 20, 10, 38, 40, 681, DateTimeKind.Utc).AddTicks(4443),
                             IsDeleted = false,
                             Name = "VNG Block 1 HCM"
                         });
@@ -1345,10 +1345,6 @@ namespace Dormy.WebService.Api.Migrations
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.ContractEntity", b =>
                 {
-                    b.HasOne("Dormy.WebService.Api.Core.Entities.AdminEntity", "Approver")
-                        .WithMany("Contracts")
-                        .HasForeignKey("ApproverId");
-
                     b.HasOne("Dormy.WebService.Api.Core.Entities.RoomEntity", "Room")
                         .WithMany("Contracts")
                         .HasForeignKey("RoomId")
@@ -1360,8 +1356,6 @@ namespace Dormy.WebService.Api.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Approver");
 
                     b.Navigation("Room");
 
@@ -1380,9 +1374,17 @@ namespace Dormy.WebService.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Dormy.WebService.Api.Core.Entities.RoomEntity", "Room")
+                        .WithMany("ContractExtensions")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Approver");
 
                     b.Navigation("Contract");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.GuardianEntity", b =>
@@ -1646,8 +1648,6 @@ namespace Dormy.WebService.Api.Migrations
                 {
                     b.Navigation("ContractExtensions");
 
-                    b.Navigation("Contracts");
-
                     b.Navigation("Notifications");
 
                     b.Navigation("OvernightAbsences");
@@ -1689,6 +1689,8 @@ namespace Dormy.WebService.Api.Migrations
 
             modelBuilder.Entity("Dormy.WebService.Api.Core.Entities.RoomEntity", b =>
                 {
+                    b.Navigation("ContractExtensions");
+
                     b.Navigation("Contracts");
 
                     b.Navigation("Invoices");

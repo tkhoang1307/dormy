@@ -18,18 +18,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
-        private readonly IContractService _contractService;
         private readonly ContractExtensionMapper _contractExtensionMapper;
         private readonly IInvoiceService _invoiceService;
 
         public ContractExtensionService(IUnitOfWork unitOfWork, 
-                                        IUserContextService userContextService, 
-                                        IContractService contractService,
+                                        IUserContextService userContextService,
                                         IInvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
-            _contractService = contractService;
             _invoiceService = invoiceService;
             _contractExtensionMapper = new ContractExtensionMapper();
         }
@@ -109,7 +106,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 EndDate = x.EndDate,
                 Status = x.Status.ToString(),
                 SubmissionDate = x.SubmissionDate,
-                Contract = (await _contractService.GetSingleContract(x.ContractId)).Result as ContractResponseModel
+                //Contract = (await _contractService.GetSingleContract(x.ContractId)).Result as ContractResponseModel
             }).ToList();
 
             return new ApiResponse().SetOk(response);
@@ -130,7 +127,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 EndDate = contractExtensionEntity.EndDate,
                 Status = contractExtensionEntity.Status.ToString(),
                 SubmissionDate = contractExtensionEntity.SubmissionDate,
-                Contract = (await _contractService.GetSingleContract(contractExtensionEntity.ContractId)).Result as ContractResponseModel
+                //Contract = (await _contractService.GetSingleContract(contractExtensionEntity.ContractId)).Result as ContractResponseModel
             };
 
             return new ApiResponse().SetOk(contractExtensionResponse);
