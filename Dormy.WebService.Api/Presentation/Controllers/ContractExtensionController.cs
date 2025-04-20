@@ -30,7 +30,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var result = await _contractExtensionService.UpdateContractExtension(model);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost]
@@ -44,7 +44,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var result = await _contractExtensionService.CreateContractExtension(model);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet("id/{id:guid}")]
@@ -52,7 +52,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetContract(Guid id)
         {
             var result = await _contractExtensionService.GetSingleContractExtensionById(id);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPost("batch")]
@@ -60,7 +60,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> GetContractBatch(GetBatchRequestModel model)
         {
             var result = await _contractExtensionService.GetContractExtensionBatch(model);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/active")]
@@ -68,7 +68,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ActiveContractExtension(Guid id)
         {
             var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.ACTIVE);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/approve-or-reject")]
@@ -97,7 +97,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ExpiredContractExtension(Guid id)
         {
             var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.EXPIRED);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpPut("id/{id:guid}/terminate")]
@@ -105,7 +105,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> TerminateContract(Guid id)
         {
             var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.TERMINATED);
-            return Ok(result);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

@@ -57,8 +57,10 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string DateMustNotBeInTheFuture = "{0} must not be in the future.";
         public const string ParkingRequestIsFull = "Parking request is full. Please choose other parking spots";
         public const string ContractHasNotBeenExpiredYet = "The current contract has not been expired yet";
+        public const string ConflictDateWhenExtendContract = "The startDate of contract extension must be greater than endDate of current contract";
         public const string ContractHasReachedMaxNumberOfExtension= "Contract has reached maximum number of extension";
         public const string UpdateContractConflict = "You only update contract which has status 'PENDING'.";
+        public const string ConflictContractExtension = "There are no valid contracts for expansion.";
         public const string KeyNameIsExistedInSystem = "{0} is existed in the system";
     }
 }

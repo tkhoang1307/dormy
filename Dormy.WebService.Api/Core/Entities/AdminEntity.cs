@@ -28,8 +28,6 @@ namespace Dormy.WebService.Api.Core.Entities
 
         public List<NotificationEntity>? Notifications { get; set; }
 
-        public List<ContractEntity>? Contracts { get; set; }
-
         public List<ContractExtensionEntity>? ContractExtensions { get; set; }
 
         public List<ParkingRequestEntity>? ParkingRequests { get; set; }

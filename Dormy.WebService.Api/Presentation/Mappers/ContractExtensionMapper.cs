@@ -14,7 +14,6 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Status = ContractExtensionStatusEnum.PENDING,
-                ContractId = model.ContractId,
                 CreatedDateUtc = DateTime.UtcNow,
                 LastUpdatedDateUtc = DateTime.UtcNow,
             };
