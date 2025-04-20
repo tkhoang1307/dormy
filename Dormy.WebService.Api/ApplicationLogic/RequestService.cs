@@ -44,6 +44,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             await _unitOfWork.RequestRepository.AddAsync(requestEntity);
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: true);
+
+            NotificationEntity notificationEntity = new NotificationEntity()
+            {
+                Title = NotificationMessages.CreateRequestTitle,
+                Content = string.Format(NotificationMessages.CreateRequestContent, $"{user?.FirstName} {user?.LastName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                Date = DateTime.UtcNow,
+                IsRead = false,
+                UserId = _userContextService.UserId,
+                NotificationType = NotificationTypeEnum.REQUEST_CREATION,
+            };
+
+            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(requestEntity.Id);
@@ -61,7 +76,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
-                requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => true, 
+                requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => true,
                                                     x => x.Include(x => x.Approver)
                                                           .Include(x => x.User)
                                                           .Include(x => x.Room)
@@ -69,7 +84,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
             else
             {
-                requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => x.UserId == userId, 
+                requestEntities = await _unitOfWork.RequestRepository.GetAllAsync(x => x.UserId == userId,
                                                                                   x => x.Include(x => x.Approver)
                                                                                         .Include(x => x.User)
                                                                                         .Include(x => x.Room)
@@ -162,6 +177,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(userId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "User"));
             }
 
+            var isAdmin = _userContextService.UserRoles.Contains(Role.ADMIN);
+
             var requestEntity = await _unitOfWork.RequestRepository.GetAsync(x => x.Id == id, isNoTracking: false);
 
             if (requestEntity == null)
@@ -188,6 +205,31 @@ namespace Dormy.WebService.Api.ApplicationLogic
             requestEntity.Status = status;
             requestEntity.LastUpdatedBy = userId;
             requestEntity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            // Notification
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == requestEntity.UserId, isNoTracking: true);
+            var notifyActorName = $"{user?.FirstName} {user?.LastName}";
+
+            if (isAdmin)
+            {
+                var adminAccount = await _unitOfWork.AdminRepository.GetAsync(x => x.Id == userId, isNoTracking: true);
+                notifyActorName = $"{adminAccount?.FirstName} {adminAccount?.LastName}";
+            }
+
+            NotificationEntity notificationEntity = new NotificationEntity()
+            {
+                Title = string.Format(NotificationMessages.UpdateStatusRequestTitle, status.ToString()),
+                Content = string.Format(NotificationMessages.UpdateStatusRequestContent, status.ToString(), notifyActorName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                Date = DateTime.UtcNow,
+                IsRead = false,
+                UserId = requestEntity.UserId,
+                NotificationType = NotificationTypeEnum.REQUEST_STATUS_CHANGE,
+                LastUpdatedBy = _userContextService.UserId,
+                LastUpdatedDateUtc = DateTime.UtcNow
+            };
+
+            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
 
             await _unitOfWork.SaveChangeAsync();
 

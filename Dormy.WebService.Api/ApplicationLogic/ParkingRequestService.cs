@@ -9,9 +9,7 @@ using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Presentation.Validations;
 using Dormy.WebService.Api.Startup;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -58,6 +56,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             await _unitOfWork.ParkingRequestRepository.AddAsync(parkingRequestEntity);
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: false);
+
+            NotificationEntity notificationEntity = new NotificationEntity()
+            {
+                Title = NotificationMessages.CreateParkingRequestTitle,
+                Content = string.Format(NotificationMessages.CreateParkingRequestContent, $"{user.FirstName} {user.LastName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                Date = DateTime.UtcNow,
+                IsRead = false,
+                UserId = _userContextService.UserId,
+                NotificationType = NotificationTypeEnum.PARKING_REQUEST_CREATION,
+            };
+
+            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetCreated(parkingRequestEntity.Id);
@@ -123,6 +136,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> UpdateParkingRequestStatus(ParkingRequestStatusModel model)
         {
+            bool isAdmin = _userContextService.UserRoles.Contains(Role.ADMIN);
             var parkingRequest = await _unitOfWork.ParkingRequestRepository.GetAsync(x => x.Id == model.Id);
 
             if (parkingRequest == null)
@@ -140,6 +154,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
             if (model.Status == RequestStatusEnum.REJECTED || model.Status == RequestStatusEnum.CANCELLED)
             {
                 var parkingSpotEntity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == parkingRequest.ParkingSpotId);
+
+                if (parkingSpotEntity == null)
+                {
+                    return new ApiResponse().SetNotFound($"Parking Spot Not Found ${parkingRequest.ParkingSpotId}");
+                }
+
                 if (parkingSpotEntity.CurrentQuantity == parkingSpotEntity.CapacitySpots)
                 {
                     parkingSpotEntity.Status = ParkingSpotStatusEnum.AVAILABLE;
@@ -166,8 +186,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         vehicle.ParkingSpotId = parkingRequest.ParkingSpotId;
                     }
                 }
+            };
+
+            // Notification
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == parkingRequest.UserId, isNoTracking: true);
+            var notifyActorName = $"{user?.FirstName} {user?.LastName}";
+
+            if (isAdmin)
+            {
+                var adminAccount = await _unitOfWork.AdminRepository.GetAsync(x => x.Id == _userContextService.UserId);
+                notifyActorName = $"{adminAccount?.FirstName} {adminAccount?.LastName}";
             }
-            ;
+
+            NotificationEntity notificationEntity = new NotificationEntity()
+            {
+                Title = string.Format(NotificationMessages.UpdateParkingRequestTitle, model.Status.ToString()),
+                Content = string.Format(NotificationMessages.UpdateParkingRequestContent, model.Status.ToString(), notifyActorName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                Date = DateTime.UtcNow,
+                IsRead = false,
+                UserId = parkingRequest.UserId,
+                NotificationType = NotificationTypeEnum.PARKING_REQUEST_STATUS_CHANGE,
+                LastUpdatedBy = _userContextService.UserId,
+                LastUpdatedDateUtc = DateTime.UtcNow
+            };
+
+            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
 
             await _unitOfWork.SaveChangeAsync();
 

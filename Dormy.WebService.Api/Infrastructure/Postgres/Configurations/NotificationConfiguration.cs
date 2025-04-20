@@ -13,6 +13,10 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .ValueGeneratedOnAdd();
 
             builder
+                .Property(roomService => roomService.NotificationType)
+                .HasConversion<string>();
+
+            builder
                 .HasOne(notification => notification.User)
                 .WithMany(user => user.Notifications)
                 .HasForeignKey(notification => notification.UserId);
