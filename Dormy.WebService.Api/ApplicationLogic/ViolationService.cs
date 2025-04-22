@@ -2,6 +2,7 @@
 using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
@@ -38,6 +39,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
             violationEntity.LastUpdatedBy = _userContextService.UserId;
 
             await _unitOfWork.ViolationRepository.AddAsync(violationEntity);
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == model.UserId, isNoTracking: true);
+            var admin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: true);
+
+            NotificationEntity notificationEntity = new NotificationEntity()
+            {
+                Title = NotificationMessages.CreateViolationTitle,
+                Content = string.Format(NotificationMessages.CreateViolationContent, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                Date = DateTime.UtcNow,
+                IsRead = false,
+                UserId = model.UserId,
+                AdminId = _userContextService.UserId,
+                NotificationType = NotificationTypeEnum.VIOLATION_CREATION,
+                CreatedBy =_userContextService.UserId,
+            };
+
+            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetCreated(violationEntity.Id);

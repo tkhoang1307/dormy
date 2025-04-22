@@ -1,4 +1,6 @@
-﻿namespace Dormy.WebService.Api.Core.Entities
+﻿using Dormy.WebService.Api.Models.Enums;
+
+namespace Dormy.WebService.Api.Core.Entities
 {
     public class NotificationEntity : BaseEntity
     {
@@ -12,14 +14,16 @@
 
         public string Description { get; set; } = string.Empty;
 
+        public NotificationTypeEnum NotificationType { get; set; }
+
         public bool IsRead { get; set; }
 
         public Guid UserId { get; set; }
 
         public UserEntity User { get; set; } = null!;
 
-        public Guid AdminId { get; set; }
+        public Guid? AdminId { get; set; }
 
-        public AdminEntity Admin { get; set; } = null!;
+        public AdminEntity? Admin { get; set; } = null!;
     }
 }

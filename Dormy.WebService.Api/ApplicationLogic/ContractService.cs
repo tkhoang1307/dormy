@@ -203,6 +203,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 }
                 contractIdTracking = (Guid)responseCreateContract.Result;
 
+                var registrationDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+
+                var registerNotification = new NotificationEntity()
+                {
+                    Title = NotificationMessages.CreateRegisterTitle,
+                    Content = string.Format(NotificationMessages.CreateRegisterContent, $"{model.User.FirstName} {model.User.LastName}", registrationDate),
+                    Date = DateTime.UtcNow,
+                    IsRead = false,
+                    UserId = userIdTracking,
+                    NotificationType = NotificationTypeEnum.REGISTRATION_CREATION,
+                    CreatedBy = userIdTracking
+                };
+
+                await _unitOfWork.NotificationRepository.AddAsync(registerNotification);
+
                 await _unitOfWork.SaveChangeAsync();
 
                 // Complete transaction
@@ -361,6 +376,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         {
                             return responseContractExtensionStatusA;
                         }
+
+                        // Create notification
+                        var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == contractEntity.UserId, isNoTracking: true);
+
+                        NotificationEntity notificationEntity = new NotificationEntity()
+                        {
+                            Title = NotificationMessages.ContractActiveTitle,
+                            Content = string.Format(NotificationMessages.ContractActiveContent, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            Date = DateTime.UtcNow,
+                            IsRead = false,
+                            UserId = contractEntity.UserId,
+                            NotificationType = NotificationTypeEnum.CONTRACT_ACTIVATION,
+                            LastUpdatedBy = _userContextService.UserId,
+                            LastUpdatedDateUtc = DateTime.UtcNow,
+                        };
+
+                        await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
                         break;
                     case ContractStatusEnum.EXTENDED:
                         break;
