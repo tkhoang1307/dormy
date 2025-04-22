@@ -60,7 +60,7 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Repositories
             {
                 query = query
                     .Skip((pageIndex - 1) * pageSize)
-                    .Take(pageSize); ;
+                    .Take(pageSize);
             }
 
             if (isNoTracking)
