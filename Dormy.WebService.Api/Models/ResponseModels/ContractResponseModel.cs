@@ -14,17 +14,11 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string Status { get; set; } = string.Empty;
 
-        //public Guid? InvoiceId { get; set; }
-
         public int NumberExtension { get; set; } = 0;
 
         public Guid UserId { get; set; }
 
         public string UserFullname { get; set; } = string.Empty;
-
-        //public Guid? ApproverId { get; set; }
-
-        //public string ApproverFullName { get; set; } = string.Empty;
 
         public Guid RoomId { get; set; }
 
@@ -60,5 +54,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Status { get; set; } = string.Empty;
+        public Guid? InvoiceId { get; set; }
+        public Guid? ApproverId { get; set; }
+        public string ApproverFullName { get; set; } = string.Empty;
     }
 }

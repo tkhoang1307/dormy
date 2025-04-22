@@ -86,12 +86,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
             if (_userContextService.UserRoles.Contains(Role.ADMIN))
             {
                 contractExtensionEntities = await _unitOfWork.ContractExtensionRepository
-                                                             .GetAllAsync(x => true, isNoTracking: true);
+                                                             .GetAllAsync(x => true,
+                                                                          x => x.Include(x => x.Contract)
+                                                                                .Include(x => x.Approver), isNoTracking: true);
             }
             else
             {
                 contractExtensionEntities = await _unitOfWork.ContractExtensionRepository
-                                                    .GetAllAsync(x => x.Contract.UserId == userId, x => x.Include(x => x.Contract),
+                                                    .GetAllAsync(x => x.Contract.UserId == userId, 
+                                                                 x => x.Include(x => x.Contract)
+                                                                       .Include(x => x.Approver),
                                                                         isNoTracking: true);
             }
 
@@ -100,14 +104,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 contractExtensionEntities = contractExtensionEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
-            var response = contractExtensionEntities.Select(async x => new ContractExtensionResponseModel
+            var response = contractExtensionEntities.Select(x => new ContractExtensionResponseModel
             {
                 Id = x.Id,
                 StartDate = x.StartDate,
                 EndDate = x.EndDate,
                 Status = x.Status.ToString(),
                 SubmissionDate = x.SubmissionDate,
-                //Contract = (await _contractService.GetSingleContract(x.ContractId)).Result as ContractResponseModel
+                InvoiceId = x.InvoiceId,
+                ApproverId = x.ApproverId,
+                ApproverFullName = x.Approver == null ? string.Empty : $"{x.Approver?.LastName} {x.Approver?.FirstName}",
             }).ToList();
 
             return new ApiResponse().SetOk(response);
