@@ -20,5 +20,7 @@ namespace Dormy.WebService.Api.Models.Enums
         DYNAMIC,
         [Description("object")]
         OBJECT,
+        [Description("array/list")]
+        ARRAY_LIST,
     }
 }

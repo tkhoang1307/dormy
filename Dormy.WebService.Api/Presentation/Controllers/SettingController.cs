@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Core.Constants;
+﻿using Dormy.WebService.Api.ApplicationLogic;
+using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
@@ -81,6 +82,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var response = await _settingService.TurnOnOrTurnOffSetting(model);
 
             return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpGet("all-datatypes")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetAllDataTypeEnums()
+        {
+            var result = await _settingService.GetAllDataTypeEnums();
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpDelete("keyname/{keyname}/hard-delete")]

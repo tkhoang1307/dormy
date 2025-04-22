@@ -11,5 +11,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetAllSettings();
         Task<ApiResponse> GetSettingByKeyName(string keyname);
         Task<ApiResponse> HardDeleteSettingByKeyName(string keyname);
+        Task<ApiResponse> GetAllDataTypeEnums();
     }
 }

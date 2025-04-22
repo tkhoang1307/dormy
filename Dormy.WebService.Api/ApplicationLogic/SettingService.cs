@@ -136,5 +136,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetOk(keyname);
         }
+
+        public async Task<ApiResponse> GetAllDataTypeEnums()
+        {
+            var dataTypeEnums = EnumHelper.GetAllEnumDescriptions<SettingDataTypeEnum>();
+
+            return new ApiResponse().SetOk(dataTypeEnums);
+        }
     }
 }
