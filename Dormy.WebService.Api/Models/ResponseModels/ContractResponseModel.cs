@@ -57,5 +57,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public Guid? InvoiceId { get; set; }
         public Guid? ApproverId { get; set; }
         public string ApproverFullName { get; set; } = string.Empty;
+        public Guid? RoomId { get; set; }
+        public int? RoomNumber { get; set; }
     }
 }

@@ -441,7 +441,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         .Include(x => x.Room)
                             .ThenInclude(r => r.RoomType)
                         .Include(x => x.ContractExtensions)
-                            .ThenInclude(u => u.Approver),
+                            .ThenInclude(u => u.Approver)
+                        .Include(x => x.ContractExtensions)
+                            .ThenInclude(u => u.Room),
                     isNoTracking: true);
 
             if (contractEntity == null)
@@ -516,7 +518,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetInitialRegistrationData()
         {
-            var genderEnums = EnumHelper.GetAllEnumDescriptions<GenderEnum>();
+            var genderEnums = EnumHelper.GetAllEnumDescriptions<GenderEnum>()
+                                        .Where(x => x.EnumValue != GenderEnum.OTHER.ToString())
+                                        .ToList();
             var relationshipEnums = EnumHelper.GetAllEnumDescriptions<RelationshipEnum>();
             var workplaceEntities = await _unitOfWork.WorkplaceRepository.GetAllAsync(x => x.IsDeleted == false);
             var roomTypeEntities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false);
