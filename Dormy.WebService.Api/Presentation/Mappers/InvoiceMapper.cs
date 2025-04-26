@@ -88,6 +88,11 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
                 LastUpdatedBy = entity.LastUpdatedBy,
                 InvoiceItems = (entity != null && entity.InvoiceItems != null) ? entity.InvoiceItems.Select(r => _invoiceItemMapper.MapToInvoiceItemResponseModel(r)).ToList() : [],
+                InvoiceUsers = (entity != null && entity.InvoiceUsers != null) ? entity.InvoiceUsers.Select(iu => new InvoiceUserResponseModel()
+                {
+                    UserId = iu.UserId,
+                    UserName = iu.User.LastName + " " + iu.User.FirstName,
+                }).ToList() : [],
                 IsDeleted = entity != null && entity.IsDeleted,
             };
 

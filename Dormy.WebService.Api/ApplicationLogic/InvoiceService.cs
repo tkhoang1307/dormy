@@ -456,6 +456,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                                 .GetAsync(i => i.Id == id,
                                                     include: q => q.Include(i => i.InvoiceItems)
                                                                     .Include(i => i.InvoiceUsers)
+                                                                        .ThenInclude(iu => iu.User)
                                                                     .Include(i => i.Room));
             if (invoiceEntity == null)
             {
