@@ -1,7 +1,9 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
+using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Validations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dormy.WebService.Api.Presentation.Controllers
@@ -11,9 +13,11 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     public class RegistrationController : ControllerBase
     {
         private readonly IContractService _contractService;
-        public RegistrationController(IContractService contractService)
+        private readonly IContractExtensionService _contractExtensionService;
+        public RegistrationController(IContractService contractService, IContractExtensionService contractExtensionService)
         {
             _contractService = contractService;
+            _contractExtensionService = contractExtensionService;
         }
 
         [HttpPost]
@@ -28,6 +32,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var result = await _contractService.Register(model);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        [HttpGet("batch")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetRegistrationAccommodationBatch()
+        {
+            var result = await _contractExtensionService.GetRegistrationAccommodationBatch();
             return StatusCode((int)result.StatusCode, result);
         }
 

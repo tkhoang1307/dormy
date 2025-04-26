@@ -11,5 +11,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetContractExtensionBatch(GetBatchRequestModel model);
         Task<ApiResponse> UpdateContractExtensionStatus(Guid id, ContractExtensionStatusEnum status);
         Task<ApiResponse> UpdateContractExtension(ContractExtensionUpdationRequestModel model);
+
+        Task<ApiResponse> GetRegistrationAccommodationBatch();
     }
 }

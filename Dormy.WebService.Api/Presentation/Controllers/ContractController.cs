@@ -23,16 +23,16 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> GetContract(Guid id)
         {
-            var result = await _contractService.GetSingleContract(id);
-            return Ok(result);
+            var response = await _contractService.GetSingleContract(id);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("batch")]
         [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> GetContractBatch(GetBatchRequestModel model)
         {
-            var result = await _contractService.GetContractBatch(model);
-            return Ok(result);
+            var response = await _contractService.GetContractBatch(model);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPut("id/{id:guid}/active")]

@@ -119,6 +119,46 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(response);
         }
 
+        public async Task<ApiResponse> GetRegistrationAccommodationBatch()
+        {
+            var contractExtensionEntities = await _unitOfWork.ContractExtensionRepository
+                                                             .GetAllAsync(x => x.Status == ContractExtensionStatusEnum.PENDING,
+                                                                          x => x.Include(x => x.Contract)
+                                                                                    .ThenInclude(xu => xu.User)
+                                                                                .Include(x => x.Room)
+                                                                                    .ThenInclude(rt => rt.RoomType)
+                                                                                .Include(x => x.Room)
+                                                                                    .ThenInclude(rb => rb.Building));
+            var response = contractExtensionEntities.Select(ce => new RegistrationAccommodationResponseModel()
+            {
+                ContractExtensionId = ce.Id,
+                OrderNo = ce.OrderNo,
+                SubmissionDate = ce.SubmissionDate,
+                StartDate = ce.StartDate,
+                EndDate = ce.EndDate,
+                Status = ce.Status.ToString(),
+                UserId = ce.Contract.UserId,
+                UserFullname = ce.Contract.User == null ? string.Empty : $"{ce.Contract.User.LastName} {ce.Contract.User.FirstName}",
+                RoomId = ce.RoomId,
+                RoomNumber = ce.Room.RoomNumber,
+                RoomTypeId = ce.Room.RoomTypeId,
+                RoomTypeName = ce.Room.RoomType.RoomTypeName,
+                BuildingId = ce.Room.BuildingId,
+                BuildingName = ce.Room.Building.Name,
+                ContractInformation = new RegistrationAccommodationContractResponseModel()
+                {
+                    ContractId = ce.Contract.Id,
+                    SubmissionDate = ce.Contract.SubmissionDate,
+                    StartDate = ce.Contract.StartDate,
+                    EndDate = ce.Contract.EndDate,
+                    Status = ce.Contract.Status.ToString(),
+                    NumberExtension =ce.Contract.NumberExtension,
+                }
+            }).ToList();
+            
+            return new ApiResponse().SetOk(response);
+        }
+
         public async Task<ApiResponse> GetSingleContractExtensionById(Guid id)
         {
             var contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == id, isNoTracking: true);
