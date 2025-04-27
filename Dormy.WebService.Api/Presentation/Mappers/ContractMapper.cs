@@ -51,6 +51,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 ContractExtensions = contractEntity.ContractExtensions.Select(contractExtension => new ContractExtensionExtendContractResponseModel()
                 {
                     ContractExtensionId = contractExtension.Id,
+                    OrderNo = contractExtension.OrderNo,
                     SubmissionDate = contractExtension.SubmissionDate,
                     StartDate = contractExtension.StartDate,
                     EndDate = contractExtension.EndDate,
@@ -60,7 +61,29 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                     ApproverFullName = contractExtension.Approver == null ? string.Empty : $"{contractExtension.Approver.LastName} {contractExtension.Approver.FirstName}",
                     RoomId = contractExtension.RoomId,
                     RoomNumber = contractExtension.Room == null ? null : contractExtension.Room.RoomNumber,
-                }).ToList(),
+                }).OrderByDescending(x => x.OrderNo).ToList(),
+            };
+        }
+
+        public ContractBatchResponseModel MapToContractBatchResponseModel(ContractEntity contractEntity)
+        {
+            return new ContractBatchResponseModel
+            {
+                Id = contractEntity.Id,
+                SubmissionDate = contractEntity.SubmissionDate,
+                StartDate = contractEntity.StartDate,
+                EndDate = contractEntity.EndDate,
+                Status = contractEntity.Status.ToString(),
+                NumberExtension = contractEntity.NumberExtension,
+                UserId = contractEntity.UserId,
+                UserFullname = contractEntity.User == null ? string.Empty : $"{contractEntity.User.LastName} {contractEntity.User.FirstName}",
+                RoomId = contractEntity.Room.Id,
+                RoomNumber = contractEntity.Room.RoomNumber,
+                RoomTypeId = contractEntity.Room.RoomType.Id,
+                RoomTypeName = contractEntity.Room.RoomType.RoomTypeName,
+                Price = contractEntity.Room.RoomType.Price,
+                BuildingId = contractEntity.Room.BuildingId,
+                BuildingName = contractEntity.Room.Building.Name,
             };
         }
 

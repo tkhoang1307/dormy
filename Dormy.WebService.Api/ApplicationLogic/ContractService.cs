@@ -404,14 +404,24 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         }
                         break;
                     case ContractStatusEnum.TERMINATED:
+                        var responseContractExtensionStatusT = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.TERMINATED);
+                        if (!responseContractExtensionStatusT.IsSuccess)
+                        {
+                            return responseContractExtensionStatusT;
+                        }
+                        break;
                     case ContractStatusEnum.REJECTED:
+                        var responseContractExtensionStatusR = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.REJECTED);
+                        if (!responseContractExtensionStatusR.IsSuccess)
+                        {
+                            return responseContractExtensionStatusR;
+                        }
                         break;
                 }
 
                 if (contractExtensionEntity?.OrderNo == 0 || 
                     status == ContractStatusEnum.EXTENDED ||
-                    status == ContractStatusEnum.TERMINATED ||
-                    status == ContractStatusEnum.REJECTED)
+                    status == ContractStatusEnum.TERMINATED)
                 {
                     contractEntity.Status = status;
                     contractEntity.LastUpdatedBy = userId;
@@ -477,15 +487,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     await _unitOfWork.ContractRepository
                     .GetAllAsync(x => true, x => x
                         .Include(u => u.User)
-                            .ThenInclude(u => u.HealthInsurance)
-                        .Include(u => u.User)
-                            .ThenInclude(u => u.Workplace)
+                        //    .ThenInclude(u => u.HealthInsurance)
+                        //.Include(u => u.User)
+                        //    .ThenInclude(u => u.Workplace)
                         .Include(x => x.Room)
                             .ThenInclude(r => r.Building)
                         .Include(x => x.Room)
-                            .ThenInclude(r => r.RoomType)
-                        .Include(x => x.ContractExtensions)
-                            .ThenInclude(u => u.Approver),
+                            .ThenInclude(r => r.RoomType),
+                        //.Include(x => x.ContractExtensions)
+                        //    .ThenInclude(u => u.Approver),
                     isNoTracking: true);
             }
             else
@@ -502,7 +512,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
                             .Include(x => x.Room)
                                 .ThenInclude(r => r.RoomType)
                             .Include(x => x.ContractExtensions)
-                                .ThenInclude(u => u.Approver),
+                                .ThenInclude(u => u.Approver)
+                            .Include(x => x.ContractExtensions)
+                                .ThenInclude(u => u.Room),
                         isNoTracking: true);
             }
 
@@ -511,8 +523,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 contractEntities = contractEntities.Where(x => model.Ids.Contains(x.Id)).ToList();
             }
 
-            var response = contractEntities.Select(x => _contractMapper.MapToContractModel(x)).ToList();
+            if (_userContextService.UserRoles.Contains(Role.ADMIN))
+            {
+                var responseTemp = contractEntities.Select(x => _contractMapper.MapToContractBatchResponseModel(x)).ToList();
+                return new ApiResponse().SetOk(responseTemp);
+            }
 
+            var response = contractEntities.Select(x => _contractMapper.MapToContractModel(x)).ToList();
             return new ApiResponse().SetOk(response);
         }
 

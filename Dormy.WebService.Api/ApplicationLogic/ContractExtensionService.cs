@@ -122,9 +122,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
         public async Task<ApiResponse> GetRegistrationAccommodationBatch()
         {
             var contractExtensionEntities = await _unitOfWork.ContractExtensionRepository
-                                                             .GetAllAsync(x => x.Status == ContractExtensionStatusEnum.PENDING,
+                                                             .GetAllAsync(x => x.Status == ContractExtensionStatusEnum.PENDING || x.Status == ContractExtensionStatusEnum.WAITING_PAYMENT,
                                                                           x => x.Include(x => x.Contract)
                                                                                     .ThenInclude(xu => xu.User)
+                                                                                        .ThenInclude(xuw => xuw.Workplace)
+                                                                                .Include(x => x.Contract)
+                                                                                    .ThenInclude(xu => xu.User)
+                                                                                        .ThenInclude(xuh => xuh.HealthInsurance)
                                                                                 .Include(x => x.Room)
                                                                                     .ThenInclude(rt => rt.RoomType)
                                                                                 .Include(x => x.Room)
@@ -145,6 +149,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 RoomTypeName = ce.Room.RoomType.RoomTypeName,
                 BuildingId = ce.Room.BuildingId,
                 BuildingName = ce.Room.Building.Name,
+                WorkplaceName = ce.Contract.User.Workplace.Name,
+                InsuranceCardNumber = ce.Contract.User.HealthInsurance.InsuranceCardNumber,
+                RegisteredHospital = ce.Contract.User.HealthInsurance.RegisteredHospital,
+                ExpirationDate = ce.Contract.User.HealthInsurance.ExpirationDate,
                 ContractInformation = new RegistrationAccommodationContractResponseModel()
                 {
                     ContractId = ce.Contract.Id,

@@ -50,6 +50,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
     public class ContractExtensionExtendContractResponseModel
     {
         public Guid ContractExtensionId { get; set; }
+        public int OrderNo { get; set; }
         public DateTime SubmissionDate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -59,5 +60,38 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public string ApproverFullName { get; set; } = string.Empty;
         public Guid? RoomId { get; set; }
         public int? RoomNumber { get; set; }
+    }
+
+    public class ContractBatchResponseModel
+    {
+        public Guid Id { get; set; }
+
+        public DateTime SubmissionDate { get; set; }
+
+        public DateTime StartDate { get; set; }
+
+        public DateTime EndDate { get; set; }
+
+        public string Status { get; set; } = string.Empty;
+
+        public int NumberExtension { get; set; } = 0;
+
+        public Guid UserId { get; set; }
+
+        public string UserFullname { get; set; } = string.Empty;
+
+        public Guid RoomId { get; set; }
+
+        public int RoomNumber { get; set; }
+
+        public Guid RoomTypeId { get; set; }
+
+        public string RoomTypeName { get; set; } = string.Empty;
+
+        public decimal Price { get; set; }
+
+        public Guid BuildingId { get; set; }
+
+        public string BuildingName { get; set; } = string.Empty;
     }
 }
