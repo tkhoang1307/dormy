@@ -29,6 +29,10 @@
         public string RoomTypeName { get; set; } = string.Empty;
         public Guid BuildingId { get; set; }
         public string BuildingName { get; set; } = string.Empty;
+        public string WorkplaceName { get; set; } = string.Empty;
+        public string InsuranceCardNumber { get; set; } = string.Empty;
+        public string RegisteredHospital { get; set; } = string.Empty;
+        public DateTime ExpirationDate { get; set; }
         public RegistrationAccommodationContractResponseModel ContractInformation { get; set; } = null!;
     }
 

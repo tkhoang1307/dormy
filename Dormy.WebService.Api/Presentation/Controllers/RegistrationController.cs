@@ -14,10 +14,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     {
         private readonly IContractService _contractService;
         private readonly IContractExtensionService _contractExtensionService;
-        public RegistrationController(IContractService contractService, IContractExtensionService contractExtensionService)
+        private readonly IRoomService _roomService;
+        public RegistrationController(IContractService contractService, 
+                                      IContractExtensionService contractExtensionService,
+                                      IRoomService roomService)
         {
             _contractService = contractService;
             _contractExtensionService = contractExtensionService;
+            _roomService = roomService;
         }
 
         [HttpPost]
@@ -54,6 +58,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> SearchBuildingsAndRoomsByGenderAndRoomType(SearchBuildingAndRoomRequestModel model)
         {
             var result = await _contractService.SearchBuildingsAndRoomsByGenderAndRoomType(model);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        [HttpGet("room/{id:guid}")]
+        public async Task<IActionResult> GetRoomSumaryById(Guid id)
+        {
+            var result = await _roomService.GetRoomSumaryById(id);
             return StatusCode((int)result.StatusCode, result);
         }
     }
