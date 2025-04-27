@@ -132,6 +132,26 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetOk(response);
         }
 
+        public async Task<ApiResponse> GetRoomSumaryById(Guid id)
+        {
+            var entity = await _unitOfWork.RoomRepository
+                .GetAsync(
+                    x => x.Id.Equals(id),
+                    x => x.Include(x => x.RoomType)
+                            .ThenInclude(roomType => roomType.RoomTypeServices)
+                                .ThenInclude(roomTypeService => roomTypeService.RoomService)
+                        .Include(x => x.Building));
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
+            }
+
+            var response = _roomMapper.MapToRoomSumaryResponseModel(entity);
+
+            return new ApiResponse().SetOk(response);
+        }
+
         public async Task<ApiResponse> GetRoomsByBuildingId(Guid buildingId)
         {
             var entity = await _unitOfWork.BuildingRepository.GetAsync(x => x.Id.Equals(buildingId), x => x.Include(x => x.Rooms).ThenInclude(x => x.RoomType));

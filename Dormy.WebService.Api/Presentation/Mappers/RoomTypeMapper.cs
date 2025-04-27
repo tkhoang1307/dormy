@@ -101,11 +101,32 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 Unit = x.Unit,
                 RoomServiceName = x.RoomServiceName,
                 RoomServiceType = x.RoomServiceType.ToString(),
+                IsServiceIndicatorUsed = x.IsServiceIndicatorUsed,
                 CreatedBy = x.CreatedBy,
                 IsDeleted = x.IsDeleted,
                 CreatedDateUtc = x.CreatedDateUtc,
                 LastUpdatedBy = x.LastUpdatedBy,
                 LastUpdatedDateUtc = x.LastUpdatedDateUtc,
+            }).ToList();
+        }
+
+        public List<RoomServiceSumaryResponseModel> MapToRoomServiceSumaryResponseModel(RoomTypeEntity source)
+        {
+            if (source.RoomTypeServices == null || source.RoomTypeServices.Count == 0)
+            {
+                return [];
+            }
+
+            var roomServices = source.RoomTypeServices.Select(x => x.RoomService).DistinctBy(x => x.Id).ToList();
+
+            return roomServices.Select(x => new RoomServiceSumaryResponseModel
+            {
+                Id = x.Id,
+                Cost = x.Cost,
+                Unit = x.Unit,
+                RoomServiceName = x.RoomServiceName,
+                RoomServiceType = x.RoomServiceType.ToString(),
+                IsServiceIndicatorUsed = x.IsServiceIndicatorUsed,
             }).ToList();
         }
     }

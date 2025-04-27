@@ -72,5 +72,21 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
             };
         }
+
+        public RoomSumaryResponseModel MapToRoomSumaryResponseModel(RoomEntity entity)
+        {
+            return new RoomSumaryResponseModel
+            {
+                Id = entity.Id,
+                FloorNumber = entity.FloorNumber,
+                RoomNumber = entity.RoomNumber,
+                RoomTypeId = entity.RoomTypeId,
+                RoomTypeName = entity.RoomType?.RoomTypeName ?? string.Empty,
+                Price = entity.RoomType?.Price ?? 0,
+                BuildingId = entity.BuildingId,
+                BuildingName = entity.Building?.Name ?? string.Empty,
+                RoomServices = entity.RoomType != null ? _roomTypeMapper.MapToRoomServiceSumaryResponseModel(entity.RoomType) : [],
+            };
+        }
     }
 }
