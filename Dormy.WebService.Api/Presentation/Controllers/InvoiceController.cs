@@ -100,6 +100,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
+        [HttpPost("edit-initial-data/invoiceId/{id:guid}")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> GetInitialInvoiceEdit(Guid id)
+        {
+            var response = await _invoiceService.GetInitialInvoiceEdit(id);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
         [HttpGet("create-initial-data/rooms")]
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> GetRoomsForInitialInvoiceCreation()

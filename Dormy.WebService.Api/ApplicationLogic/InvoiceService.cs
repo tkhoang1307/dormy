@@ -281,7 +281,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
 
-            var responseDeleteBatchInvoiceUser = await _invoiceItemService.HardDeleteInvoiceItemsBatchByInvoiceId(invoiceEntity.Id);
+            var responseDeleteBatchInvoiceUser = await _invoiceUserService.HardDeleteInvoiceUsersBatchByInvoiceId(invoiceEntity.Id);
             if (!responseDeleteBatchInvoiceUser.IsSuccess)
             {
                 return responseDeleteBatchInvoiceUser;
@@ -394,6 +394,53 @@ namespace Dormy.WebService.Api.ApplicationLogic
             };
 
             return new ApiResponse().SetOk(initialInvoiceCreation);
+        }
+
+        public async Task<ApiResponse> GetInitialInvoiceEdit(Guid id)
+        {
+            var invoiceEntity = await _unitOfWork.InvoiceRepository
+                                                .GetAsync(i => i.Id == id,
+                                                    include: q => q.Include(i => i.InvoiceItems));
+                                                                    //.Include(i => i.InvoiceUsers)
+                                                                    //    .ThenInclude(iu => iu.User)
+                                                                    //.Include(i => i.Room));
+            if (invoiceEntity == null)
+            {
+                return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
+            }
+
+            if (invoiceEntity.Status != InvoiceStatusEnum.DRAFT)
+            {
+                return new ApiResponse().SetConflict(invoiceEntity.Id,
+                       message: string.Format(ErrorMessages.UpdateInvoiceConflict));
+            }
+
+            var responseModel = new GetInitialInvoiceEditResponseModel()
+            {
+                InvoiceId = invoiceEntity.Id,
+                InvoiceName = invoiceEntity.InvoiceName,
+                DueDate = invoiceEntity.DueDate,
+                Type = invoiceEntity.Type.ToString(),
+                Status = invoiceEntity.Status.ToString(),
+                Month = invoiceEntity.Month ?? 0,
+                Year = invoiceEntity?.Year ?? 0,
+                RoomId = invoiceEntity.RoomId,
+                InvoiceItems = invoiceEntity.InvoiceItems.Select(ii => new GetInitialInvoiceItemEditResponseModel()
+                {
+                    InvoiceItemId = ii.Id,
+                    RoomServiceId = ii.RoomServiceId,
+                    RoomServiceName = ii.RoomServiceName,
+                    Cost = ii.Cost,
+                    Unit = ii.Unit,
+                    Quantity = ii.Quantity,
+                    Total = ii.Cost * ii.Quantity,
+                    OldIndicator = ii.OldIndicator,
+                    NewIndicator = ii.NewIndicator,
+                    IsServiceIndicatorUsed = ii.OldIndicator.HasValue && ii.NewIndicator.HasValue,
+                }).ToList()
+            };
+
+            return new ApiResponse().SetOk(responseModel);
         }
 
         public async Task<ApiResponse> GetInvoiceBatch(GetBatchInvoiceRequestModel model)
