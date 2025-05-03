@@ -167,8 +167,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 var roomServiceIdRentalPayment = roomTypeServices.Where(x => x.RoomService.RoomServiceType == RoomServiceTypeEnum.RENTAL_PAYMENT)
                                                                  .Select(x => x.RoomServiceId).FirstOrDefault();
-                var roomServiceEntity = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id == roomServiceIdRentalPayment);
-                roomServiceEntity.Cost = model.Price;
+                if (roomServiceIdRentalPayment != Guid.Empty)
+                {
+                    var roomServiceEntity = await _unitOfWork.RoomServiceRepository.GetAsync(x => x.Id == roomServiceIdRentalPayment);
+                    if (roomServiceEntity != null)
+                    {
+                        roomServiceEntity.Cost = model.Price;
+                    }
+                }
             }
 
             if (entity.Capacity != model.Capacity)
