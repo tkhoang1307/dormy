@@ -80,9 +80,9 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendForgotPasswordEmail([FromBody] string email)
+        public async Task<IActionResult> SendForgotPasswordEmail([FromBody] ForgotPasswordRequestModel  model)
         {
-            var response = await _emailService.SendForgotPasswordEmailAsync(email);
+            var response = await _emailService.SendForgotPasswordEmailAsync(model.Email);
             return StatusCode((int)response.StatusCode, response);
         }
     }
