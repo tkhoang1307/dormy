@@ -71,11 +71,19 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpPost("verify-email")]
-        [Authorize(Roles = $"{Role.ADMIN}, {Role.USER}")]
+        [AllowAnonymous]
         public async Task<IActionResult> SendVerifyEmail(VerifyEmailRequest request)
         {
             var verificationCode = await _emailService.SendVerifyEmailAsync(request.Email);
             return Ok(verificationCode);
+        }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendForgotPasswordEmail([FromBody] string email)
+        {
+            var response = await _emailService.SendForgotPasswordEmailAsync(email);
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }
