@@ -26,6 +26,12 @@ namespace Dormy.WebService.Api.Presentation.Validations
             //        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ContractId)));
             //}
 
+            if (model?.RoomId == null)
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.RoomId)));
+            }
+
             if (model?.StartDate == null)
             {
                 return new ApiResponse().SetUnprocessableEntity(message:

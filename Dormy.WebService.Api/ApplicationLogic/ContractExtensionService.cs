@@ -59,9 +59,20 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetConflict(contractEntity.Id, message: string.Format(ErrorMessages.ContractHasReachedMaxNumberOfExtension));
             }
 
+            var roomEntity = await _unitOfWork.RoomRepository.GetAsync(x => x.Id.Equals(model.RoomId), x => x.Include(x => x.Building));
+            if (roomEntity == null)
+            {
+                return new ApiResponse().SetNotFound(model.RoomId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Room"));
+            }
+
+            if (roomEntity.TotalUsedBed >= roomEntity.TotalAvailableBed)
+            {
+                return new ApiResponse().SetBadRequest(message: string.Format(ErrorMessages.RoomIsFull));
+            }
+
             var contractExtensionEntity = _contractExtensionMapper.MapToContractExtensionEntity(model);
             contractExtensionEntity.ContractId = contractEntity.Id;
-            contractExtensionEntity.RoomId = contractEntity.RoomId;
+            contractExtensionEntity.RoomId = model.RoomId;
             contractExtensionEntity.CreatedBy = _userContextService.UserId;
             contractExtensionEntity.LastUpdatedBy = _userContextService.UserId;
 
@@ -327,6 +338,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         contractExtensionEntity.Room.Status = contractExtensionEntity.Room.TotalAvailableBed == contractExtensionEntity.Room.TotalUsedBed ? RoomStatusEnum.FULL : RoomStatusEnum.AVAILABLE;
                         contractExtensionEntity.Room.LastUpdatedBy = userId;
                         contractExtensionEntity.Room.LastUpdatedDateUtc = DateTime.UtcNow;
+                        if (status == ContractExtensionStatusEnum.REJECTED)
+                        {
+                            contractExtensionEntity.ApproverId = userId;
+                        }
                         break;
                 }
 

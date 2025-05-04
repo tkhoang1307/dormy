@@ -60,6 +60,10 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public string ApproverFullName { get; set; } = string.Empty;
         public Guid? RoomId { get; set; }
         public int? RoomNumber { get; set; }
+        public Guid? BuildingId { get; set; }
+        public string BuildingName { get; set; } = string.Empty;
+        public Guid? RoomTypeId { get; set; }
+        public string RoomTypeName { get; set; } = string.Empty;
     }
 
     public class ContractBatchResponseModel

@@ -16,7 +16,7 @@
             set => _endDate = value.Date;
         }
 
-        //public Guid ContractId { get; set; }
+        public Guid RoomId { get; set; }
     }
 
     public class ContractExtensionUpdationRequestModel

@@ -514,7 +514,11 @@ namespace Dormy.WebService.Api.ApplicationLogic
                             .Include(x => x.ContractExtensions)
                                 .ThenInclude(u => u.Approver)
                             .Include(x => x.ContractExtensions)
-                                .ThenInclude(u => u.Room),
+                                .ThenInclude(ce => ce.Room)
+                                    .ThenInclude(r => r.Building)
+                            .Include(x => x.ContractExtensions)
+                                .ThenInclude(ce => ce.Room)
+                                    .ThenInclude(r => r.RoomType),
                         isNoTracking: true);
             }
 
