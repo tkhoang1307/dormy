@@ -1,8 +1,10 @@
 ﻿using Dormy.WebService.Api.ApplicationLogic;
+using Dormy.WebService.Api.Core.Constants;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
 using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,16 +16,23 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     public class ContractController : ControllerBase
     {
         private readonly IContractService _contractService;
-        public ContractController(IContractService contractService)
+        private readonly IUserContextService _userContextService;
+        public ContractController(IContractService contractService, IUserContextService userContextService)
         {
             _contractService = contractService;
+            _userContextService = userContextService;
         }
 
         [HttpPost]
         [Authorize(Roles = Role.USER)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Register(ContractRequestModel model)
+        public async Task<IActionResult> CreateNewContract(ContractRequestModel model)
         {
+            if (_userContextService.UserId != model.UserId)
+            {
+                var response = new ApiResponse().SetForbidden(message: ErrorMessages.AccountDoesNotHavePermissionCreateContract);
+                return StatusCode((int)response.StatusCode, response);
+            }
             var result = await _contractService.AddNewContract(model);
             return StatusCode((int)result.StatusCode, result);
         }

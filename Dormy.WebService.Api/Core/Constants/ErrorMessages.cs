@@ -62,5 +62,6 @@ namespace Dormy.WebService.Api.Core.Constants
         public const string UpdateContractConflict = "You only update contract which has status 'PENDING'.";
         public const string ConflictContractExtension = "There are no valid contracts for expansion.";
         public const string KeyNameIsExistedInSystem = "{0} is existed in the system";
+        public const string AccountDoesNotHavePermissionCreateContract = "Your account doesn’t have permission to create contract.";
     }
 }
