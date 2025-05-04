@@ -599,5 +599,81 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             return new ApiResponse().SetOk(result);
         }
+
+        public async Task<ApiResponse> GetAllRoomTypesData()
+        {
+            var roomTypeEntities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false);
+
+            var listRoomTypes = roomTypeEntities.Select(entity =>
+                new InitialDataRoomTypeResponseModel()
+                {
+                    Id = entity.Id,
+                    RoomTypeName = entity.RoomTypeName,
+                    Capacity = entity.Capacity,
+                    Price = entity.Price,
+                }).ToList();
+
+            return new ApiResponse().SetOk(listRoomTypes);
+        }
+
+        public async Task<ApiResponse> GetInitialCreateContractData()
+        {
+            var roomTypeEntities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false);
+            var contractEntities = await _unitOfWork.ContractRepository
+                .GetAllAsync(
+                    x => x.UserId == _userContextService.UserId &&
+                         (x.Status == ContractStatusEnum.ACTIVE ||
+                          x.Status == ContractStatusEnum.EXPIRED ||
+                          x.Status == ContractStatusEnum.EXTENDED),
+                    include: x => x
+                        .Include(u => u.User)
+                        .Include(c => c.Room)
+                            .ThenInclude(r => r.RoomType)
+                        .Include(c => c.Room)
+                            .ThenInclude(r => r.Building)
+                );
+
+            var contractEntity = contractEntities
+                .OrderByDescending(x => x.EndDate)
+                .FirstOrDefault();
+
+
+            var informationOfTheLatestContract = new InformationOfTheLatestContract()
+            {
+                ContractId = contractEntity.Id,
+                StartDate = contractEntity.StartDate,
+                EndDate = contractEntity.EndDate,
+                Status = contractEntity.Status.ToString(),
+                NumberExtension = contractEntity.NumberExtension,
+                RoomId = contractEntity.Room.Id,
+                RoomNumber = contractEntity.Room.RoomNumber,
+                BuildingId = contractEntity.Room.Building.Id,
+                BuildingName = contractEntity.Room.Building.Name,
+                RoomTypeId = contractEntity.Room.RoomType.Id,
+                RoomTypeName = contractEntity.Room.RoomType.RoomTypeName,
+                Price = contractEntity.Room.RoomType.Price,
+            };
+
+            var listRoomTypes = roomTypeEntities.Select(entity =>
+                new InitialDataRoomTypeResponseModel()
+                {
+                    Id = entity.Id,
+                    RoomTypeName = entity.RoomTypeName,
+                    Capacity = entity.Capacity,
+                    Price = entity.Price,
+                }).ToList();
+
+            var responseModel = new InitialCreateEntendContractDataResponseModel()
+            {
+                UserInformation = new UserInformation()
+                {
+                    Gender = contractEntity.User.Gender.ToString(),
+                },
+                ContractInformation = informationOfTheLatestContract,
+                ListRoomTypes = listRoomTypes,
+            };
+
+            return new ApiResponse().SetOk(responseModel);
+        }
     }
 }

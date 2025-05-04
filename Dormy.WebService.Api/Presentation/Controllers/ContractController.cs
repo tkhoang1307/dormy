@@ -19,6 +19,15 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             _contractService = contractService;
         }
 
+        [HttpPost]
+        [Authorize(Roles = Role.USER)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<IActionResult> Register(ContractRequestModel model)
+        {
+            var result = await _contractService.AddNewContract(model);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
         [HttpGet("id/{id:guid}")]
         [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> GetContract(Guid id)
@@ -85,6 +94,22 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         {
             var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.EXPIRED);
             return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpGet("all-room-types")]
+        [Authorize(Roles = Role.USER)]
+        public async Task<IActionResult> GetAllRoomTypesData()
+        {
+            var result = await _contractService.GetAllRoomTypesData();
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        [HttpGet("initial-create-contract-data")]
+        [Authorize(Roles = Role.USER)]
+        public async Task<IActionResult> GetInitialCreateContractData()
+        {
+            var result = await _contractService.GetInitialCreateContractData();
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

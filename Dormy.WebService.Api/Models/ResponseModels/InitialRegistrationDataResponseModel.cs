@@ -63,4 +63,32 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public string Status { get; set; } = string.Empty;
     }
+
+    public class InformationOfTheLatestContract
+    {
+        public Guid ContractId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public int NumberExtension { get; set; }
+        public Guid RoomId { get; set; }
+        public int RoomNumber { get; set; }
+        public Guid BuildingId { get; set; }
+        public string BuildingName { get; set;} = string.Empty;
+        public Guid RoomTypeId { get; set; }
+        public string RoomTypeName { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+    }
+
+    public class UserInformation
+    {
+        public string Gender { get; set; } = string.Empty;
+    }
+
+    public class InitialCreateEntendContractDataResponseModel
+    {
+        public UserInformation UserInformation { get; set; } = null!;
+        public InformationOfTheLatestContract? ContractInformation { get; set; } = null!;
+        public List<InitialDataRoomTypeResponseModel>? ListRoomTypes { get; set; } = [];
+    }
 }

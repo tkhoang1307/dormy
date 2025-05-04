@@ -33,11 +33,17 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateContractExtension(ContractExtensionRequestModel model)
         {
-            var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.UserId == _userContextService.UserId &&
-                                                                                    (x.Status == ContractStatusEnum.ACTIVE || 
-                                                                                     x.Status == ContractStatusEnum.EXPIRED || 
-                                                                                     x.Status == ContractStatusEnum.EXTENDED), 
-                                                                               x => x.Include(x => x.Room));
+            var contractEntities = await _unitOfWork.ContractRepository
+                .GetAllAsync(x => x.UserId == _userContextService.UserId &&
+                                  (x.Status == ContractStatusEnum.ACTIVE ||
+                                   x.Status == ContractStatusEnum.EXPIRED ||
+                                   x.Status == ContractStatusEnum.EXTENDED),
+                             include: x => x.Include(x => x.Room));
+
+            var contractEntity = contractEntities
+                .OrderByDescending(x => x.EndDate)
+                .FirstOrDefault();
+
             if (contractEntity == null)
             {
                 return new ApiResponse().SetConflict(message: string.Format(ErrorMessages.ConflictContractExtension));
