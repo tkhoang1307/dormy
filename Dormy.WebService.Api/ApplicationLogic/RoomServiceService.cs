@@ -55,7 +55,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entities = new List<RoomServiceEntity>();
 
-            entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => true);
+            entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => !x.IsDeleted);
 
             if (model.Ids.Count > 0)
             {
@@ -103,7 +103,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetBadRequest("Request IDs must contain value");
             }
 
-            var entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => ids.Contains(x.Id));
+            var entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => ids.Contains(x.Id), isNoTracking: false);
 
             if (entities == null || entities.Count != ids.Count)
             {
