@@ -404,7 +404,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         }
                         break;
                     case ContractStatusEnum.TERMINATED:
-                        var responseContractExtensionStatusT = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.TERMINATED);
+                        var responseContractExtensionStatusT = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.TERMINATED, isTriggerRule: false);
                         if (!responseContractExtensionStatusT.IsSuccess)
                         {
                             return responseContractExtensionStatusT;
@@ -625,10 +625,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var roomTypeEntities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => x.IsDeleted == false);
             var contractEntities = await _unitOfWork.ContractRepository
                 .GetAllAsync(
-                    x => x.UserId == _userContextService.UserId &&
+                    x => x.UserId == _userContextService.UserId/* &&
                          (x.Status == ContractStatusEnum.ACTIVE ||
                           x.Status == ContractStatusEnum.EXPIRED ||
-                          x.Status == ContractStatusEnum.EXTENDED),
+                          x.Status == ContractStatusEnum.EXTENDED)*/,
                     include: x => x
                         .Include(u => u.User)
                         .Include(c => c.Room)

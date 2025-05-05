@@ -245,7 +245,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             return new ApiResponse().SetAccepted(contractExtensionEntity.Id);
         }
 
-        public async Task<ApiResponse> UpdateContractExtensionStatus(Guid id, ContractExtensionStatusEnum status)
+        public async Task<ApiResponse> UpdateContractExtensionStatus(Guid id, ContractExtensionStatusEnum status, bool isTriggerRule = true)
         {
             var userId = _userContextService.UserId;
             if (userId == Guid.Empty)
@@ -272,10 +272,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract extension"));
             }
 
-            var (isError, errorMessage) = ContractExtensionStatusChangeValidator.VerifyContractExtensionStatusChangeValidator(contractExtensionEntity.Status, status);
-            if (isError)
+            if (isTriggerRule)
             {
-                return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Contract extension"));
+                var (isError, errorMessage) = ContractExtensionStatusChangeValidator.VerifyContractExtensionStatusChangeValidator(contractExtensionEntity.Status, status);
+                if (isError)
+                {
+                    return new ApiResponse().SetConflict(id, message: string.Format(errorMessage, "Contract extension"));
+                }
             }
 
             Guid invoiceIdTracking = Guid.Empty;
