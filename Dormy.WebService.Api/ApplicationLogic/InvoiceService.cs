@@ -557,7 +557,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> GetRoomsForInitialInvoiceCreation()
         {
-            var roomEntities = await _unitOfWork.RoomRepository.GetAllAsync(x => true, include: q => q.Include(i => i.Building));
+            var roomEntities = await _unitOfWork.RoomRepository.GetAllAsync(x => x.TotalUsedBed > 0, include: q => q.Include(i => i.Building));
 
             var roomModels = roomEntities
                 .OrderBy(room => room.Building.Name)

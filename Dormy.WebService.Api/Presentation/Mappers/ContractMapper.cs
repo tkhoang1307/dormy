@@ -61,9 +61,9 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                     ApproverFullName = contractExtension.Approver == null ? string.Empty : $"{contractExtension.Approver.LastName} {contractExtension.Approver.FirstName}",
                     RoomId = contractExtension.RoomId,
                     RoomNumber = contractExtension.Room == null ? null : contractExtension.Room.RoomNumber,
-                    BuildingId = contractExtension.Room.Building.Id,
+                    BuildingId = contractExtension.Room.Building == null ? null : contractExtension.Room.Building.Id,
                     BuildingName = contractExtension.Room.Building == null ? null : contractExtension.Room.Building.Name,
-                    RoomTypeId = contractExtension.Room.RoomType.Id,
+                    RoomTypeId = contractExtension.Room.RoomType == null ? null : contractExtension.Room.RoomType.Id,
                     RoomTypeName = contractExtension.Room.RoomType == null ? null : contractExtension.Room.RoomType.RoomTypeName,
                 }).OrderByDescending(x => x.OrderNo).ToList(),
             };

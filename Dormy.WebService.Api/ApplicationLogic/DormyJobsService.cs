@@ -30,7 +30,9 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> ContractJob()
         {
-            var contractEntities = await _unitOfWork.ContractRepository.GetAllAsync(x => DateTime.Compare(x.EndDate.Date, DateTime.Now.Date) > 0);
+            var contractEntities = await _unitOfWork.ContractRepository.GetAllAsync(x => (x.Status == Models.Enums.ContractStatusEnum.ACTIVE ||
+                                                                                          x.Status == Models.Enums.ContractStatusEnum.EXTENDED) && 
+                                                                                          DateTime.Compare(x.EndDate.Date, DateTime.Now.Date) > 0);
             foreach(var contractEntity in contractEntities)
             {
                 contractEntity.Status = Models.Enums.ContractStatusEnum.EXPIRED;
@@ -43,7 +45,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> ỊnvoiceJob()
         {
-            var invoiceEntities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => DateTime.Compare(x.DueDate.Date, DateTime.Now.Date) > 0);
+            var invoiceEntities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => x.Status == Models.Enums.InvoiceStatusEnum.UNPAID && 
+                                                                                       DateTime.Compare(x.DueDate.Date, DateTime.Now.Date) > 0);
             foreach (var invoiceEntity in invoiceEntities)
             {
                 invoiceEntity.Status = Models.Enums.InvoiceStatusEnum.OVERDUE;
@@ -56,7 +59,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> ContractExtensionJob()
         {
-            var contractExtensionEntities = await _unitOfWork.ContractExtensionRepository.GetAllAsync(x => DateTime.Compare(x.EndDate.Date, DateTime.Now.Date) > 0, 
+            var contractExtensionEntities = await _unitOfWork.ContractExtensionRepository.GetAllAsync(x => x.Status == Models.Enums.ContractExtensionStatusEnum.ACTIVE && 
+                                                                                                           DateTime.Compare(x.EndDate.Date, DateTime.Now.Date) > 0, 
                                                                                                       x => x.Include(x => x.Contract));
             
             foreach (var contractExtensionEntity in contractExtensionEntities)
