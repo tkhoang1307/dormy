@@ -143,7 +143,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.USER)]
         public async Task<IActionResult> GetProfile(Guid id)
         {
-            var response = await _userService.GetUserInformation(id);
+            var response = await _userService.GetUserProfileByUseridForAdmin(id);
 
             return StatusCode((int)response.StatusCode, response);
         }

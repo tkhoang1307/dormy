@@ -348,7 +348,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     Address = guardian.Address,
                     Email = guardian.Email,
                     PhoneNumber = guardian.PhoneNumber,
-                    RelationshipToUser = guardian.RelationshipToUser,
+                    RelationshipToUser = EnumHelper.GetEnumDescriptionByLanguage<RelationshipEnum>(
+                        (RelationshipEnum)Enum.Parse(typeof(RelationshipEnum), guardian.RelationshipToUser)),
                 }).ToList();
             }
 

@@ -32,5 +32,19 @@ namespace Dormy.WebService.Api.Core.Utilities
             var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
             return attribute?.Description ?? value.ToString();
         }
+
+        //VI: Vietnamese
+        //EN: English
+        public static string GetEnumDescriptionByLanguage<TEnum>(TEnum enumValue, string language = "EN") where TEnum : Enum
+        {
+            var description = GetEnumDescription(enumValue);
+            var parts = description.Split(" /*-*/ ", StringSplitOptions.None);
+
+            if (language == "EN")
+            {
+                return parts.Length > 0 ? parts[0] : string.Empty;
+            }
+            return parts.Length > 1 ? parts[1] : string.Empty;
+        }
     }
 }
