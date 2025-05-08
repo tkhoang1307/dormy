@@ -47,7 +47,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _roomServiceService = roomServiceService;
         }
 
-        public async Task<ApiResponse> CreateNewInvoice(InvoiceRequestModel model)
+        public async Task<ApiResponse> CreateNewInvoice(InvoiceRequestModel model, Guid? userIdForParkingInvoice = null, string parkingSpotName = "")
         {
             var roomEntity = await _unitOfWork.RoomRepository.GetAsync(r => r.Id == model.RoomId);
             if (roomEntity == null)
@@ -134,13 +134,31 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     });
                 }
 
-                var invoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")";
+                if (model.Type == InvoiceTypeEnum.PARKING_INVOICE.ToString())
+                {
+                    invoiceUsersModel.Add(new InvoiceUserMapperModel()
+                    {
+                        UserId = userIdForParkingInvoice ?? Guid.Empty,
+                    });
+                }
+
+                var invoiceName = "Invoice for month " + model.Month + "/" + model.Year;
                 var invoiceStatus = InvoiceStatusEnum.DRAFT.ToString();
                 if (model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString())
                 {
-                    invoiceName = "Hóa đơn hợp đồng lưu trú (Accommodation contract invoice)";
+                    invoiceName = "Accommodation contract invoice";
                     invoiceStatus = InvoiceStatusEnum.UNPAID.ToString();
                 }
+                if (model.Type == InvoiceTypeEnum.PARKING_INVOICE.ToString())
+                {
+                    invoiceName = "Parking invoice for " + parkingSpotName;
+                    invoiceStatus = InvoiceStatusEnum.UNPAID.ToString();
+                    if (invoiceItemsMapperRequestModel.FirstOrDefault().Cost == 0)
+                    {
+                        invoiceStatus = InvoiceStatusEnum.PAID.ToString();
+                    }
+                }
+
                 var invoiceMapperRequestModel = new InvoiceMapperRequestModel()
                 {
                     InvoiceName = invoiceName,

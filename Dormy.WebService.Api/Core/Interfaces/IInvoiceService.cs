@@ -5,7 +5,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
 {
     public interface IInvoiceService
     {
-        Task<ApiResponse> CreateNewInvoice(InvoiceRequestModel model);
+        Task<ApiResponse> CreateNewInvoice(InvoiceRequestModel model, Guid? userIdForParkingInvoice = null, string parkingSpotName = "");
         Task<ApiResponse> GetInvoiceById(Guid id);
         Task<ApiResponse> GetInvoiceBatch(GetBatchInvoiceRequestModel model);
         Task<ApiResponse> UpdateInvoiceStatus(InvoiceStatusUpdationRequestModel model);

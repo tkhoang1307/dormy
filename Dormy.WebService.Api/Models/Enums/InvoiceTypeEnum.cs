@@ -7,6 +7,8 @@ namespace Dormy.WebService.Api.Models.Enums
         [Description("Room serivce monthly")]
         ROOM_SERVICE_MONTHLY,
         [Description("Payment contract")]
-        PAYMENT_CONTRACT
+        PAYMENT_CONTRACT,
+        [Description("Parking invoice")]
+        PARKING_INVOICE,
     }
 }
