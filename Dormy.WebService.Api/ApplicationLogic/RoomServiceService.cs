@@ -55,7 +55,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         {
             var entities = new List<RoomServiceEntity>();
 
-            entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => !x.IsDeleted);
+            entities = await _unitOfWork.RoomServiceRepository.GetAllAsync(x => !x.IsDeleted && x.RoomServiceType != RoomServiceTypeEnum.RENTAL_PAYMENT);
 
             if (model.Ids.Count > 0)
             {
