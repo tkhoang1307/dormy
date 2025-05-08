@@ -22,13 +22,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .HasOne(roomTypeService => roomTypeService.RoomService)
                 .WithMany(roomService => roomService.RoomTypeServices)
                 .HasForeignKey(roomTypeService => roomTypeService.RoomServiceId);
-
-            builder.HasData(new RoomTypeServiceEntity()
-            {
-                Id = Guid.NewGuid(),
-                RoomServiceId = SeedData.RoomServiceId,
-                RoomTypeId = SeedData.RoomTypeId,
-            });
         }
     }
 }

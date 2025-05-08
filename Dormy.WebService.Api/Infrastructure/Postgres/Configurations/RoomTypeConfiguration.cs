@@ -12,15 +12,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
             builder
                 .Property(roomType => roomType.Id)
                 .ValueGeneratedOnAdd();
-
-            builder.HasData(new RoomTypeEntity()
-            {
-                Capacity = 5,
-                Description = "Room type normal",
-                Id = SeedData.RoomTypeId,
-                Price = 100000,
-                RoomTypeName = "Normal",
-            });
         }
     }
 }

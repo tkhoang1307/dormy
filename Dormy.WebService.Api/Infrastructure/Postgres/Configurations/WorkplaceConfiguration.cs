@@ -17,16 +17,6 @@ namespace Dormy.WebService.Api.Infrastructure.Postgres.Configurations
                 .HasMany(workplace => workplace.Users)
                 .WithOne(user => user.Workplace)
                 .HasForeignKey(user => user.WorkplaceId);
-
-            builder.HasData(new WorkplaceEntity()
-            {
-                Id = SeedData.WorkplaceId,
-                Abbrevation = "20000",
-                Address = "VNG Q1 HCM City",
-                CreatedBy = SeedData.AdminId,
-                CreatedDateUtc = DateTime.UtcNow,
-                Name = "VNG Block 1 HCM",
-            });
         }
     }
 }
