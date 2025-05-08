@@ -9,6 +9,7 @@ using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace Dormy.WebService.Api.ApplicationLogic
 {
@@ -16,15 +17,17 @@ namespace Dormy.WebService.Api.ApplicationLogic
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
+        private readonly IInvoiceService _invoiceService;
         private ParkingSpotMapper _parkingSpotMapper;
         private readonly VehicleMapper _vehicleMapper;
 
-        public ParkingSpotService(IUnitOfWork unitOfWork, IUserContextService userContextService)
+        public ParkingSpotService(IUnitOfWork unitOfWork, IUserContextService userContextService, IInvoiceService invoiceService)
         {
             _unitOfWork = unitOfWork;
             _parkingSpotMapper = new ParkingSpotMapper();
             _userContextService = userContextService;
             _vehicleMapper = new VehicleMapper();
+            _invoiceService = invoiceService;
         }
 
         public async Task<ApiResponse> AddNewParkingSpot(ParkingSpotRequestModel model)
@@ -172,6 +175,61 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetAccepted(entity.Id);
+        }
+
+        public async Task<ApiResponse> CreateParkingSpotInvoiceForAllUsers(Guid parkingSpotId)
+        {
+            var entity = await _unitOfWork.ParkingSpotRepository.GetAsync(x => x.Id == parkingSpotId);
+
+            if (entity == null)
+            {
+                return new ApiResponse().SetNotFound(parkingSpotId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Parking spot"));
+            }
+
+            var vehicleEntities = await _unitOfWork.VehicleRepository.GetAllAsync(x => x.ParkingSpotId == parkingSpotId, include: x => x.Include(x => x.User));
+            if (vehicleEntities != null && vehicleEntities.Count != 0)
+            {
+                var settingEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == SettingKeyname.ParkingPriceKeyname);
+                decimal parkingPrice = 0;
+                if (settingEntity.IsApplied)
+                {
+                    if (!decimal.TryParse(settingEntity?.Value?.ToString(), out parkingPrice))
+                    {
+                        parkingPrice = 50000;
+                    }
+                }
+
+                var listUserId = vehicleEntities.Select(x => x.UserId).ToList();
+                foreach(var userId  in listUserId)
+                {
+                    var responseContract = await _unitOfWork.ContractRepository.GetAllAsync(x => x.UserId == userId);
+                    var roomId = responseContract.FirstOrDefault().RoomId;
+                    var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
+                    {
+                        DueDate = DateTime.Now.AddDays(15),
+                        Type = InvoiceTypeEnum.PARKING_INVOICE.ToString(),
+                        RoomId = roomId,
+                        InvoiceItems = new List<InvoiceItemRequestModel>()
+                            {
+                                new InvoiceItemRequestModel()
+                                {
+                                    RoomServiceName = "Parking fee",
+                                    Cost = parkingPrice,
+                                    Unit = "month",
+                                    Quantity = 1,
+                                }
+                            }
+                    }, userIdForParkingInvoice: userId, parkingSpotName: entity.ParkingSpotName);
+
+                    if (!responseCreateInvoice.IsSuccess)
+                    {
+                        return responseCreateInvoice;
+                    }
+                }
+
+            }
+
+            return new ApiResponse().SetCreated(entity.Id);
         }
     }
 }

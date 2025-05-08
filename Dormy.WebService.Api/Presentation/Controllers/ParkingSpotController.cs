@@ -93,5 +93,14 @@ namespace Dormy.WebService.Api.Presentation.Controllers
 
             return StatusCode((int)result.StatusCode, result);
         }
+
+        [HttpPost("id/{id:guid}/create-invoices")]
+        [Authorize(Roles = Role.ADMIN)]
+        public async Task<IActionResult> CreateParkingSpotInvoiceForAllUsers(Guid id)
+        {
+            var result = await _parkingSpotService.CreateParkingSpotInvoiceForAllUsers(id);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
     }
 }
