@@ -42,7 +42,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
             return invoiceEntity;
         }
 
-        public InvoiceBatchResponseModel MapToInvoiceBatchResponseModel(InvoiceEntity entity)
+        public InvoiceBatchResponseModel MapToInvoiceBatchResponseModel(InvoiceEntity entity, bool isUserDisplayed = false)
         {
             var invoiceResponse = new InvoiceBatchResponseModel
             {
@@ -51,17 +51,18 @@ namespace Dormy.WebService.Api.Presentation.Mappers
                 DueDate = entity.DueDate,
                 AmountBeforePromotion = entity.AmountBeforePromotion,
                 AmountAfterPromotion = entity.AmountAfterPromotion,
-                Month = entity.Month, 
+                Month = entity.Month,
                 Year = entity.Year,
                 Type = entity.Type.ToString(),
                 Status = entity.Status.ToString(),
                 ContractId = entity.ContractId,
                 RoomId = entity.RoomId,
+                UserFullname = isUserDisplayed ? entity.InvoiceUsers.FirstOrDefault().User.LastName + " " + entity.InvoiceUsers.FirstOrDefault().User.FirstName : "",
                 CreatedBy = entity.CreatedBy,
                 CreatedDateUtc = entity.CreatedDateUtc,
                 LastUpdatedDateUtc = entity.LastUpdatedDateUtc,
                 LastUpdatedBy = entity.LastUpdatedBy,
-                IsDeleted = entity != null && entity.IsDeleted,
+                IsDeleted = entity != null && entity.IsDeleted
             };
 
             return invoiceResponse;

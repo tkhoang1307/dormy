@@ -468,7 +468,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             switch (_userContextService.UserRoles.FirstOrDefault())
             {
                 case Role.ADMIN:
-                    entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => true);
+                    entities = await _unitOfWork.InvoiceRepository.GetAllAsync(x => true, include: q => q.Include(i => i.InvoiceUsers)
+                                                                                                            .ThenInclude(iu => iu.User));
 
                     if (model.RoomId != null)
                     {
@@ -498,7 +499,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     break;
             }
 
-            var invoiceModels = entities.Select(x => _invoiceMapper.MapToInvoiceBatchResponseModel(x)).ToList();
+            var isUserDisplayed = false;
+            if (model.InvoiceType != null && model.InvoiceType == InvoiceTypeEnum.PARKING_INVOICE.ToString())
+            {
+                isUserDisplayed = true;
+            }
+            var invoiceModels = entities.Select(x => _invoiceMapper.MapToInvoiceBatchResponseModel(x, isUserDisplayed)).ToList();
 
             for (int i = 0; i < invoiceModels.Count; i++)
             {

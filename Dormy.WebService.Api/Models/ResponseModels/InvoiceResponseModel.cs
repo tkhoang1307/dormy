@@ -27,6 +27,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public Guid RoomId { get; set; }
 
         public string RoomName { get; set; } = string.Empty;
+
+        public string UserFullname { get; set; } = string.Empty;
     }
 
     public class InvoiceResponseModel : InvoiceBatchResponseModel
