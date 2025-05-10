@@ -353,9 +353,19 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 }).ToList();
             }
 
-            if (userEntity.Contracts?.Count > 0 && userEntity.Contracts.Any(x => x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED))
+            if (userEntity.Contracts?.Count > 0 && userEntity.Contracts.Any(x => x.Status == ContractStatusEnum.WAITING_PAYMENT || 
+                                                                                 x.Status == ContractStatusEnum.ACTIVE || 
+                                                                                 x.Status == ContractStatusEnum.EXTENDED || 
+                                                                                 x.Status == ContractStatusEnum.EXPIRED))
             {
-                var currentContract = userEntity.Contracts.First(x => x.Status == ContractStatusEnum.ACTIVE || x.Status == ContractStatusEnum.EXTENDED);
+                var listContracts = userEntity.Contracts.Where(x => x.Status == ContractStatusEnum.WAITING_PAYMENT ||
+                                                                                 x.Status == ContractStatusEnum.ACTIVE ||
+                                                                                 x.Status == ContractStatusEnum.EXTENDED ||
+                                                                                 x.Status == ContractStatusEnum.EXPIRED);
+
+                var currentContract = listContracts.OrderByDescending(x => x.EndDate)
+                                                   .FirstOrDefault();
+
                 reponseUserProfile.Contract = new UserProfileContractResponseModel()
                 {
                     Id = currentContract.Id,
