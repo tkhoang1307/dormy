@@ -14,6 +14,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetInitialRegistrationData();
         Task<ApiResponse> GetAllRoomTypesData();
         Task<ApiResponse> GetInitialCreateContractData();
+        Task<ApiResponse> GetInitialExtendContractData(Guid contractId);
         Task<ApiResponse> SearchBuildingsAndRoomsByGenderAndRoomType(SearchBuildingAndRoomRequestModel model);
     }
 }

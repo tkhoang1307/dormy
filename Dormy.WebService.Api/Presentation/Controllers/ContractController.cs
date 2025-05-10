@@ -120,5 +120,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             var result = await _contractService.GetInitialCreateContractData();
             return StatusCode((int)result.StatusCode, result);
         }
+
+        [HttpGet("id/{id:guid}/initial-extend-contract-data")]
+        [Authorize(Roles = Role.USER)]
+        public async Task<IActionResult> GetInitialExtendContractData(Guid id)
+        {
+            var result = await _contractService.GetInitialExtendContractData(id);
+            return StatusCode((int)result.StatusCode, result);
+        }
     }
 }
