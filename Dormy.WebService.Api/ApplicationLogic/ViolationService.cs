@@ -16,11 +16,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private readonly ViolationMapper _violationMapper;
+        private readonly INotificationService _notificationService;
 
-        public ViolationService(IUnitOfWork unitOfWork, IUserContextService userContextService)
+        public ViolationService(IUnitOfWork unitOfWork, IUserContextService userContextService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
+            _notificationService = notificationService;
             _violationMapper = new ViolationMapper();
         }
 
@@ -43,19 +45,17 @@ namespace Dormy.WebService.Api.ApplicationLogic
             var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == model.UserId, isNoTracking: true);
             var admin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: true);
 
-            NotificationEntity notificationEntity = new NotificationEntity()
+            await _notificationService.CreateNotification(new NotificationRequestModel()
             {
                 Title = NotificationMessages.CreateViolationTitle,
-                Content = string.Format(NotificationMessages.CreateViolationContent, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                Date = DateTime.UtcNow,
-                IsRead = false,
+                Content = string.Format(NotificationMessages.CreateViolationContent,
+                                        $"{user?.LastName} {user?.FirstName}",
+                                        $"{admin?.LastName} {admin?.FirstName}",
+                                        DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
                 UserId = model.UserId,
                 AdminId = _userContextService.UserId,
                 NotificationType = NotificationTypeEnum.VIOLATION_CREATION,
-                CreatedBy =_userContextService.UserId,
-            };
-
-            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+            });
 
             await _unitOfWork.SaveChangeAsync();
 
@@ -136,6 +136,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
             violationEntity.UserId = model.UserId;
             violationEntity.LastUpdatedBy = _userContextService.UserId;
             violationEntity.LastUpdatedDateUtc = DateTime.UtcNow;
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == model.UserId, isNoTracking: true);
+            var admin = await _unitOfWork.AdminRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: true);
+
+            await _notificationService.CreateNotification(new NotificationRequestModel()
+            {
+                Title = NotificationMessages.UpdateViolationTitle,
+                Content = string.Format(NotificationMessages.UpdateViolationTitle,
+                                        $"{user?.LastName} {user?.FirstName}",
+                                        $"{admin?.LastName} {admin?.FirstName}",
+                                        DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                UserId = model.UserId,
+                AdminId = _userContextService.UserId,
+                NotificationType = NotificationTypeEnum.VIOLATION_UPDATION,
+            });
 
             await _unitOfWork.SaveChangeAsync();
 

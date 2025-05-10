@@ -31,6 +31,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IVehicleService _vehicleService;
         private readonly IContractExtensionService _contractExtensionService;
         private readonly ContractExtensionMapper _contractExtensionMapper;
+        private readonly INotificationService _notificationService;
 
         public ContractService(IUnitOfWork unitOfWork,
                                IUserContextService userContextService,
@@ -40,7 +41,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                IGuardianService guardianService,
                                IInvoiceService invoiceService,
                                IVehicleService vehicleService,
-                               IContractExtensionService contractExtensionService)
+                               IContractExtensionService contractExtensionService,
+                               INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
@@ -51,6 +53,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _invoiceService = invoiceService;
             _vehicleService = vehicleService;
             _contractExtensionService = contractExtensionService;
+            _notificationService = notificationService;
             _userMapper = new UserMapper();
             _workplaceMapper = new WorkplaceMapper();
             _roomTypeMapper = new RoomTypeMapper();
@@ -205,18 +208,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 var registrationDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
-                var registerNotification = new NotificationEntity()
+                await _notificationService.CreateNotification(new NotificationRequestModel()
                 {
                     Title = NotificationMessages.CreateRegisterTitle,
                     Content = string.Format(NotificationMessages.CreateRegisterContent, $"{model.User.FirstName} {model.User.LastName}", registrationDate),
-                    Date = DateTime.UtcNow,
-                    IsRead = false,
                     UserId = userIdTracking,
                     NotificationType = NotificationTypeEnum.REGISTRATION_CREATION,
-                    CreatedBy = userIdTracking
-                };
-
-                await _unitOfWork.NotificationRepository.AddAsync(registerNotification);
+                });
 
                 await _unitOfWork.SaveChangeAsync();
 
@@ -307,6 +305,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
                 contractIdTracking = contractEntity.Id;
                 await _unitOfWork.ContractRepository.AddAsync(contractEntity);
+
+                await _notificationService.CreateNotification(new NotificationRequestModel()
+                {
+                    Title = NotificationMessages.ContractCreateTitle,
+                    Content = string.Format(NotificationMessages.ContractCreateContent, $"{userEntity.LastName} {userEntity.FirstName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                    UserId = model?.UserId ?? _userContextService.UserId,
+                    NotificationType = NotificationTypeEnum.CONTRACT_CREATION,
+                });
+
                 await _unitOfWork.SaveChangeAsync();
 
                 // Complete transaction
@@ -369,6 +376,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         {
                             return responseContractExtensionStatusWT;
                         }
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
+                        {
+                            Title = NotificationMessages.ContractAcceptTitle,
+                            Content = string.Format(NotificationMessages.ContractAcceptContent, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            UserId = contractEntity.UserId,
+                            AdminId = _userContextService.UserId,
+                            NotificationType = NotificationTypeEnum.CONTRACT_ACCEPTION,
+                        });
                         break;
                     case ContractStatusEnum.ACTIVE:
                         var responseContractExtensionStatusA = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.ACTIVE);
@@ -380,21 +395,23 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         // Create notification
                         var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == contractEntity.UserId, isNoTracking: true);
 
-                        NotificationEntity notificationEntity = new NotificationEntity()
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
                         {
                             Title = NotificationMessages.ContractActiveTitle,
                             Content = string.Format(NotificationMessages.ContractActiveContent, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                            Date = DateTime.UtcNow,
-                            IsRead = false,
                             UserId = contractEntity.UserId,
+                            AdminId = _userContextService.UserId,
                             NotificationType = NotificationTypeEnum.CONTRACT_ACTIVATION,
-                            LastUpdatedBy = _userContextService.UserId,
-                            LastUpdatedDateUtc = DateTime.UtcNow,
-                        };
-
-                        await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+                        });
                         break;
                     case ContractStatusEnum.EXTENDED:
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
+                        {
+                            Title = NotificationMessages.ContractExtendTitle,
+                            Content = string.Format(NotificationMessages.ContractExtendContent, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            UserId = contractEntity.UserId,
+                            NotificationType = NotificationTypeEnum.CONTRACT_EXTENSION,
+                        });
                         break;
                     case ContractStatusEnum.EXPIRED:
                         var responseContractExtensionStatusE = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.EXPIRED);
@@ -409,6 +426,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         {
                             return responseContractExtensionStatusT;
                         }
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
+                        {
+                            Title = NotificationMessages.ContractTerminateTitle,
+                            Content = string.Format(NotificationMessages.ContractTerminateContent, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            UserId = contractEntity.UserId,
+                            NotificationType = NotificationTypeEnum.CONTRACT_TERMINATION,
+                        });
                         break;
                     case ContractStatusEnum.REJECTED:
                         var responseContractExtensionStatusR = await _contractExtensionService.UpdateContractExtensionStatus(contractExtensionEntity.Id, ContractExtensionStatusEnum.REJECTED);
@@ -416,6 +440,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         {
                             return responseContractExtensionStatusR;
                         }
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
+                        {
+                            Title = NotificationMessages.ContractRejectTitle,
+                            Content = string.Format(NotificationMessages.ContractRejectContent, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            UserId = contractEntity.UserId,
+                            AdminId = _userContextService.UserId,
+                            NotificationType = NotificationTypeEnum.CONTRACT_REJECTION,
+                        });
                         break;
                 }
 

@@ -17,12 +17,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private readonly RequestMapper _requestMapper;
+        private readonly INotificationService _notificationService;
 
-        public RequestService(IUnitOfWork unitOfWork, IUserContextService userContextService)
+        public RequestService(IUnitOfWork unitOfWork, IUserContextService userContextService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
             _requestMapper = new RequestMapper();
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse> CreateRequest(RequestRequestModel model)
@@ -47,17 +49,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: true);
 
-            NotificationEntity notificationEntity = new NotificationEntity()
+            await _notificationService.CreateNotification(new NotificationRequestModel()
             {
                 Title = NotificationMessages.CreateRequestTitle,
                 Content = string.Format(NotificationMessages.CreateRequestContent, $"{user?.FirstName} {user?.LastName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                Date = DateTime.UtcNow,
-                IsRead = false,
                 UserId = _userContextService.UserId,
                 NotificationType = NotificationTypeEnum.REQUEST_CREATION,
-            };
-
-            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+            });
 
             await _unitOfWork.SaveChangeAsync();
 
@@ -164,6 +162,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 requestEntity.RoomId = model.RoomId.Value;
             }
 
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: true);
+
+            await _notificationService.CreateNotification(new NotificationRequestModel()
+            {
+                Title = NotificationMessages.UpdateRequestTitle,
+                Content = string.Format(NotificationMessages.UpdateRequestContent, $"{user?.LastName} {user?.FirstName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                UserId = _userContextService.UserId,
+                NotificationType = NotificationTypeEnum.REQUEST_UPDATION,
+            });
+
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk(requestEntity.Id);
@@ -217,19 +225,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 notifyActorName = $"{adminAccount?.FirstName} {adminAccount?.LastName}";
             }
 
-            NotificationEntity notificationEntity = new NotificationEntity()
+            await _notificationService.CreateNotification(new NotificationRequestModel()
             {
                 Title = string.Format(NotificationMessages.UpdateStatusRequestTitle, status.ToString()),
                 Content = string.Format(NotificationMessages.UpdateStatusRequestContent, status.ToString(), notifyActorName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                Date = DateTime.UtcNow,
-                IsRead = false,
                 UserId = requestEntity.UserId,
                 NotificationType = NotificationTypeEnum.REQUEST_STATUS_CHANGE,
-                LastUpdatedBy = _userContextService.UserId,
-                LastUpdatedDateUtc = DateTime.UtcNow
-            };
-
-            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+            });
 
             await _unitOfWork.SaveChangeAsync();
 

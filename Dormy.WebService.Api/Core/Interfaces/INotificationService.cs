@@ -1,4 +1,5 @@
-﻿using Dormy.WebService.Api.Models.ResponseModels;
+﻿using Dormy.WebService.Api.Models.RequestModels;
+using Dormy.WebService.Api.Models.ResponseModels;
 
 namespace Dormy.WebService.Api.Core.Interfaces
 {
@@ -6,5 +7,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
     {
         Task<List<NotificationModel>> GetNotifications();
         Task<ApiResponse> ReadNotification(Guid id);
+        Task<ApiResponse> CreateNotification(NotificationRequestModel model);
     }
 }

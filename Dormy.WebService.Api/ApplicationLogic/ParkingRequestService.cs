@@ -18,12 +18,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContextService;
         private readonly ParkingRequestMapper _parkingRequestMapper;
+        private readonly INotificationService _notificationService;
 
-        public ParkingRequestService(IUnitOfWork unitOfWork, IUserContextService userContextService)
+        public ParkingRequestService(IUnitOfWork unitOfWork, IUserContextService userContextService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
             _parkingRequestMapper = new ParkingRequestMapper();
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse> CreateParkingRequest(ParkingRequestModel model)
@@ -59,17 +61,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: false);
 
-            NotificationEntity notificationEntity = new NotificationEntity()
+            await _notificationService.CreateNotification(new NotificationRequestModel()
             {
                 Title = NotificationMessages.CreateParkingRequestTitle,
                 Content = string.Format(NotificationMessages.CreateParkingRequestContent, $"{user.FirstName} {user.LastName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                Date = DateTime.UtcNow,
-                IsRead = false,
                 UserId = _userContextService.UserId,
                 NotificationType = NotificationTypeEnum.PARKING_REQUEST_CREATION,
-            };
-
-            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+            });
 
             await _unitOfWork.SaveChangeAsync();
 
@@ -199,19 +197,13 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 notifyActorName = $"{adminAccount?.FirstName} {adminAccount?.LastName}";
             }
 
-            NotificationEntity notificationEntity = new NotificationEntity()
+            await _notificationService.CreateNotification(new NotificationRequestModel()
             {
-                Title = string.Format(NotificationMessages.UpdateParkingRequestTitle, model.Status.ToString()),
-                Content = string.Format(NotificationMessages.UpdateParkingRequestContent, model.Status.ToString(), notifyActorName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                Date = DateTime.UtcNow,
-                IsRead = false,
+                Title = string.Format(NotificationMessages.UpdateParkingRequestStatusTitle, model.Status.ToString()),
+                Content = string.Format(NotificationMessages.UpdateParkingRequestStatusContent, model.Status.ToString(), notifyActorName, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
                 UserId = parkingRequest.UserId,
                 NotificationType = NotificationTypeEnum.PARKING_REQUEST_STATUS_CHANGE,
-                LastUpdatedBy = _userContextService.UserId,
-                LastUpdatedDateUtc = DateTime.UtcNow
-            };
-
-            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+            });
 
             await _unitOfWork.SaveChangeAsync();
 
@@ -262,6 +254,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
             parkingRequest.ParkingSpotId = model.ParkingSpotId;
             parkingRequest.LastUpdatedBy = _userContextService.UserId;
             parkingRequest.LastUpdatedDateUtc = DateTime.Now;
+
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == _userContextService.UserId, isNoTracking: false);
+
+            await _notificationService.CreateNotification(new NotificationRequestModel()
+            {
+                Title = NotificationMessages.UpdateParkingRequestTitle,
+                Content = string.Format(NotificationMessages.UpdateParkingRequestContent, $"{user.FirstName} {user.LastName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                UserId = _userContextService.UserId,
+                NotificationType = NotificationTypeEnum.PARKING_REQUEST_UPDATION,
+            });
 
             await _unitOfWork.SaveChangeAsync();
 

@@ -1,6 +1,9 @@
-﻿using Dormy.WebService.Api.Core.Entities;
+﻿using Dormy.WebService.Api.Core.Constants;
+using Dormy.WebService.Api.Core.Entities;
 using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Models.Constants;
+using Dormy.WebService.Api.Models.Enums;
+using Dormy.WebService.Api.Models.RequestModels;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Presentation.Mappers;
 using Dormy.WebService.Api.Startup;
@@ -55,6 +58,27 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk();
+        }
+
+        public async Task<ApiResponse> CreateNotification(NotificationRequestModel model)
+        {
+            var notificationEntity = new NotificationEntity()
+            {
+                Title = model.Title,
+                Content = model.Content,
+                Date = DateTime.UtcNow,
+                IsRead = false,
+                UserId = model.UserId,
+                AdminId = model?.AdminId,
+                NotificationType = NotificationTypeEnum.REGISTRATION_CREATION,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdatedDateUtc = DateTime.UtcNow,
+            };
+
+            await _unitOfWork.NotificationRepository.AddAsync(notificationEntity);
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetCreated();
         }
     }
 }
