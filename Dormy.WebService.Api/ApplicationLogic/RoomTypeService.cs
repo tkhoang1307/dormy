@@ -81,7 +81,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             if (isAdmin)
             {
-                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => true);
+                entities = await _unitOfWork.RoomTypeRepository.GetAllAsync(x => !x.IsDeleted);
             }
             else
             {
