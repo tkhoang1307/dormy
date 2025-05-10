@@ -15,12 +15,6 @@ namespace Dormy.WebService.Api.Presentation.Validations
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.KeyName)));
             }
 
-            if (string.IsNullOrEmpty(model.Value))
-            {
-                return new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Value)));
-            }
-
             if (string.IsNullOrEmpty(model.DataType))
             {
                 return new ApiResponse().SetUnprocessableEntity(message:
@@ -31,6 +25,12 @@ namespace Dormy.WebService.Api.Presentation.Validations
             {
                 return new ApiResponse().SetPreconditionFailed(message:
                     string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.DataType, nameof(SettingDataTypeEnum)));
+            }
+
+            if (model.Value != SettingDataTypeEnum.BOOL.ToString() && string.IsNullOrEmpty(model.Value))
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Value)));
             }
 
             return new ApiResponse().SetOk();
@@ -44,12 +44,6 @@ namespace Dormy.WebService.Api.Presentation.Validations
                     string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.KeyName)));
             }
 
-            if (string.IsNullOrEmpty(model.Value))
-            {
-                return new ApiResponse().SetUnprocessableEntity(message:
-                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Value)));
-            }
-
             if (string.IsNullOrEmpty(model.DataType))
             {
                 return new ApiResponse().SetUnprocessableEntity(message:
@@ -60,6 +54,12 @@ namespace Dormy.WebService.Api.Presentation.Validations
             {
                 return new ApiResponse().SetPreconditionFailed(message:
                     string.Format(ErrorMessages.ValueDoesNotExistInEnum, model.DataType, nameof(SettingDataTypeEnum)));
+            }
+
+            if (model.Value != SettingDataTypeEnum.BOOL.ToString() && string.IsNullOrEmpty(model.Value))
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.Value)));
             }
 
             return new ApiResponse().SetOk();

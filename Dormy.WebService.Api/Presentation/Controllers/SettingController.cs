@@ -22,7 +22,7 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         }
 
         [HttpGet("keyname/{keyname}")]
-        [Authorize(Roles = Role.ADMIN)]
+        [Authorize(Roles = $"{Role.USER}, {Role.ADMIN}")]
         public async Task<IActionResult> GetSettingByKeyname(string keyname)
         {
             var response = await _settingService.GetSettingByKeyName(keyname);

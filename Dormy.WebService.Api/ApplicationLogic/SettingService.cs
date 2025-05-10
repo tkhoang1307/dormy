@@ -32,7 +32,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var entity = _mapper.MapToSettingEntity(model);
-
+            if (model.DataType == SettingDataTypeEnum.BOOL.ToString())
+            {
+                entity.Value = entity.IsApplied ? "true" : "false";
+            }
             entity.CreatedBy = _userContextService.UserId;
             entity.LastUpdatedBy = _userContextService.UserId;
 
@@ -50,9 +53,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetNotFound(model.KeyName, message: string.Format(ErrorMessages.PropertyDoesNotExist, model.KeyName));
             }
 
-            
-            entity.Value = model.Value;
             entity.DataType = (SettingDataTypeEnum)Enum.Parse(typeof(SettingDataTypeEnum), model.DataType);
+            if (entity.DataType == SettingDataTypeEnum.BOOL)
+            {
+                entity.Value = entity.IsApplied ? "true" : "false";
+            }
+            else
+            {
+                entity.Value = model.Value;
+            }
             entity.LastUpdatedBy = _userContextService.UserId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
 
@@ -72,6 +81,10 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
 
             entity.IsApplied = model.IsApplied;
+            if (entity.DataType == SettingDataTypeEnum.BOOL)
+            {
+                entity.Value = entity.IsApplied ? "true" : "false";
+            }
             entity.LastUpdatedBy = _userContextService.UserId;
             entity.LastUpdatedDateUtc = DateTime.UtcNow;
 
