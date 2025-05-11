@@ -28,13 +28,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IInvoiceItemService _invoiceItemService;
         private readonly IInvoiceUserService _invoiceUserService;
         private readonly IRoomServiceService _roomServiceService;
+        private readonly INotificationService _notificationService;
 
         public InvoiceService(IUnitOfWork unitOfWork, 
                               IUserContextService userContextService, 
                               IRoomService roomService, 
                               IInvoiceItemService invoiceItemService, 
                               IInvoiceUserService invoiceUserService,
-                              IRoomServiceService roomServiceService)
+                              IRoomServiceService roomServiceService,
+                              INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _invoiceMapper = new InvoiceMapper();
@@ -45,6 +47,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _invoiceItemService = invoiceItemService;
             _invoiceUserService = invoiceUserService;
             _roomServiceService = roomServiceService;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse> CreateNewInvoice(InvoiceRequestModel model, Guid? userIdForParkingInvoice = null, string parkingSpotName = "")
@@ -132,6 +135,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     {
                         UserId = contractExtensionEntity.Contract.UserId,
                     });
+
+                    await _notificationService.CreateNotification(new NotificationRequestModel()
+                    {
+                        Title = string.Format(NotificationMessages.InvoiceCreateTitle, "contract payment"),
+                        Content = string.Format(NotificationMessages.InvoiceCreateContent, "contract payment", $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                        UserId = contractExtensionEntity.Contract.UserId,
+                        AdminId = _userContextService.UserId,
+                        NotificationType = NotificationTypeEnum.INVOICE_CREATION,
+                    });
                 }
 
                 if (model.Type == InvoiceTypeEnum.PARKING_INVOICE.ToString())
@@ -139,6 +151,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     invoiceUsersModel.Add(new InvoiceUserMapperModel()
                     {
                         UserId = userIdForParkingInvoice ?? Guid.Empty,
+                    });
+
+                    await _notificationService.CreateNotification(new NotificationRequestModel()
+                    {
+                        Title = string.Format(NotificationMessages.InvoiceCreateTitle, "parking fee"),
+                        Content = string.Format(NotificationMessages.InvoiceCreateContent, "parking fee", $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                        UserId = userIdForParkingInvoice ?? Guid.Empty,
+                        AdminId = _userContextService.UserId,
+                        NotificationType = NotificationTypeEnum.INVOICE_CREATION,
                     });
                 }
 
@@ -347,7 +368,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> UpdateInvoiceStatus(InvoiceStatusUpdationRequestModel model)
         {
-            var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == model.Id);
+            var invoiceEntity = await _unitOfWork.InvoiceRepository.GetAsync(i => i.Id == model.Id, include: x => x.Include(x => x.InvoiceUsers));
             if (invoiceEntity == null)
             {
                 return new ApiResponse().SetNotFound(model.Id, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Invoice"));
@@ -358,6 +379,37 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 return new ApiResponse().SetConflict(invoiceEntity.Id,
                                                      message: string.Format(errorMessage, "invoice"));
+            }
+
+            if (statusChanged == InvoiceStatusEnum.UNPAID && invoiceEntity.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY)
+            {
+                foreach(var invoiceUser in invoiceEntity.InvoiceUsers)
+                {
+                    await _notificationService.CreateNotification(new NotificationRequestModel()
+                    {
+                        Title = string.Format(NotificationMessages.InvoiceCreateTitle, "room service monthly"),
+                        Content = string.Format(NotificationMessages.InvoiceCreateContent, "room service monthly", $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                        UserId = invoiceUser.UserId,
+                        AdminId = _userContextService.UserId,
+                        NotificationType = NotificationTypeEnum.INVOICE_CREATION,
+                    });
+                }    
+            }
+
+            if (statusChanged == InvoiceStatusEnum.PAID)
+            {
+                var invoiceTypeName = EnumHelper.GetEnumDescription(invoiceEntity.Type);
+                foreach (var invoiceUser in invoiceEntity.InvoiceUsers)
+                {
+                    await _notificationService.CreateNotification(new NotificationRequestModel()
+                    {
+                        Title = string.Format(NotificationMessages.InvoicePaidTitle, invoiceTypeName),
+                        Content = string.Format(NotificationMessages.InvoicePaidContent, invoiceTypeName, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                        UserId = invoiceUser.UserId,
+                        AdminId = _userContextService.UserId,
+                        NotificationType = NotificationTypeEnum.INVOICE_CHANGE_STATUS,
+                    });
+                }
             }
 
             invoiceEntity.Status = statusChanged;
