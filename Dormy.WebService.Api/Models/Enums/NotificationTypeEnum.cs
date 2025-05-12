@@ -2,6 +2,7 @@
 {
     public enum NotificationTypeEnum
     {
+        ANNOUNCEMENT,
         REGISTRATION_CREATION,
         CONTRACT_ACTIVATION,
         VIOLATION_CREATION,

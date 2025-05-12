@@ -12,4 +12,10 @@ namespace Dormy.WebService.Api.Models.RequestModels
         public Guid UserId { get; set; }
         public Guid? AdminId { get; set; }
     }
+
+    public class AnnouncementCreationRequestModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
 }

@@ -24,14 +24,14 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _notificationMapper = new NotificationMapper();
         }
 
-        public async Task<List<NotificationModel>> GetNotifications()
+        public async Task<ApiResponse> GetNotifications()
         {
             var notificationEntities = new List<NotificationEntity>();
             bool isAdmin = _userContextService.UserRoles.Contains(Role.ADMIN);
 
             if (isAdmin)
             {
-                notificationEntities = await _unitOfWork.NotificationRepository.GetAllAsync(x => !x.IsRead && !x.IsDeleted, x => x.Include(x => x.User), isNoTracking: true);
+                notificationEntities = await _unitOfWork.NotificationRepository.GetAllAsync(x => !x.IsRead && !x.IsDeleted && x.NotificationType != NotificationTypeEnum.ANNOUNCEMENT, x => x.Include(x => x.User), isNoTracking: true);
             }
             else
             {
@@ -42,7 +42,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
             result = notificationEntities.Select(_notificationMapper.MapToNotificationModel).OrderByDescending(x => x.Date).ToList();
 
-            return result;
+            return new ApiResponse().SetOk(result);
         }
 
         public async Task<ApiResponse> ReadNotification(Guid id)
@@ -79,6 +79,40 @@ namespace Dormy.WebService.Api.ApplicationLogic
             await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetCreated();
+        }
+
+        public async Task<ApiResponse> CreateAnnouncement(AnnouncementCreationRequestModel model)
+        {
+            var userEntities = await _unitOfWork.UserRepository
+                                                .GetAllAsync(x => x.Status == UserStatusEnum.ACTIVE || x.IsDeleted == false);
+
+            var userIds = userEntities.Select(x => x.Id).ToList();
+            var currentDateTime = DateTime.UtcNow;
+            var adminId = _userContextService.UserId;
+            var listNotificationEntities = new List<NotificationEntity>();
+            foreach (var userId in userIds)
+            {
+                var notificationEntity = new NotificationEntity()
+                {
+                    Title = model.Title,
+                    Content = model.Description,
+                    Date = currentDateTime,
+                    IsRead = false,
+                    UserId = userId,
+                    AdminId = adminId,
+                    NotificationType = NotificationTypeEnum.ANNOUNCEMENT,
+                    CreatedBy = adminId,
+                    LastUpdatedBy = adminId,
+                    CreatedDateUtc = currentDateTime,
+                    LastUpdatedDateUtc = currentDateTime,
+                };
+                listNotificationEntities.Add(notificationEntity);
+            }
+            var listNoticationIds = listNotificationEntities.Select(x => x.Id).ToList();
+            await _unitOfWork.NotificationRepository.AddRangeAsync(listNotificationEntities);
+            await _unitOfWork.SaveChangeAsync();
+
+            return new ApiResponse().SetCreated(listNoticationIds);
         }
     }
 }
