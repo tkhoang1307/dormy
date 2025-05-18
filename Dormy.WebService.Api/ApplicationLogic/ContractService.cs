@@ -32,6 +32,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
         private readonly IContractExtensionService _contractExtensionService;
         private readonly ContractExtensionMapper _contractExtensionMapper;
         private readonly INotificationService _notificationService;
+        private readonly IEmailService _emailService;
 
         public ContractService(IUnitOfWork unitOfWork,
                                IUserContextService userContextService,
@@ -42,7 +43,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                IInvoiceService invoiceService,
                                IVehicleService vehicleService,
                                IContractExtensionService contractExtensionService,
-                               INotificationService notificationService)
+                               INotificationService notificationService,
+                               IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _userContextService = userContextService;
@@ -54,6 +56,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             _vehicleService = vehicleService;
             _contractExtensionService = contractExtensionService;
             _notificationService = notificationService;
+            _emailService = emailService;
             _userMapper = new UserMapper();
             _workplaceMapper = new WorkplaceMapper();
             _roomTypeMapper = new RoomTypeMapper();
@@ -274,6 +277,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             Guid contractIdTracking = Guid.Empty;
+            Guid contractExtensionIdTracking = Guid.Empty;
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
                 new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
@@ -304,6 +308,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 }
 
                 contractIdTracking = contractEntity.Id;
+                contractExtensionIdTracking = contractExtensionEntity.Id;
                 await _unitOfWork.ContractRepository.AddAsync(contractEntity);
 
                 await _notificationService.CreateNotification(new NotificationRequestModel()
@@ -321,6 +326,67 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             return new ApiResponse().SetCreated(contractIdTracking);
+        }
+
+        public async Task<ApiResponse> SendContractEmail(Guid contractExtensionId, bool isContractExtension = true)
+        {
+            if (!isContractExtension)
+            {
+                var responseCE = (await _unitOfWork.ContractExtensionRepository
+                                                            .GetAllAsync(x => x.ContractId == contractExtensionId))
+                                                            .OrderByDescending(x => x.OrderNo)
+                                                            .FirstOrDefault();
+                contractExtensionId = responseCE.Id;
+            }
+            var ce = await _unitOfWork.ContractExtensionRepository
+                                                             .GetAsync(x => x.Id == contractExtensionId,
+                                                                            x => x.Include(x => x.Contract)
+                                                                                    .ThenInclude(xu => xu.User)
+                                                                                        .ThenInclude(xuw => xuw.Workplace)
+                                                                                .Include(x => x.Contract)
+                                                                                    .ThenInclude(xu => xu.User)
+                                                                                        .ThenInclude(xuh => xuh.HealthInsurance)
+                                                                                .Include(x => x.Room)
+                                                                                    .ThenInclude(rt => rt.RoomType)
+                                                                                .Include(x => x.Room)
+                                                                                    .ThenInclude(rb => rb.Building));
+            if (ce != null)
+            {
+                var responseSendEmail = new RegistrationAccommodationResponseModel()
+                {
+                    ContractExtensionId = ce.Id,
+                    OrderNo = ce.OrderNo,
+                    SubmissionDate = ce.SubmissionDate,
+                    StartDate = ce.StartDate,
+                    EndDate = ce.EndDate,
+                    Status = ce.Status.ToString(),
+                    UserId = ce.Contract.UserId,
+                    UserFullname = ce.Contract.User == null ? string.Empty : $"{ce.Contract.User.LastName} {ce.Contract.User.FirstName}",
+                    RoomId = ce.RoomId,
+                    RoomNumber = ce.Room.RoomNumber,
+                    RoomTypeId = ce.Room.RoomTypeId,
+                    RoomTypeName = ce.Room.RoomType.RoomTypeName,
+                    BuildingId = ce.Room.BuildingId,
+                    BuildingName = ce.Room.Building.Name,
+                    WorkplaceName = ce.Contract.User.Workplace.Name,
+                    InsuranceCardNumber = ce.Contract.User.HealthInsurance.InsuranceCardNumber,
+                    RegisteredHospital = ce.Contract.User.HealthInsurance.RegisteredHospital,
+                    ExpirationDate = ce.Contract.User.HealthInsurance.ExpirationDate,
+                    ContractInformation = new RegistrationAccommodationContractResponseModel()
+                    {
+                        ContractId = ce.Contract.Id,
+                        SubmissionDate = ce.Contract.SubmissionDate,
+                        StartDate = ce.Contract.StartDate,
+                        EndDate = ce.Contract.EndDate,
+                        Status = ce.Contract.Status.ToString(),
+                        NumberExtension = ce.Contract.NumberExtension,
+                    }
+                };
+
+                await _emailService.SendContractEmailAsync(ce.Contract.User.Email, responseSendEmail);
+            }
+
+            return new ApiResponse().SetOk();
         }
 
         public async Task<ApiResponse> UpdateContractStatus(Guid id, ContractStatusEnum status)
@@ -391,7 +457,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                         {
                             return responseContractExtensionStatusA;
                         }
-
+                        contractEntity.EndDate = contractExtensionEntity.EndDate.Date;
                         // Create notification
                         var user = await _unitOfWork.UserRepository.GetAsync(x => x.Id == contractEntity.UserId, isNoTracking: true);
 
@@ -499,6 +565,18 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var response = _contractMapper.MapToContractModel(contractEntity);
+            foreach(var contractExtension in response.ContractExtensions)
+            {
+                if (contractExtension.InvoiceId != null)
+                {
+                    var responseInvoice = await _unitOfWork.InvoiceRepository.GetAsync(x => x.Id == contractExtension.InvoiceId);
+                    if (responseInvoice != null)
+                    {
+                        contractExtension.InvoiceStatus = responseInvoice.Status.ToString();
+                    }
+
+                }
+            }
 
             return new ApiResponse().SetOk(response);
         }
@@ -566,6 +644,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var response = contractEntities.Select(x => _contractMapper.MapToContractModel(x)).ToList();
+            foreach(var contract in response)
+            {
+                foreach (var contractExtension in contract.ContractExtensions)
+                {
+                    if (contractExtension.InvoiceId != null)
+                    {
+                        var responseInvoice = await _unitOfWork.InvoiceRepository.GetAsync(x => x.Id == contractExtension.InvoiceId);
+                        if (responseInvoice != null)
+                        {
+                            contractExtension.InvoiceStatus = responseInvoice.Status.ToString();
+                        }
+
+                    }
+                }
+            }
             return new ApiResponse().SetOk(response);
         }
 

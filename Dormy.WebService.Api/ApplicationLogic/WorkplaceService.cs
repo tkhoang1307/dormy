@@ -77,7 +77,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetOk(new List<WorkplaceResponseModel>());
             }
 
-            var response = entities.Select(entity => _workplaceMapper.MapToWorkplaceResponseModel(entity)).ToList();
+            var response = entities.OrderBy(entity => entity.IsDeleted)
+                                   .Select(entity => _workplaceMapper.MapToWorkplaceResponseModel(entity)).ToList();
 
             for (var i = 0; i < response.Count; i++)
             {
@@ -136,7 +137,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetOk(new List<WorkplaceResponseModel>());
             }
 
-            var response = entities.Select(entity => _workplaceMapper.MapToWorkplaceResponseModel(entity)).ToList();
+            var response = entities.OrderBy(entity => entity.IsDeleted)
+                                   .Select(entity => _workplaceMapper.MapToWorkplaceResponseModel(entity)).ToList();
 
             for (var i = 0; i < response.Count; i++)
             {
