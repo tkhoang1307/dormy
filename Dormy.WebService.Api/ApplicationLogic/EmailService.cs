@@ -1,5 +1,6 @@
 ﻿using Dormy.WebService.Api.Core.Interfaces;
 using Dormy.WebService.Api.Infrastructure.TokenRetriever;
+using Dormy.WebService.Api.Models.Enums;
 using Dormy.WebService.Api.Models.ResponseModels;
 using Dormy.WebService.Api.Startup;
 using MailKit.Net.Smtp;
@@ -90,6 +91,100 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 "</body>" +
                 "</html>"
             };
+            return message;
+        }
+
+        public async Task<bool> SendContractEmailAsync(string email, RegistrationAccommodationResponseModel registration)
+        {
+            var parseEnum = Enum.TryParse<ContractExtensionStatusEnum>(registration.Status, true, out var enumValue);
+            var subject = "";
+            var title = "";
+            switch (enumValue)
+            {
+                case ContractExtensionStatusEnum.PENDING:
+                    subject = "[Dormy] You have just created new contract.";
+                    title = "You have just created new contract. Please review contract detail below: ";
+                    break;
+                case ContractExtensionStatusEnum.WAITING_PAYMENT:
+                    subject = "[Dormy] Your accommodation registration has just been approved.";
+                    title = "Your accommodation registration has just been approved. Please review contract detail below: ";
+                    break;
+                case ContractExtensionStatusEnum.ACTIVE:
+                    subject = "[Dormy] Your contract has just been active.";
+                    title = "Your contract has just been paid and active. Please review contract detail below: ";
+                    break;
+                case ContractExtensionStatusEnum.EXPIRED:
+                    subject = "[Dormy] Your contract has just been expired.";
+                    title = "Your contract has just been expired. Please review the current contract detail below: ";
+                    break;
+                case ContractExtensionStatusEnum.TERMINATED:
+                    subject = "[Dormy] Your contract has just been terminated.";
+                    title = "Your contract has just been terminated. Please review contract detail below: ";
+                    break;
+                case ContractExtensionStatusEnum.REJECTED:
+                    subject = "[Dormy] Your accommodation registration has just been rejected.";
+                    title = "Your accommodation registration has just been rejected. Please review contract detail below: ";
+                    break;
+            }
+            var message = BuildContractEmailTemplate(subject, title, email, registration);
+
+            // Send the email
+            await SendEmailAsync(message);
+
+            return true;
+        }
+
+        private MimeMessage BuildContractEmailTemplate(string subject, string title, string to, RegistrationAccommodationResponseModel registration)
+        {
+            MimeMessage message = new();
+            message.From.Add(new MailboxAddress("Dormy", "Dormy@gmail.com"));
+            message.Subject = subject;
+            message.To.Add(MailboxAddress.Parse(to));
+            var sb = new StringBuilder();
+
+            sb.AppendLine("<html>");
+            sb.AppendLine("<body>");
+            sb.AppendLine($"<h3>{title}</h3>");
+            sb.AppendLine("<div style='font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;'>");
+
+            sb.AppendLine($"<p><strong>Tenant:</strong> {registration.UserFullname}</p>");
+            sb.AppendLine($"<p><strong>Submission Date:</strong> {registration.SubmissionDate:dd/MM/yyyy}</p>");
+            sb.AppendLine($"<p><strong>Contract period:</strong> {registration.StartDate:dd/MM/yyyy} - {registration.EndDate:dd/MM/yyyy}</p>");
+            sb.AppendLine($"<p><strong>Workplace:</strong> {registration.WorkplaceName}</p>");
+            sb.AppendLine($"<p><strong>Insurance Card Number:</strong> {registration.InsuranceCardNumber}</p>");
+            sb.AppendLine($"<p><strong>Registered Hospital:</strong> {registration.RegisteredHospital}</p>");
+            sb.AppendLine($"<p><strong>Expiration Date:</strong> {registration.ExpirationDate:dd/MM/yyyy}</p>");
+            sb.AppendLine($"<p><strong>Room Number:</strong> {registration.RoomNumber} - <strong>Building:</strong> {registration.BuildingName}</p>");
+            sb.AppendLine($"<p><strong>Room Type:</strong> {registration.RoomTypeName}</p>");
+            sb.AppendLine($"<p><strong>Status:</strong> {registration.Status}</p>");
+
+            // Conditional section for extended contract
+            if (registration.OrderNo != 0 && registration.ContractInformation != null)
+            {
+                sb.AppendLine("<hr style='margin:16px 0;'>");
+                sb.AppendLine("<p><strong>BE EXTENDED FROM THE CONTRACT:</strong></p>");
+                sb.AppendLine($"<p style='margin-left: 32px;'><strong>Submission Date:</strong> {registration.ContractInformation.SubmissionDate:dd/MM/yyyy}</p>");
+                sb.AppendLine($"<p style='margin-left: 32px;'><strong>Contract period:</strong> {registration.ContractInformation.StartDate:dd/MM/yyyy} - {registration.ContractInformation.EndDate:dd/MM/yyyy}</p>");
+                sb.AppendLine($"<p style='margin-left: 32px;'><strong>Status:</strong> {registration.ContractInformation.Status}</p>");
+            }
+
+            sb.AppendLine("</div>");
+            if (registration.Status == ContractExtensionStatusEnum.WAITING_PAYMENT.ToString())
+            {
+                sb.AppendLine($"<h3 style='color: red;'>Please access website to pay for your contract.</h3>");
+            }
+            if (registration.Status == ContractExtensionStatusEnum.EXPIRED.ToString())
+            {
+                sb.AppendLine($"<h3 style='color: red;'>Please access website to extend or create new contract.</h3>");
+            }
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            {
+                Text = sb.ToString()
+            };
+            
             return message;
         }
 

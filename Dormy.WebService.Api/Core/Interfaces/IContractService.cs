@@ -16,5 +16,6 @@ namespace Dormy.WebService.Api.Core.Interfaces
         Task<ApiResponse> GetInitialCreateContractData();
         Task<ApiResponse> GetInitialExtendContractData(Guid contractId);
         Task<ApiResponse> SearchBuildingsAndRoomsByGenderAndRoomType(SearchBuildingAndRoomRequestModel model);
+        Task<ApiResponse> SendContractEmail(Guid contractExtensionId, bool isContractExtension = true);
     }
 }

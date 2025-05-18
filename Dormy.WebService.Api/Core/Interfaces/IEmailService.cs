@@ -6,5 +6,7 @@ namespace Dormy.WebService.Api.Core.Interfaces
     {
         Task<string> SendVerifyEmailAsync(string email);
         Task<ApiResponse> SendForgotPasswordEmailAsync(string email);
+
+        Task<bool> SendContractEmailAsync(string email, RegistrationAccommodationResponseModel registration);
     }
 }
