@@ -36,6 +36,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var result = await _contractService.Register(model);
+            if (result.IsSuccess)
+            {
+                await _contractService.SendContractEmail(((RegistrationResponseModel)result.Result).ContractId, false);
+            }
             return StatusCode((int)result.StatusCode, result);
         }
 

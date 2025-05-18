@@ -14,9 +14,11 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     public class ContractExtensionController : ControllerBase
     {
         private readonly IContractExtensionService _contractExtensionService;
-        public ContractExtensionController(IContractExtensionService contractService)
+        private readonly IContractService _contractService;
+        public ContractExtensionController(IContractExtensionService contractExtensionService, IContractService contractService)
         {
-            _contractExtensionService = contractService;
+            _contractExtensionService = contractExtensionService;
+            _contractService = contractService;
         }
 
         [HttpPut("id/{id:guid}")]
@@ -44,6 +46,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var result = await _contractExtensionService.CreateContractExtension(model);
+            if (result.IsSuccess)
+            {
+                await _contractService.SendContractEmail((Guid)result.Result);
+            }
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -68,6 +74,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ActiveContractExtension(Guid id)
         {
             var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.ACTIVE);
+            if (result.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id);
+            }
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -88,7 +98,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _contractExtensionService.UpdateContractExtensionStatus(id, status);
-
+            if (response.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id);
+            }
             return StatusCode((int)response.StatusCode, response);
         }
 
@@ -97,6 +110,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ExpiredContractExtension(Guid id)
         {
             var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.EXPIRED);
+            if (result.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id);
+            }
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -105,6 +122,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> TerminateContract(Guid id)
         {
             var result = await _contractExtensionService.UpdateContractExtensionStatus(id, ContractExtensionStatusEnum.TERMINATED);
+            if (result.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id);
+            }
             return StatusCode((int)result.StatusCode, result);
         }
     }

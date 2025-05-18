@@ -34,6 +34,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
                 return StatusCode((int)response.StatusCode, response);
             }
             var result = await _contractService.AddNewContract(model);
+            if (result.IsSuccess)
+            {
+                await _contractService.SendContractEmail((Guid)result.Result, false);
+            }
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -58,6 +62,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ActiveContract(Guid id)
         {
             var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.ACTIVE);
+            if (response.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id, false);
+            }
             return StatusCode((int)response.StatusCode, response);
         }
 
@@ -85,7 +93,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
             }
 
             var response = await _contractService.UpdateContractStatus(payload.Id, payload.Status);
-
+            if (response.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id, false);
+            }
             return StatusCode((int)response.StatusCode, response);
         }
 
@@ -94,6 +105,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> TerminateContract(Guid id)
         {
             var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.TERMINATED);
+            if (response.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id, false);
+            }
             return StatusCode((int)response.StatusCode, response);
         }
 
@@ -102,6 +117,10 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         public async Task<IActionResult> ExpiredContract(Guid id)
         {
             var response = await _contractService.UpdateContractStatus(id, ContractStatusEnum.EXPIRED);
+            if (response.IsSuccess)
+            {
+                await _contractService.SendContractEmail(id, false);
+            }
             return StatusCode((int)response.StatusCode, response);
         }
 
