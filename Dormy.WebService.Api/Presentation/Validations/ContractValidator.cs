@@ -20,11 +20,11 @@ namespace Dormy.WebService.Api.Presentation.Validations
 
         public static async Task<ApiResponse> ContractExtensionRequestModelValidator(ContractExtensionRequestModel model)
         {
-            //if (model?.ContractId == null)
-            //{
-            //    return new ApiResponse().SetUnprocessableEntity(message:
-            //        string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ContractId)));
-            //}
+            if (model?.ContractId == null)
+            {
+                return new ApiResponse().SetUnprocessableEntity(message:
+                    string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(model.ContractId)));
+            }
 
             if (model?.RoomId == null)
             {
