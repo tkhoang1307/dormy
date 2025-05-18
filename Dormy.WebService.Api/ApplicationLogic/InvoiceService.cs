@@ -363,7 +363,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 invoiceUserEntities.Add(invoiceUserEntity);
             }
 
-            invoiceEntity.InvoiceName = "Hóa đơn tháng " + model.Month + "/" + model.Year + " (Invoice for month " + +model.Month + "/" + model.Year + ")";
+            invoiceEntity.InvoiceName = "Invoice for month " + model.Month + "/" + model.Year;
             invoiceEntity.DueDate = model.DueDate ?? DateTime.Now;
             invoiceEntity.AmountBeforePromotion = amountBeforePromotion;
             invoiceEntity.AmountAfterPromotion = amountBeforePromotion;
