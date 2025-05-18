@@ -33,16 +33,12 @@ namespace Dormy.WebService.Api.ApplicationLogic
 
         public async Task<ApiResponse> CreateContractExtension(ContractExtensionRequestModel model)
         {
-            var contractEntities = await _unitOfWork.ContractRepository
-                .GetAllAsync(x => x.UserId == _userContextService.UserId &&
-                                  (x.Status == ContractStatusEnum.ACTIVE ||
-                                   x.Status == ContractStatusEnum.EXPIRED ||
-                                   x.Status == ContractStatusEnum.EXTENDED),
-                             include: x => x.Include(x => x.Room));
-
-            var contractEntity = contractEntities
-                .OrderByDescending(x => x.EndDate)
-                .FirstOrDefault();
+            var contractEntity = await _unitOfWork.ContractRepository.GetAsync(x => x.Id == model.ContractId && 
+                                                                                     x.UserId == _userContextService.UserId &&
+                                                                                    (x.Status == ContractStatusEnum.ACTIVE ||
+                                                                                    x.Status == ContractStatusEnum.EXPIRED ||
+                                                                                    x.Status == ContractStatusEnum.EXTENDED),
+                                                                                include: x => x.Include(x => x.Room));
 
             if (contractEntity == null)
             {
@@ -54,7 +50,16 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 return new ApiResponse().SetConflict(contractEntity.Id, message: string.Format(ErrorMessages.ConflictDateWhenExtendContract));
             }
 
-            if (contractEntity.NumberExtension >= 3)
+            var settingEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == SettingKeyname.MaximumNumberCcontractExtensions);
+            int maxNumberExtension = 5;
+            if (settingEntity != null && settingEntity.IsApplied)
+            {
+                if (!int.TryParse(settingEntity.Value.ToString(), out maxNumberExtension))
+                {
+                    maxNumberExtension = 5;
+                }
+            }
+            if (contractEntity.NumberExtension > maxNumberExtension)
             {
                 return new ApiResponse().SetConflict(contractEntity.Id, message: string.Format(ErrorMessages.ContractHasReachedMaxNumberOfExtension));
             }

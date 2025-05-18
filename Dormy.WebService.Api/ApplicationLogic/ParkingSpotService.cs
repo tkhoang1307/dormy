@@ -191,11 +191,21 @@ namespace Dormy.WebService.Api.ApplicationLogic
             {
                 var settingEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == SettingKeyname.ParkingPriceKeyname);
                 decimal parkingPrice = 0;
-                if (settingEntity.IsApplied)
+                if (settingEntity != null && settingEntity.IsApplied)
                 {
                     if (!decimal.TryParse(settingEntity?.Value?.ToString(), out parkingPrice))
                     {
                         parkingPrice = 50000;
+                    }
+                }
+
+                settingEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == SettingKeyname.ExtendDueDateForPaymentParkingFee);
+                int extendedDueDate = 15;
+                if (settingEntity != null && settingEntity.IsApplied)
+                {
+                    if (!int.TryParse(settingEntity?.Value?.ToString(), out extendedDueDate))
+                    {
+                        extendedDueDate = 15;
                     }
                 }
 
@@ -206,7 +216,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     var roomId = responseContract.FirstOrDefault().RoomId;
                     var responseCreateInvoice = await _invoiceService.CreateNewInvoice(new InvoiceRequestModel()
                     {
-                        DueDate = DateTime.Now.AddDays(15),
+                        DueDate = DateTime.Now.AddDays(extendedDueDate).Date,
                         Type = InvoiceTypeEnum.PARKING_INVOICE.ToString(),
                         RoomId = roomId,
                         InvoiceItems = new List<InvoiceItemRequestModel>()

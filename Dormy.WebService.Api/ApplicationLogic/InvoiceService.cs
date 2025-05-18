@@ -163,12 +163,32 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     });
                 }
 
+                int extendedDueDate = 15;
                 var invoiceName = "Invoice for month " + model.Month + "/" + model.Year;
                 var invoiceStatus = InvoiceStatusEnum.DRAFT.ToString();
+                if (model.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY.ToString())
+                {
+                    var settingInvoiceEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == SettingKeyname.ExtendDueDateForPaymentInvoice);
+                    if (settingInvoiceEntity != null && settingInvoiceEntity.IsApplied)
+                    {
+                        if (!int.TryParse(settingInvoiceEntity.Value.ToString(), out extendedDueDate))
+                        {
+                            extendedDueDate = 15;
+                        }
+                    }
+                }
                 if (model.Type == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString())
                 {
                     invoiceName = "Accommodation contract invoice";
                     invoiceStatus = InvoiceStatusEnum.UNPAID.ToString();
+                    var settingContractEntity = await _unitOfWork.SettingRepository.GetAsync(x => x.KeyName == SettingKeyname.ExtendDueDateForPaymentContract);
+                    if (settingContractEntity != null && settingContractEntity.IsApplied)
+                    {
+                        if (!int.TryParse(settingContractEntity.Value.ToString(), out extendedDueDate))
+                        {
+                            extendedDueDate = 15;
+                        }
+                    }
                 }
                 if (model.Type == InvoiceTypeEnum.PARKING_INVOICE.ToString())
                 {
@@ -183,7 +203,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                 var invoiceMapperRequestModel = new InvoiceMapperRequestModel()
                 {
                     InvoiceName = invoiceName,
-                    DueDate = model.DueDate ?? DateTime.Now,
+                    DueDate = model.DueDate ?? DateTime.Now.AddDays(extendedDueDate),
                     AmountBeforePromotion = amountBeforePromotion,
                     AmountAfterPromotion = amountBeforePromotion,
                     Month = model.Month,
@@ -381,42 +401,70 @@ namespace Dormy.WebService.Api.ApplicationLogic
                                                      message: string.Format(errorMessage, "invoice"));
             }
 
-            if (statusChanged == InvoiceStatusEnum.UNPAID && invoiceEntity.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY)
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required,
+                new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
+                TransactionScopeAsyncFlowOption.Enabled))
             {
-                foreach(var invoiceUser in invoiceEntity.InvoiceUsers)
+                if (statusChanged == InvoiceStatusEnum.UNPAID && invoiceEntity.Type == InvoiceTypeEnum.ROOM_SERVICE_MONTHLY)
                 {
-                    await _notificationService.CreateNotification(new NotificationRequestModel()
+                    foreach (var invoiceUser in invoiceEntity.InvoiceUsers)
                     {
-                        Title = string.Format(NotificationMessages.InvoiceCreateTitle, "room service monthly"),
-                        Content = string.Format(NotificationMessages.InvoiceCreateContent, "room service monthly", $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                        UserId = invoiceUser.UserId,
-                        AdminId = _userContextService.UserId,
-                        NotificationType = NotificationTypeEnum.INVOICE_CREATION,
-                    });
-                }    
-            }
-
-            if (statusChanged == InvoiceStatusEnum.PAID)
-            {
-                var invoiceTypeName = EnumHelper.GetEnumDescription(invoiceEntity.Type);
-                foreach (var invoiceUser in invoiceEntity.InvoiceUsers)
-                {
-                    await _notificationService.CreateNotification(new NotificationRequestModel()
-                    {
-                        Title = string.Format(NotificationMessages.InvoicePaidTitle, invoiceTypeName),
-                        Content = string.Format(NotificationMessages.InvoicePaidContent, invoiceTypeName, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
-                        UserId = invoiceUser.UserId,
-                        AdminId = _userContextService.UserId,
-                        NotificationType = NotificationTypeEnum.INVOICE_CHANGE_STATUS,
-                    });
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
+                        {
+                            Title = string.Format(NotificationMessages.InvoiceCreateTitle, "room service monthly"),
+                            Content = string.Format(NotificationMessages.InvoiceCreateContent, "room service monthly", $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            UserId = invoiceUser.UserId,
+                            AdminId = _userContextService.UserId,
+                            NotificationType = NotificationTypeEnum.INVOICE_CREATION,
+                        });
+                    }
                 }
+
+                if (statusChanged == InvoiceStatusEnum.PAID)
+                {
+                    var invoiceTypeName = EnumHelper.GetEnumDescription(invoiceEntity.Type);
+                    foreach (var invoiceUser in invoiceEntity.InvoiceUsers)
+                    {
+                        await _notificationService.CreateNotification(new NotificationRequestModel()
+                        {
+                            Title = string.Format(NotificationMessages.InvoicePaidTitle, invoiceTypeName),
+                            Content = string.Format(NotificationMessages.InvoicePaidContent, invoiceTypeName, $"{_userContextService.UserName}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")),
+                            UserId = invoiceUser.UserId,
+                            AdminId = _userContextService.UserId,
+                            NotificationType = NotificationTypeEnum.INVOICE_CHANGE_STATUS,
+                        });
+                    }
+
+                    if (invoiceEntity.Type == InvoiceTypeEnum.PAYMENT_CONTRACT)
+                    {
+                        var contractExtensionEntity = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == invoiceEntity.ContractId,
+                                                                                                             x => x.Include(x => x.Contract)
+                                                                                                                   .Include(x => x.Room));
+                        if (contractExtensionEntity == null)
+                        {
+                            return new ApiResponse().SetNotFound(invoiceEntity.ContractId, message: string.Format(ErrorMessages.PropertyDoesNotExist, "Contract extension"));
+                        }
+
+                        (isError, errorMessage) = ContractExtensionStatusChangeValidator.VerifyContractExtensionStatusChangeValidator(contractExtensionEntity.Status, ContractExtensionStatusEnum.ACTIVE);
+                        if (isError)
+                        {
+                            return new ApiResponse().SetConflict(invoiceEntity.ContractId, message: string.Format(errorMessage, "Contract extension"));
+                        }
+
+                        contractExtensionEntity.Status = ContractExtensionStatusEnum.ACTIVE;
+                        contractExtensionEntity.LastUpdatedBy = _userContextService.UserId;
+                        contractExtensionEntity.LastUpdatedDateUtc = DateTime.Now;
+                    }
+                }
+
+                invoiceEntity.Status = statusChanged;
+                invoiceEntity.LastUpdatedBy = _userContextService.UserId;
+                invoiceEntity.LastUpdatedDateUtc = DateTime.Now;
+
+                await _unitOfWork.SaveChangeAsync();
+                scope.Complete();
             }
-
-            invoiceEntity.Status = statusChanged;
-            invoiceEntity.LastUpdatedBy = _userContextService.UserId;
-            invoiceEntity.LastUpdatedDateUtc = DateTime.Now;
-
-            await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetAccepted(invoiceEntity.Id);
         }
@@ -554,7 +602,8 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var isUserDisplayed = false;
-            if (model.InvoiceType != null && model.InvoiceType == InvoiceTypeEnum.PARKING_INVOICE.ToString())
+            if (model.InvoiceType != null && 
+                (model.InvoiceType == InvoiceTypeEnum.PARKING_INVOICE.ToString() || model.InvoiceType == InvoiceTypeEnum.PAYMENT_CONTRACT.ToString()))
             {
                 isUserDisplayed = true;
             }
@@ -603,6 +652,15 @@ namespace Dormy.WebService.Api.ApplicationLogic
             }
 
             var invoiceModel = _invoiceMapper.MapToInvoiceResponseModel(invoiceEntity);
+            if (invoiceEntity.ContractId != null)
+            {
+                var responseContractExtension = await _unitOfWork.ContractExtensionRepository.GetAsync(x => x.Id == invoiceEntity.ContractId);
+                if (responseContractExtension != null)
+                {
+                    invoiceModel.ContractExtensionId = responseContractExtension.Id;
+                    invoiceModel.ContractId = responseContractExtension.ContractId;
+                }
+            }
 
             var (createdUser, lastUpdatedUser) = await _unitOfWork.AdminRepository.GetAuthors(invoiceModel.CreatedBy, invoiceModel.LastUpdatedBy);
 

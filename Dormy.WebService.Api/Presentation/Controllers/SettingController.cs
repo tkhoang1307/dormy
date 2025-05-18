@@ -14,11 +14,13 @@ namespace Dormy.WebService.Api.Presentation.Controllers
     [ApiController]
     public class SettingController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly ISettingService _settingService;
 
-        public SettingController(ISettingService settingService)
+        public SettingController(ISettingService settingService, IConfiguration configuration)
         {
             _settingService = settingService;
+            _configuration = configuration;
         }
 
         [HttpGet("keyname/{keyname}")]
@@ -96,6 +98,22 @@ namespace Dormy.WebService.Api.Presentation.Controllers
         [Authorize(Roles = Role.ADMIN)]
         public async Task<IActionResult> DeleteSetting(string keyname)
         {
+            var secretKeyFromHeader = HttpContext.Request.Headers["SecretKey"].FirstOrDefault();
+
+            // Check if the SecretKey exists in the header
+            if (string.IsNullOrEmpty(secretKeyFromHeader))
+            {
+                return Unauthorized(new { message = "SecretKey is missing in the header." });
+            }
+
+            // Retrieve the SecretKey from appsettings
+            var secretKeyFromAppSettings = _configuration["SecretKeyToCreateAdmin"];
+
+            if (secretKeyFromHeader != secretKeyFromAppSettings)
+            {
+                return Unauthorized(new { message = "Invalid SecretKey." });
+            }
+
             var response = await _settingService.HardDeleteSettingByKeyName(keyname);
 
             return StatusCode((int)response.StatusCode, response);
