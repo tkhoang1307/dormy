@@ -205,10 +205,10 @@ namespace Dormy.WebService.Api.Presentation.Validations
                         string.Format(ErrorMessages.RequiredFieldErrorMessage, nameof(invoiceItem.Quantity)));
                 }
 
-                if (invoiceItem.Quantity <= 0)
+                if (invoiceItem.Quantity < 0)
                 {
                     return new ApiResponse().SetPreconditionFailed(message:
-                        string.Format(ErrorMessages.PropertyMustBeMoreThan0, nameof(invoiceItem.Quantity)));
+                        string.Format(ErrorMessages.PropertyMustBeMoreThanOrEqual0, nameof(invoiceItem.Quantity)));
                 }
             }
 
