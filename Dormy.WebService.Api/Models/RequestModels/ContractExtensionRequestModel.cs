@@ -15,7 +15,7 @@
             get => _endDate;
             set => _endDate = value.Date;
         }
-
+        public Guid ContractId { get; set; }
         public Guid RoomId { get; set; }
     }
 

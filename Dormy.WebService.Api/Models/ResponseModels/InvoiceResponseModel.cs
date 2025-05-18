@@ -24,6 +24,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
 
         public Guid? ContractId { get; set; }
 
+        public Guid? ContractExtensionId { get; set; }
+
         public Guid RoomId { get; set; }
 
         public string RoomName { get; set; } = string.Empty;

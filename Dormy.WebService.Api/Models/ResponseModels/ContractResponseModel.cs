@@ -56,6 +56,7 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public DateTime EndDate { get; set; }
         public string Status { get; set; } = string.Empty;
         public Guid? InvoiceId { get; set; }
+        public string InvoiceStatus {  get; set; } = string.Empty;
         public Guid? ApproverId { get; set; }
         public string ApproverFullName { get; set; } = string.Empty;
         public Guid? RoomId { get; set; }
