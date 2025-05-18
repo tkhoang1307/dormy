@@ -10,6 +10,7 @@ namespace Dormy.WebService.Api.Presentation.Mappers
         {
             return new ContractExtensionEntity
             {
+                Id = Guid.NewGuid(),
                 SubmissionDate = DateTime.Today,
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
