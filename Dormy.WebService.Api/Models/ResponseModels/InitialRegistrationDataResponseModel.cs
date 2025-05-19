@@ -31,6 +31,8 @@ namespace Dormy.WebService.Api.Models.ResponseModels
         public int Capacity { get; set; }
 
         public decimal Price { get; set; }
+
+        public string Description { get; set; } = string.Empty;
     }
 
     public class SearchBuildingAndRoomRequestModel

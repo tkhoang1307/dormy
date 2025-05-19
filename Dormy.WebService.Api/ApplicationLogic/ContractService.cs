@@ -685,6 +685,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     RoomTypeName = entity.RoomTypeName,
                     Capacity = entity.Capacity,
                     Price = entity.Price,
+                    Description = entity.Description,
                 }).ToList();
 
             var initialRegistrationData = new InitialRegistrationDataResponseModel() 
@@ -740,6 +741,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     RoomTypeName = entity.RoomTypeName,
                     Capacity = entity.Capacity,
                     Price = entity.Price,
+                    Description = entity.Description,
                 }).ToList();
 
             return new ApiResponse().SetOk(listRoomTypes);
@@ -790,6 +792,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     RoomTypeName = entity.RoomTypeName,
                     Capacity = entity.Capacity,
                     Price = entity.Price,
+                    Description = entity.Description,
                 }).ToList();
 
             var responseModel = new InitialCreateEntendContractDataResponseModel()
@@ -852,6 +855,7 @@ namespace Dormy.WebService.Api.ApplicationLogic
                     RoomTypeName = entity.RoomTypeName,
                     Capacity = entity.Capacity,
                     Price = entity.Price,
+                    Description = entity.Description,
                 }).ToList();
 
             var responseModel = new InitialCreateEntendContractDataResponseModel()
